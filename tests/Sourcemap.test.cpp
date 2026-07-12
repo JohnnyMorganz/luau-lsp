@@ -1326,6 +1326,142 @@ TEST_CASE_FIXTURE(Fixture, "plugin_prunes_children_removed_from_plugin_info")
     CHECK_FALSE(platform->rootSourceNode->findChild("ChildB"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "plugin_update_removes_stale_path_map_entries_for_pruned_nodes")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    auto pluginData1 = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                { "Name": "ChildA", "ClassName": "Folder" },
+                { "Name": "ChildB", "ClassName": "ModuleScript", "FilePaths": ["ChildB.luau"] }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData1);
+
+    auto childBUri = workspace.rootUri.resolvePath("ChildB.luau");
+    REQUIRE(platform->virtualPathsToSourceNodes.count("game/ChildB") == 1);
+    REQUIRE(platform->resolveToVirtualPath(childBUri) == "game/ChildB");
+
+    // Second plugin update prunes ChildB
+    auto pluginData2 = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                { "Name": "ChildA", "ClassName": "Folder" }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData2);
+
+    // The path maps must not retain entries pointing at the pruned node, otherwise later
+    // type checks can resolve the node and resurrect its freed cached types
+    CHECK(platform->virtualPathsToSourceNodes.count("game/ChildB") == 0);
+    CHECK_FALSE(platform->resolveToVirtualPath(childBUri));
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_update_clears_cached_types_on_pruned_nodes")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    auto pluginData1 = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                { "Name": "ChildB", "ClassName": "Folder" }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData1);
+
+    auto childB = platform->rootSourceNode->findChild("ChildB");
+    REQUIRE(childB);
+    const SourceNode* childBNode = *childB;
+
+    // Simulate a type having been generated and cached for this node during a previous check
+    childBNode->tys.insert_or_assign(&workspace.frontend.globals, workspace.frontend.builtinTypes->anyType);
+
+    // Second plugin update prunes ChildB. The node stays allocated but is detached from the
+    // tree, so clearSourcemapTypes can no longer reach it - the cache must be cleared on prune
+    auto pluginData2 = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": []
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData2);
+
+    CHECK_FALSE(platform->rootSourceNode->findChild("ChildB"));
+    CHECK(childBNode->tys.empty());
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_clear_clears_cached_types_on_pruned_nodes")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    auto pluginData = json::parse(R"(
+        {
+            "Name": "game",
+            "ClassName": "DataModel",
+            "Children": [
+                { "Name": "ChildB", "ClassName": "ModuleScript", "FilePaths": ["ChildB.luau"] }
+            ]
+        }
+    )");
+    platform->onStudioPluginFullChange(pluginData);
+
+    auto childB = platform->rootSourceNode->findChild("ChildB");
+    REQUIRE(childB);
+    const SourceNode* childBNode = *childB;
+    childBNode->tys.insert_or_assign(&workspace.frontend.globals, workspace.frontend.builtinTypes->anyType);
+
+    auto childBUri = workspace.rootUri.resolvePath("ChildB.luau");
+    REQUIRE(platform->resolveToVirtualPath(childBUri) == "game/ChildB");
+
+    platform->onStudioPluginClear();
+
+    CHECK_FALSE(platform->rootSourceNode->findChild("ChildB"));
+    CHECK(childBNode->tys.empty());
+    CHECK(platform->virtualPathsToSourceNodes.count("game/ChildB") == 0);
+    CHECK_FALSE(platform->resolveToVirtualPath(childBUri));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_update_invalidates_stale_module_type_graphs")
+{
+    // Use an unmanaged on-disk file: recomputeDiagnostics (triggered by the sourcemap update
+    // when expressive DataModel types are enabled) would immediately recheck a managed file,
+    // which prevents observing the invalidation
+    auto uri = Uri::file(tempDir.write_child("foo.luau", "local x = 1"));
+    auto moduleName = workspace.fileResolver.getModuleName(uri);
+
+    workspace.frontend.check(moduleName);
+    REQUIRE(workspace.frontend.allModuleDependenciesValid(moduleName, /* forAutocomplete= */ false));
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": []
+        }
+    )");
+
+    // The retained type graph of an already-checked module may reference the sourcemap types
+    // that were just destroyed. It must not be considered valid for incremental (fragment)
+    // autocomplete until the module has been rechecked
+    CHECK_FALSE(workspace.frontend.allModuleDependenciesValid(moduleName, /* forAutocomplete= */ false));
+    CHECK_FALSE(workspace.frontend.allModuleDependenciesValid(moduleName, /* forAutocomplete= */ true));
+
+    // A recheck makes the module valid again
+    workspace.frontend.check(moduleName);
+    CHECK(workspace.frontend.allModuleDependenciesValid(moduleName, /* forAutocomplete= */ false));
+}
+
 TEST_CASE_FIXTURE(Fixture, "nested_plugin_children_are_all_marked_plugin_managed")
 {
     auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());

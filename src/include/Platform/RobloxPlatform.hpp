@@ -58,6 +58,10 @@ struct SourceNode
     /// Walk a slash-delimited path (supporting `.`, `..`, and `./` prefixes) from this node.
     /// Returns nullptr if any segment fails to resolve.
     const SourceNode* walkPath(const std::string& path) const;
+    /// Recursively clear the cached sourcemap-generated types (`tys`) for this node and its descendants.
+    /// Must be called whenever the types the cache points into are about to be destroyed, including on
+    /// nodes detached from the tree (which `RobloxPlatform::clearSourcemapTypes` cannot reach)
+    void clearCachedTypes() const;
 
     bool containsFilePaths() const;
     ordered_json toJson() const;
