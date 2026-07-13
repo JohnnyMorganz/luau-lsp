@@ -309,7 +309,7 @@ static bool deprecated(const Luau::AutocompleteEntry& entry, std::optional<lsp::
     }
 
     if (documentation)
-        if (documentation->value.find("@deprecated") != std::string::npos)
+        if (documentation->value.find("@deprecated") != std::string::npos || documentation->value.find("**Deprecated**") != std::string::npos)
             return true;
 
     return false;

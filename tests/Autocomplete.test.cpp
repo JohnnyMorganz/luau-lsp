@@ -335,7 +335,7 @@ TEST_CASE_FIXTURE(Fixture, "imported_type_reference_has_documentation")
 TEST_CASE_FIXTURE(Fixture, "deprecated_marker_in_documentation_comment_applies_to_autocomplete_entry")
 {
     auto [source, marker] = sourceWithMarker(R"(
-        --- @deprecated Use `bar` instead
+        --- @deprecated v1.0.0 -- Use `bar` instead
         local function foo()
         end
 
