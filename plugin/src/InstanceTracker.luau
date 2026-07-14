@@ -148,6 +148,13 @@ function InstanceTracker.shouldInclude(self: InstanceTracker, instance: Instance
 	return false
 end
 
+--- Verifies strings are valid UTF8
+--- @param str -- The input string.
+--- @return boolean -- Returns if its valid UTF8 or not.
+local function isValidUTF8(str: string): boolean
+	return utf8.len(str) ~= nil
+end
+
 --- Recursively encodes an Instance and its children into a serializable table.
 --- Only includes children that pass the `shouldInclude` filter.
 --- @param self -- The InstanceTracker instance.
@@ -172,6 +179,11 @@ function InstanceTracker.encode(
 
 	for _, child in instance:GetChildren() do
 		if not self:shouldInclude(child, includeList) then
+			continue
+		end
+
+		if not isValidUTF8(instance.Name) then
+			Log.warn(`Cannot encode instance "{instance:GetFullName()}" because its name contains invalid UTF-8.`)
 			continue
 		end
 

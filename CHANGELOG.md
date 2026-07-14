@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed use-after-free crashes after a sourcemap update. Studio Plugin updates left stale entries in the virtual/real path maps and stale cached DataModel types on pruned source nodes, allowing later type checks to reference destroyed sourcemap types. Additionally, incremental (fragment) autocomplete could read the stale type graph of a not-yet-rechecked module which referenced destroyed sourcemap types ([#1331](https://github.com/JohnnyMorganz/luau-lsp/issues/1331))
+- Fixed a crash in the Studio Plugin JSON encoder when an Instance name contained malformed UTF-8. Such instances are now skipped (with a warning logged) instead of corrupting the encoded output ([#1559](https://github.com/JohnnyMorganz/luau-lsp/pull/1559))
 
 ## [1.68.1] - 2026-06-14
 
