@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.69.0] - 2026-07-14
+
 ### Added
 
 - Added support for more Moonwave tags in hover documentation: `@deprecated` and `@since` are now rendered with their version and description, `@field` entries are shown in a "Fields" list, and `@readonly` is boldified
