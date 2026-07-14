@@ -1,17 +1,17 @@
 --#METADATA#{"CREATABLE_INSTANCES":["TextLabel","Part"], "SERVICES": ["ReplicatedStorage","ServerScriptService","Workspace"]}
 
-declare class Enum
+declare extern type Enum with
     function GetEnumItems(self): { any }
 end
-declare class EnumItem
+declare extern type EnumItem with
     Name: string
     Value: number
     EnumType: Enum
     function IsA(self, enumName: string): boolean
 end
 
-declare class EnumHumanoidRigType extends EnumItem end
-declare class EnumHumanoidRigType_INTERNAL extends Enum
+declare extern type EnumHumanoidRigType extends EnumItem with end
+declare extern type EnumHumanoidRigType_INTERNAL extends Enum with
     R6: EnumHumanoidRigType
     R15: EnumHumanoidRigType
 end
@@ -20,7 +20,7 @@ type ENUM_LIST = {
 } & { GetEnums: (self: ENUM_LIST) -> { Enum } }
 declare Enum: ENUM_LIST
 
-declare class RBXScriptConnection
+declare extern type RBXScriptConnection with
     Connected: boolean
     function Disconnect(self): nil
 end
@@ -31,14 +31,14 @@ export type RBXScriptSignal<T... = ...any> = {
     ConnectParallel: (self: RBXScriptSignal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 }
 
-declare class Object
+declare extern type Object with
 	Changed: RBXScriptSignal<string>
 	ClassName: string
 	function GetPropertyChangedSignal(self, property: string): RBXScriptSignal
 	function IsA(self, className: string): boolean
 end
 
-declare class Instance extends Object
+declare extern type Instance extends Object with
     AncestryChanged: RBXScriptSignal<Instance, Instance?>
     AttributeChanged: RBXScriptSignal<string>
     ChildAdded: RBXScriptSignal<Instance>
@@ -74,32 +74,32 @@ declare class Instance extends Object
     function QueryDescendants(self, selector: string): { Instance }
 end
 
-declare class BasePart extends Instance
+declare extern type BasePart extends Instance with
     Anchored: boolean
 end
 
-declare class Part extends BasePart
+declare extern type Part extends BasePart with
     Anchored: boolean
 end
 
-declare class TextLabel extends Instance
+declare extern type TextLabel extends Instance with
     Text: string
 end
 
-declare class ReplicatedStorage extends Instance
+declare extern type ReplicatedStorage extends Instance with
 end
 
-declare class ServerScriptService extends Instance
+declare extern type ServerScriptService extends Instance with
 end
 
-declare class Workspace extends Instance
+declare extern type Workspace extends Instance with
 end
 
-declare class ServiceProvider extends Instance
+declare extern type ServiceProvider extends Instance with
     function GetService(self, className: string): Instance
 end
 
-declare class DataModel extends ServiceProvider
+declare extern type DataModel extends ServiceProvider with
     function BindToClose(self, func: ((...any) -> ...any)): nil
 end
 
@@ -117,7 +117,7 @@ export type DocumentedTable = {
 }
 
 --- This is a documented class
-declare class DocumentedClass
+declare extern type DocumentedClass with
     --- This is a documented member1 of the class
     member1: string
     --- This is a documented function1 of the class

@@ -150,6 +150,7 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
         return "";
 
     std::string result;
+    std::vector<std::string> fields{};
     std::vector<std::string> params{};
     std::vector<std::string> returns{};
     std::vector<std::string> throws{};
@@ -162,14 +163,72 @@ std::string printMoonwaveDocumentation(const std::vector<std::string>& comments)
             returns.emplace_back(comment);
         else if (Luau::startsWith(comment, "@error "))
             throws.emplace_back(comment);
-        else if (comment == "@yields" || comment == "@unreleased")
-            // Boldify
-            result += "**" + comment + "**\n";
-        else if (Luau::startsWith(comment, "@tag ") || Luau::startsWith(comment, "@within "))
+        else if (Luau::startsWith(comment, "@field "))
+            fields.emplace_back(comment);
+        else if (comment == "@private")
+            result += "**Private**\n";
+        else if (comment == "@yields")
+            result += "**Yields**\n";
+        else if (comment == "@unreleased")
+            result += "**Unreleased**\n";
+        else if (comment == "@server")
+            result += "**Server**\n";
+        else if (comment == "@client")
+            result += "**Client**\n";
+        else if (comment == "@plugin")
+            result += "**Plugin**\n";
+        else if (comment == "@readonly")
+            result += "**Read Only**\n";
+        else if (Luau::startsWith(comment, "@deprecated "))
+        {
+            result += "**Deprecated** ";
+
+            auto description = comment.substr(12);
+            auto version = description;
+
+            if (auto space = description.find(' '); space != std::string::npos)
+            {
+                version = description.substr(0, space);
+                description = description.substr(space);
+            }
+
+            if (version == description)
+                result += "`" + version + "`" + "\n";
+            else
+                result += "`" + version + "`" + description + "\n";
+        }
+        else if (Luau::startsWith(comment, "@since "))
+            result += "**Since** `" + comment.substr(7) + "`\n";
+        else if (comment == "@ignore" || Luau::startsWith(comment, "@tag ") || Luau::startsWith(comment, "@within ") ||
+                 Luau::startsWith(comment, "@class ") || Luau::startsWith(comment, "@function ") || Luau::startsWith(comment, "@method ") ||
+                 Luau::startsWith(comment, "@prop ") || Luau::startsWith(comment, "@interface ") || Luau::startsWith(comment, "@type ") ||
+                 Luau::startsWith(comment, "@__index ") || Luau::startsWith(comment, "@external "))
             // Ignore
             continue;
         else
             result += comment + "\n";
+    }
+
+    if (!fields.empty())
+    {
+        result += "\n\n**Fields**\n";
+        for (auto& field : fields)
+        {
+            auto fieldText = field.substr(7);
+
+            // Parse name
+            auto fieldName = fieldText;
+            if (auto space = fieldText.find(' '); space != std::string::npos)
+            {
+                fieldName = fieldText.substr(0, space);
+                fieldText = fieldText.substr(space);
+            }
+
+            if (fieldText == fieldName)
+                result += "\n- `" + fieldName + "`";
+            else
+                result += "\n- `" + fieldName + "`" + fieldText;
+        }
     }
 
     if (!params.empty())
@@ -270,7 +329,8 @@ struct AttachCommentsVisitor : public Luau::AstVisitor
 
         // Sort by end position descending (closest to target first)
         std::sort(candidates.begin(), candidates.end(),
-            [](const Luau::Comment& a, const Luau::Comment& b) {
+            [](const Luau::Comment& a, const Luau::Comment& b)
+            {
                 return a.location.end > b.location.end;
             });
 

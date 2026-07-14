@@ -335,7 +335,7 @@ TEST_CASE_FIXTURE(Fixture, "imported_type_reference_has_documentation")
 TEST_CASE_FIXTURE(Fixture, "deprecated_marker_in_documentation_comment_applies_to_autocomplete_entry")
 {
     auto [source, marker] = sourceWithMarker(R"(
-        --- @deprecated Use `bar` instead
+        --- @deprecated v1.0.0 -- Use `bar` instead
         local function foo()
         end
 
@@ -2528,6 +2528,67 @@ TEST_CASE_FIXTURE(Fixture, "anonymous_autofilled_function_snippet_no_param_tabst
     REQUIRE(item.insertText);
     CHECK_EQ(item.insertTextFormat, lsp::InsertTextFormat::Snippet);
     CHECK_EQ(*item.insertText, "function(x: number, y: string)\n\t$0\nend");
+}
+
+// Use-after-free regression test: a sourcemap update destroys the sourcemap-generated types
+// that the retained type graph of an already-checked module references. Fragment autocomplete
+// reads the stale type graph of a dirty module, so it must be skipped until the module is
+// rechecked (without this, the completion below crashes under ASAN)
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_is_not_used_after_sourcemap_update_destroys_types")
+{
+    // Enable pull-based diagnostics so the sourcemap update does not synchronously recheck
+    client->capabilities.textDocument = lsp::TextDocumentClientCapabilities{};
+    client->capabilities.textDocument->diagnostic = lsp::DiagnosticClientCapabilities{};
+
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                { "name": "Script", "className": "ModuleScript", "filePaths": ["foo.luau"] }
+            ]
+        }
+    )");
+
+    auto oldSource = R"(
+        local p = script.Parent
+    )";
+    auto [newSource, marker] = sourceWithMarker(R"(
+        local p = script.Parent
+        local x = p|
+    )");
+
+    auto uri = newDocument("foo.luau", oldSource);
+    auto moduleName = workspace.fileResolver.getModuleName(uri);
+    bool forAutocomplete = !FFlag::LuauSolverV2;
+
+    // Initial check with retained type graphs: `p` references a sourcemap-generated type
+    workspace.checkStrict(moduleName, /* cancellationToken= */ nullptr, forAutocomplete);
+    REQUIRE(workspace.frontend.allModuleDependenciesValid(moduleName, forAutocomplete));
+
+    // Reloading the sourcemap destroys the sourcemap-generated types
+    loadSourcemap(R"(
+        {
+            "name": "game",
+            "className": "DataModel",
+            "children": [
+                { "name": "Script", "className": "ModuleScript", "filePaths": ["foo.luau"] },
+                { "name": "Folder", "className": "Folder" }
+            ]
+        }
+    )");
+
+    REQUIRE(workspace.frontend.isDirty(moduleName, forAutocomplete));
+    CHECK_FALSE(workspace.frontend.allModuleDependenciesValid(moduleName, forAutocomplete));
+
+    updateDocument(uri, newSource);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto results = workspace.completion(params, /* cancellationToken= */ nullptr);
+    CHECK(!results.empty());
 }
 
 TEST_SUITE_END();
