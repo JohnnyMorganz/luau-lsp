@@ -5,6 +5,7 @@
 #include "Platform/RobloxPlatform.hpp"
 #include "Luau/Ast.h"
 #include "Luau/FileResolver.h"
+#include "Luau/LinterConfig.h"
 #include "LuauFileUtils.hpp"
 
 TEST_SUITE_BEGIN("WorkspaceFileResolverTests");
@@ -628,6 +629,27 @@ TEST_CASE_FIXTURE(Fixture, "support_config_luau")
 
     CHECK_EQ(fooConfig.aliases.size(), 1);
     CHECK(fooConfig.aliases.find("test"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "luaurc_still_uses_legacy_config_parser")
+{
+    Luau::Config config;
+
+    auto error = WorkspaceFileResolver::parseConfig(workspace.rootUri.resolvePath(Luau::kConfigName), R"({
+        "languageMode": "strict",
+        "lint": {
+            "LocalUnused": false
+        },
+        "aliases": {
+            "src": "src"
+        }
+    })",
+        config);
+
+    REQUIRE_FALSE(error);
+    CHECK_EQ(config.mode, Luau::Mode::Strict);
+    CHECK_FALSE(config.enabledLint.isEnabled(Luau::LintWarning::Code_LocalUnused));
+    CHECK(config.aliases.find("src"));
 }
 
 #ifndef _WIN32
