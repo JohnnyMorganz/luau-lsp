@@ -118,7 +118,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicInstanceIsA::handleOld
 
     auto type = Luau::follow(tfun->type);
 
-    Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+    Luau::TypeArena& arena = *typeChecker.currentModule->internalTypes;
     Luau::TypePackId booleanPack = arena.addTypePack({typeChecker.booleanType});
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, type}}};
 }
@@ -180,7 +180,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicInstanceClone::handleO
     if (!index)
         return std::nullopt;
 
-    Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+    Luau::TypeArena& arena = *typeChecker.currentModule->internalTypes;
     auto instanceType = typeChecker.checkExpr(scope, *index->expr);
     return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({instanceType.type})};
 }
@@ -214,7 +214,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicInstanceFromExisting::
     if (expr.args.size < 1)
         return std::nullopt;
 
-    Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+    Luau::TypeArena& arena = *typeChecker.currentModule->internalTypes;
     auto instanceType = typeChecker.checkExpr(scope, *expr.args.data[0]);
     return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({instanceType.type})};
 }
@@ -262,7 +262,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicInstanceFindFirstXWhic
 
     auto type = Luau::follow(tfun->type);
 
-    Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+    Luau::TypeArena& arena = *typeChecker.currentModule->internalTypes;
     Luau::TypeId nillableClass = Luau::makeOption(typeChecker.builtinTypes, arena, type);
     return Luau::WithPredicate<Luau::TypePackId>{arena.addTypePack({nillableClass})};
 }
@@ -326,7 +326,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicEnumItemIsA::handleOld
 
     auto type = Luau::follow(tfun->type);
 
-    Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+    Luau::TypeArena& arena = *typeChecker.currentModule->internalTypes;
     Luau::TypePackId booleanPack = arena.addTypePack({typeChecker.booleanType});
     return Luau::WithPredicate<Luau::TypePackId>{booleanPack, {Luau::IsAPredicate{std::move(*lvalue), expr.location, type}}};
 }
@@ -476,7 +476,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicQueryDescendants::hand
         classTypes.push_back(Luau::follow(tfun->type));
     }
 
-    Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+    Luau::TypeArena& arena = *typeChecker.currentModule->internalTypes;
 
     Luau::TypeId elementType;
     if (classTypes.size() == 1)
@@ -593,7 +593,7 @@ std::optional<Luau::WithPredicate<Luau::TypePackId>> MagicTypeLookup::handleOldS
 
             auto type = Luau::follow(tfun->type);
 
-            Luau::TypeArena& arena = typeChecker.currentModule->internalTypes;
+            Luau::TypeArena& arena = *typeChecker.currentModule->internalTypes;
             Luau::TypePackId classTypePack = arena.addTypePack({type});
             return Luau::WithPredicate<Luau::TypePackId>{classTypePack};
         }
