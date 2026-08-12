@@ -891,7 +891,7 @@
     "@typescript-eslint/eslint-plugin": "^7.16.0",
     "@typescript-eslint/parser": "^7.16.0",
     "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2",
+    "@vscode/test-electron": "^3.1.0",
     "eslint": "^8.57.0",
     "mocha": "^11.1.0",
     "prettier": "^3.8.2",
