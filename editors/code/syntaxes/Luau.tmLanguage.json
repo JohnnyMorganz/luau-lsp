@@ -76,7 +76,7 @@
   ],
   "repository": {
     "function-definition": {
-      "begin": "\\b(?:(local)\\s+|(const)\\s+)?(function)\\b(?![,:])",
+      "begin": "\\b(?:(local)\\s+|(const)\\s+|(export)\\s+)?(function)\\b(?![,:])",
       "beginCaptures": {
         "1": {
           "name": "storage.modifier.local.luau"
@@ -85,6 +85,9 @@
           "name": "storage.modifier.const.luau"
         },
         "3": {
+          "name": "storage.modifier.visibility.luau"
+        },
+        "4": {
           "name": "keyword.control.luau"
         }
       },
@@ -154,10 +157,13 @@
       ]
     },
     "local-declaration": {
-      "begin": "\\b(local)\\b",
+      "begin": "\\b(?:(export)\\s+)?(local)\\b",
       "end": "(?=\\s*do\\b|\\s*[=;]|\\s*$)",
       "beginCaptures": {
         "1": {
+          "name": "storage.modifier.visibility.luau"
+        },
+        "2": {
           "name": "storage.modifier.local.luau"
         }
       },
@@ -193,10 +199,13 @@
       ]
     },
     "const-declaration": {
-      "begin": "\\b(const)\\b",
+      "begin": "\\b(?:(export)\\s+)?(const)\\b",
       "end": "(?=\\s*[=;]|\\s*$)",
       "beginCaptures": {
         "1": {
+          "name": "storage.modifier.visibility.luau"
+        },
+        "2": {
           "name": "storage.modifier.const.luau"
         }
       },
@@ -305,15 +314,19 @@
       "patterns": [
         {
           "name": "constant.numeric.hex.luau",
-          "match": "\\b0_*[xX]_*[\\da-fA-F_]*(?:i|[eE][\\+\\-]?_*\\d[\\d_]*(?:\\.[\\d_]*)?)?"
+          "match": "\\b0_*[xX]_*[\\da-fA-F][\\da-fA-F_]*i?"
         },
         {
           "name": "constant.numeric.binary.luau",
-          "match": "\\b0_*[bB][01_]+(?:i|[eE][\\+\\-]?_*\\d[\\d_]*(?:\\.[\\d_]*)?)?"
+          "match": "\\b0_*[bB]_*[01][01_]*i?"
         },
         {
           "name": "constant.numeric.decimal.luau",
-          "match": "(?:\\d[\\d_]*(?:\\.[\\d_]*)?|\\.\\d[\\d_]*)(?:i|[eE][\\+\\-]?_*\\d[\\d_]*(?:\\.[\\d_]*)?)?"
+          "match": "\\d[\\d_]*i"
+        },
+        {
+          "name": "constant.numeric.decimal.luau",
+          "match": "(?:\\d[\\d_]*(?:\\.[\\d_]*)?|\\.\\d[\\d_]*)(?:[eE][\\+\\-]?_*\\d[\\d_]*)?"
         }
       ]
     },
