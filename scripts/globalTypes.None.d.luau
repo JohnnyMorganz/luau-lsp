@@ -8145,6 +8145,11 @@ declare extern type Font with
 	Weight: EnumFontWeight
 end
 
+declare extern type InstanceHandle with
+	function Get(self): Instance?
+	function Wait(self, timeout: number?): Instance?
+end
+
 declare extern type NumberRange with
 	Max: number
 	Min: number
