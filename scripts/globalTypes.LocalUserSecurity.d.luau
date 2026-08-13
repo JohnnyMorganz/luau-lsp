@@ -13356,7 +13356,7 @@ declare extern type BasePart extends PVInstance with
 	function CanSetNetworkOwnership(self): (boolean, string)
 	function GetClosestPointOnSurface(self, position: Vector3): Vector3
 	function GetConnectedParts(self, recursive: boolean?): { BasePart }
-	function GetJoints(self): { BasePart }
+	function GetJoints(self): { Instance }
 	function GetMass(self): number
 	function GetNetworkOwner(self): Player?
 	function GetNetworkOwnershipAuto(self): boolean

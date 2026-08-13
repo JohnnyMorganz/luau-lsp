@@ -328,7 +328,7 @@ EXTRA_MEMBERS = {
     "InstanceAdornment": ["Adornee: Instance?"],
     "BasePart": [
         "function GetConnectedParts(self, recursive: boolean?): { BasePart }",
-        "function GetJoints(self): { BasePart }",
+        "function GetJoints(self): { Instance }",
         "function GetNetworkOwner(self): Player?",
         "function GetTouchingParts(self): { BasePart }",
         "function SubtractAsync(self, parts: { BasePart }, collisionfidelity: EnumCollisionFidelity?, renderFidelity: EnumRenderFidelity?): UnionOperation",

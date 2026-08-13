@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed `@self` string-require aliases resolving from the filesystem instead of the sourcemap tree for non-DataModel roots ([#1511](https://github.com/JohnnyMorganz/luau-lsp/issues/1511))
+- Fixed `BasePart:GetJoints()` being typed as returning `{ BasePart }` instead of `{ Instance }`, matching the Roblox API dump and documentation, which state it can return both joints and constraints ([#1579](https://github.com/JohnnyMorganz/luau-lsp/issues/1579))
 
 ### Changed
 

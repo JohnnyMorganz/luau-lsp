@@ -1247,12 +1247,6 @@
                     }
                 },
                 {
-                    "Name": "GetJoints",
-                    "ReturnType": {
-                        "Generic": "JointInstance"
-                    }
-                },
-                {
                     "Name": "GetTouchingParts",
                     "ReturnType": {
                         "Generic": "BasePart"
