@@ -3910,7 +3910,7 @@
       "@luau/global/assert/return/0"
     ],
     "learn_more_link": "https://luau.org/library/#global-functions",
-    "code_sample": ""
+    "code_sample": "local product = 90 * 4\nassert(product == 360, \"Oh dear, multiplication is broken\")\n-- The line above does nothing, because 90 times 4 is 360"
   },
   "@luau/global/collectgarbage/param/0": {
     "documentation": "The name of the operation that should be performed by the garbage collector."
@@ -4032,7 +4032,7 @@
       "@luau/global/ipairs/return/2"
     ],
     "learn_more_link": "https://luau.org/library/#global-functions",
-    "code_sample": ""
+    "code_sample": "local fruits = {\"apples\", \"oranges\", \"kiwi\"}\nfor index, fruit in ipairs(fruits) do\n   print(index, fruit) --> 1 apples, 2 oranges, 3 kiwi, etc...\nend"
   },
   "@luau/global/loadstring/param/0": {
     "documentation": "The specified string to be loaded as Luau code."
@@ -4134,7 +4134,7 @@
       "@luau/global/pairs/return/1"
     ],
     "learn_more_link": "https://luau.org/library/#global-functions",
-    "code_sample": ""
+    "code_sample": "local scores = {\n    [\"John\"] = 5,\n    [\"Sally\"] = 10\n}\n\nfor name, score in pairs(scores) do\n    print(name .. \" has score: \" .. score)\nend"
   },
   "@luau/global/pcall/param/0": {
     "documentation": "The function to be called in protected mode."
@@ -4308,7 +4308,7 @@
       "@luau/global/require/return/0"
     ],
     "learn_more_link": "https://luau.org/library/#global-functions",
-    "code_sample": ""
+    "code_sample": "-- \"./\" prefix is equivalent to script.Parent\nrequire(\"./MySibling\")\nrequire((script.Parent).MySibling)\n\n-- \"../\" prefix is equivalent to script.Parent.Parent\nrequire(\"../SiblingOfMyParent\")\nrequire((script.Parent.Parent).SiblingOfMyParent)\n\n-- \"../\" can be chained to go up multiple levels\nrequire(\"../../SiblingOfMyGrandparent\")\nrequire((script.Parent.Parent).Parent.SiblingOfMyGrandparent)\n\n-- \"@self\" prefix corresponds to the script itself\nrequire(\"@self/MyChild\")\nrequire((script).MyChild)\n\n-- \"@game\" prefix corresponds to the DataModel root\nrequire(\"@game/ReplicatedStorage/Shared/MyModule\")\nrequire((game).ReplicatedStorage.Shared.MyModule)"
   },
   "@luau/global/select/param/0": {
     "documentation": "The index of the argument to return all arguments after in <code>args</code>. If it's set to <code>\"#\"</code>, the number of arguments that were passed after it is returned."
@@ -4335,7 +4335,7 @@
       "@luau/global/select/return/0"
     ],
     "learn_more_link": "https://luau.org/library/#global-functions",
-    "code_sample": ""
+    "code_sample": "print(select(2, \"A\", \"B\", \"C\")) --> B C\nprint(select(-1, \"A\", \"B\", \"C\")) --> C\nprint(select(\"#\", \"A\", \"B\", \"C\")) --> 3"
   },
   "@luau/global/setfenv/param/0": {
     "documentation": "Either a function or a number that specifies the function at that stack level."
@@ -4436,7 +4436,7 @@
       "@luau/global/tostring/return/0"
     ],
     "learn_more_link": "https://luau.org/library/#global-functions",
-    "code_sample": ""
+    "code_sample": "local isRobloxCool = true\n-- Convert the boolean to a string then concatenate:\nprint(\"Roblox is cool: \" .. tostring(isRobloxCool)) --> Roblox is cool: true"
   },
   "@luau/global/type/param/0": {
     "documentation": "The object to return the type of."
