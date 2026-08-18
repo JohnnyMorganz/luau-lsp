@@ -14,8 +14,8 @@ namespace Luau::LanguageServer::AutoImports
 struct FixedVariable
 {
     std::string variableName;
-    Luau::AstExpr* expr;
-    size_t endLine;
+    Luau::AstExpr* expr = nullptr;
+    size_t endLine = 0;
 };
 
 struct RobloxFindImportsVisitor : FindImportsVisitor

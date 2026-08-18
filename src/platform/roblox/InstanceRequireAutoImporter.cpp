@@ -72,7 +72,7 @@ struct ResolvedFixedVariable
 {
     Luau::ModuleName path;
     std::string variableName;
-    size_t endLine;
+    size_t endLine = 0;
 };
 
 std::vector<InstanceRequireResult> computeAllInstanceRequires(const InstanceRequireAutoImporterContext& ctx)
