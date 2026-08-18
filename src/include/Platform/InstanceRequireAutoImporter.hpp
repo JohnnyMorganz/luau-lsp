@@ -11,11 +11,19 @@ class RobloxPlatform;
 namespace Luau::LanguageServer::AutoImports
 {
 
+struct FixedVariable
+{
+    std::string variableName;
+    Luau::AstExpr* expr;
+    size_t endLine;
+};
+
 struct RobloxFindImportsVisitor : FindImportsVisitor
 {
     std::optional<size_t> firstServiceDefinitionLine = std::nullopt;
     std::optional<size_t> lastServiceDefinitionLine = std::nullopt;
     std::map<std::string, Luau::AstStatLocal*> serviceLineMap{};
+    std::vector<FixedVariable> fixedVariables{};
 
     size_t findBestLineForService(const std::string& serviceName, size_t minimumLineNumber) const
     {
@@ -34,6 +42,9 @@ struct RobloxFindImportsVisitor : FindImportsVisitor
 
     bool handleLocal(Luau::AstStatLocal* local, Luau::AstLocal* localName, Luau::AstExpr* expr, unsigned int startLine, unsigned int endLine) override
     {
+        if (!isRequire(expr))
+            fixedVariables.emplace_back(FixedVariable{std::string(localName->name.value), expr, endLine});
+
         if (!isGetService(expr))
             return false;
 
@@ -74,7 +85,7 @@ struct InstanceRequireAutoImporterContext
     size_t hotCommentsLineNumber = 0;
     Luau::NotNull<const RobloxFindImportsVisitor> importsVisitor;
 
-    Luau::NotNull<const RobloxPlatform> platform;
+    Luau::NotNull<RobloxPlatform> platform;
 
     std::optional<std::function<bool(const std::string&)>> moduleFilter;
 };

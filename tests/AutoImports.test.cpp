@@ -963,6 +963,365 @@ TEST_CASE_FIXTURE(Fixture, "auto_imports_handles_ancestor_of_module")
     CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Module = require(script.Parent.Parent)\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "nearest_absolute_requires_through_findfirstancestor_variable")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::NearestAbsolute;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "PluginName",
+                        "className": "Folder",
+                        "children": [
+                            { "name": "Main", "className": "ModuleScript", "filePaths": ["main.luau"] },
+                            {
+                                "name": "X",
+                                "className": "Folder",
+                                "children": [{ "name": "Y", "className": "ModuleScript" }]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(local Main = script:FindFirstAncestor("PluginName")
+
+|)");
+
+    auto uri = newDocument("main.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "Y");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "Y");
+    // No service import is emitted - the anchor replaces it
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Y = require(Main.X.Y)\n");
+    // Inserted after the anchor definition, not at the top of the file
+    CHECK_EQ(imports[0].additionalTextEdits[0].range, lsp::Range{{1, 0}, {1, 0}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "nearest_absolute_requires_through_dotted_instance_variable")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::NearestAbsolute;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "PluginName",
+                        "className": "Folder",
+                        "children": [
+                            {
+                                "name": "Nested",
+                                "className": "Folder",
+                                "children": [
+                                    { "name": "Main", "className": "ModuleScript", "filePaths": ["main.luau"] }
+                                ]
+                            },
+                            {
+                                "name": "X",
+                                "className": "Folder",
+                                "children": [{ "name": "Y", "className": "ModuleScript" }]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    // `script.Parent.Parent` resolves to the PluginName folder (a known instance)
+    auto [source, marker] = sourceWithMarker(R"(local Root = script.Parent.Parent
+
+|)");
+
+    auto uri = newDocument("main.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "Y");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "Y");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Y = require(Root.X.Y)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "nearest_absolute_prefers_the_closest_anchor")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::NearestAbsolute;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "PluginName",
+                        "className": "Folder",
+                        "children": [
+                            {
+                                "name": "SubFolder",
+                                "className": "Folder",
+                                "children": [
+                                    { "name": "Main", "className": "ModuleScript", "filePaths": ["main.luau"] },
+                                    { "name": "Target", "className": "ModuleScript" }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(local Main = script:FindFirstAncestor("PluginName")
+local Sub = script:FindFirstAncestor("SubFolder")
+
+|)");
+
+    auto uri = newDocument("main.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "Target");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "Target");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    // The deeper anchor (Sub -> SubFolder) is chosen to produce the shortest require chain
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Target = require(Sub.Target)\n");
+    // Inserted after the last anchor definition (line 2)
+    CHECK_EQ(imports[0].additionalTextEdits[0].range, lsp::Range{{2, 0}, {2, 0}});
+}
+
+TEST_CASE_FIXTURE(Fixture, "nearest_absolute_falls_back_to_auto_when_no_anchor_is_an_ancestor")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::NearestAbsolute;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "PluginName",
+                        "className": "Folder",
+                        "children": [
+                            { "name": "Main", "className": "ModuleScript", "filePaths": ["main.luau"] }
+                        ]
+                    },
+                    {
+                        "name": "OtherFolder",
+                        "className": "Folder",
+                        "children": [{ "name": "OtherModule", "className": "ModuleScript" }]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    // OtherModule is not a descendant of the anchor, so we fall back to `auto` (service + absolute)
+    auto [source, marker] = sourceWithMarker(R"(local Main = script:FindFirstAncestor("PluginName")
+
+|)");
+
+    auto uri = newDocument("main.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "OtherModule");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "OtherModule");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 2);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ReplicatedStorage = game:GetService(\"ReplicatedStorage\")\n");
+    CHECK_EQ(imports[0].additionalTextEdits[1].newText, "local OtherModule = require(ReplicatedStorage.OtherFolder.OtherModule)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "nearest_absolute_separates_anchor_and_require_with_line")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::NearestAbsolute;
+    client->globalConfig.completion.imports.separateGroupsWithLine = true;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "PluginName",
+                        "className": "Folder",
+                        "children": [
+                            { "name": "Main", "className": "ModuleScript", "filePaths": ["main.luau"] },
+                            {
+                                "name": "X",
+                                "className": "Folder",
+                                "children": [{ "name": "Y", "className": "ModuleScript" }]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(local Main = script:FindFirstAncestor("PluginName")
+
+|)");
+
+    auto uri = newDocument("main.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "Y");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "Y");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    // A blank line separates the anchor group from the inserted require
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "\nlocal Y = require(Main.X.Y)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "nearest_absolute_handles_non_identifier_path_segments")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::NearestAbsolute;
+    loadSourcemap(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "PluginName",
+                        "className": "Folder",
+                        "children": [
+                            { "name": "Main", "className": "ModuleScript", "filePaths": ["main.luau"] },
+                            {
+                                "name": "X",
+                                "className": "Folder",
+                                "children": [{ "name": "Weird Name", "className": "ModuleScript" }]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(local Main = script:FindFirstAncestor("PluginName")
+
+|)");
+
+    auto uri = newDocument("main.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "Weird_Name");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "Weird_Name");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Weird_Name = require(Main.X[\"Weird Name\"])\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "nearest_absolute_resolves_project_root_anchor")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::NearestAbsolute;
+    // Non-DataModel (model) project - the root maps to `ProjectRoot`
+    loadSourcemap(R"(
+    {
+        "name": "PluginName",
+        "className": "Folder",
+        "children": [
+            { "name": "Main", "className": "ModuleScript", "filePaths": ["main.luau"] },
+            {
+                "name": "X",
+                "className": "Folder",
+                "children": [{ "name": "Y", "className": "ModuleScript" }]
+            }
+        ]
+    }
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(local Main = script:FindFirstAncestor("PluginName")
+
+|)");
+
+    auto uri = newDocument("main.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "Y");
+
+    REQUIRE_EQ(imports.size(), 1);
+    CHECK_EQ(imports[0].label, "Y");
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Y = require(Main.X.Y)\n");
+}
+
 using namespace Luau::LanguageServer::AutoImports;
 
 static StringRequireAutoImporterContext createContext(Fixture* fixture, const Uri& uri, FindImportsVisitor* importsVisitor)

@@ -624,12 +624,14 @@
           "enum": [
             "auto",
             "alwaysRelative",
-            "alwaysAbsolute"
+            "alwaysAbsolute",
+            "nearestAbsolute"
           ],
           "enumDescriptions": [
             "Automatically compute the style of require to use based on heuristics",
             "Always require the module relative to the current file",
-            "Always require the module absolute based on root"
+            "Always require the module absolute based on root",
+            "Require the module relative to the nearest fixed variable that resolves to a known ancestor instance (e.g. `local Main = script:FindFirstAncestor(\"PluginName\")` or `local Main = script.Parent.Parent`), falling back to `auto` when no such variable exists"
           ],
           "scope": "resource"
         },

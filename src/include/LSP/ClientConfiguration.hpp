@@ -124,11 +124,13 @@ enum struct ImportRequireStyle
     Auto,
     AlwaysRelative,
     AlwaysAbsolute,
+    NearestAbsolute,
 };
 NLOHMANN_JSON_SERIALIZE_ENUM(ImportRequireStyle, {
                                                      {ImportRequireStyle::Auto, "auto"},
                                                      {ImportRequireStyle::AlwaysRelative, "alwaysRelative"},
                                                      {ImportRequireStyle::AlwaysAbsolute, "alwaysAbsolute"},
+                                                     {ImportRequireStyle::NearestAbsolute, "nearestAbsolute"},
                                                  })
 
 struct ClientCompletionImportsStringRequiresConfiguration
