@@ -51,10 +51,10 @@
     "code_sample": ""
   },
   "@luau/global/math.abs/param/0": {
-    "documentation": ""
+    "documentation": "The number to return the absolute value of."
   },
   "@luau/global/math.abs/return/0": {
-    "documentation": ""
+    "documentation": "The absolute value of <code>x</code>."
   },
   "@luau/global/math.abs": {
     "documentation": "Returns the absolute value of <code>x</code>.",
@@ -71,10 +71,10 @@
     "code_sample": ""
   },
   "@luau/global/math.acos/param/0": {
-    "documentation": ""
+    "documentation": "The cosine value, between <code>-1</code> and <code>1</code>."
   },
   "@luau/global/math.acos/return/0": {
-    "documentation": ""
+    "documentation": "The angle in radians whose cosine is <code>x</code>, in the range <code>[0, pi]</code>."
   },
   "@luau/global/math.acos": {
     "documentation": "Returns the arc cosine of <code>x</code>.",
@@ -91,10 +91,10 @@
     "code_sample": ""
   },
   "@luau/global/math.asin/param/0": {
-    "documentation": ""
+    "documentation": "The sine value, between <code>-1</code> and <code>1</code>."
   },
   "@luau/global/math.asin/return/0": {
-    "documentation": ""
+    "documentation": "The angle in radians whose sine is <code>x</code>, in the range <code>[-pi/2, pi/2]</code>."
   },
   "@luau/global/math.asin": {
     "documentation": "Returns the arc sine of <code>x</code>.",
@@ -111,10 +111,10 @@
     "code_sample": ""
   },
   "@luau/global/math.atan/param/0": {
-    "documentation": ""
+    "documentation": "The value to compute the arc tangent of."
   },
   "@luau/global/math.atan/return/0": {
-    "documentation": ""
+    "documentation": "The arc tangent of <code>x</code> in radians, in the range <code>[-pi/2, pi/2]</code>."
   },
   "@luau/global/math.atan": {
     "documentation": "Returns the arc tangent of <code>x</code> in radians.",
@@ -131,13 +131,13 @@
     "code_sample": ""
   },
   "@luau/global/math.atan2/param/0": {
-    "documentation": ""
+    "documentation": "The <strong>Y</strong> coordinate."
   },
   "@luau/global/math.atan2/param/1": {
-    "documentation": ""
+    "documentation": "The <strong>X</strong> coordinate."
   },
   "@luau/global/math.atan2/return/0": {
-    "documentation": ""
+    "documentation": "The arc tangent of <code>y</code>/<code>x</code> in radians, in the range <code>[-pi, pi]</code>."
   },
   "@luau/global/math.atan2": {
     "documentation": "Returns the arc tangent of <code>y</code>/<code>x</code> (in radians) while using the signs of both parameters to find the quadrant of the result.",
@@ -158,10 +158,10 @@
     "code_sample": ""
   },
   "@luau/global/math.ceil/param/0": {
-    "documentation": ""
+    "documentation": "The number to round up."
   },
   "@luau/global/math.ceil/return/0": {
-    "documentation": ""
+    "documentation": "The smallest integer greater than or equal to <code>x</code>."
   },
   "@luau/global/math.ceil": {
     "documentation": "Returns the smallest integer larger than or equal to <code>x</code>.",
@@ -178,16 +178,16 @@
     "code_sample": ""
   },
   "@luau/global/math.clamp/param/0": {
-    "documentation": ""
+    "documentation": "The number to clamp."
   },
   "@luau/global/math.clamp/param/1": {
-    "documentation": ""
+    "documentation": "The minimum value of the range."
   },
   "@luau/global/math.clamp/param/2": {
-    "documentation": ""
+    "documentation": "The maximum value of the range; must be greater than or equal to <code>min</code>."
   },
   "@luau/global/math.clamp/return/0": {
-    "documentation": ""
+    "documentation": "<code>x</code> constrained to the range <code>[</code>min<code>,</code>max<code>]</code>."
   },
   "@luau/global/math.clamp": {
     "documentation": "Returns a number between <code>min</code> and <code>max</code>, inclusive.",
@@ -212,10 +212,10 @@
     "code_sample": ""
   },
   "@luau/global/math.cos/param/0": {
-    "documentation": ""
+    "documentation": "The angle in radians."
   },
   "@luau/global/math.cos/return/0": {
-    "documentation": ""
+    "documentation": "The cosine of <code>x</code>."
   },
   "@luau/global/math.cos": {
     "documentation": "Returns the cosine of <code>x</code>, assumed to be in radians.",
@@ -232,10 +232,10 @@
     "code_sample": ""
   },
   "@luau/global/math.cosh/param/0": {
-    "documentation": ""
+    "documentation": "The number to compute the hyperbolic cosine of."
   },
   "@luau/global/math.cosh/return/0": {
-    "documentation": ""
+    "documentation": "The hyperbolic cosine of <code>x</code>."
   },
   "@luau/global/math.cosh": {
     "documentation": "Returns the hyperbolic cosine of <code>x</code>.",
@@ -252,10 +252,10 @@
     "code_sample": ""
   },
   "@luau/global/math.deg/param/0": {
-    "documentation": ""
+    "documentation": "The angle in radians to convert."
   },
   "@luau/global/math.deg/return/0": {
-    "documentation": ""
+    "documentation": "The angle <code>x</code> converted to degrees."
   },
   "@luau/global/math.deg": {
     "documentation": "Returns the angle <code>x</code> (given in radians) in degrees.",
@@ -272,10 +272,10 @@
     "code_sample": ""
   },
   "@luau/global/math.exp/param/0": {
-    "documentation": ""
+    "documentation": "The exponent."
   },
   "@luau/global/math.exp/return/0": {
-    "documentation": ""
+    "documentation": "The value of <code>e</code> raised to the power <code>x</code>."
   },
   "@luau/global/math.exp": {
     "documentation": "Returns the value <code>e</code>^<code>x</code>.",
@@ -292,10 +292,10 @@
     "code_sample": ""
   },
   "@luau/global/math.floor/param/0": {
-    "documentation": ""
+    "documentation": "The number to round down."
   },
   "@luau/global/math.floor/return/0": {
-    "documentation": ""
+    "documentation": "The largest integer less than or equal to <code>x</code>."
   },
   "@luau/global/math.floor": {
     "documentation": "Returns the largest integer smaller than or equal to <code>x</code>.",
@@ -312,13 +312,13 @@
     "code_sample": ""
   },
   "@luau/global/math.fmod/param/0": {
-    "documentation": ""
+    "documentation": "The dividend."
   },
   "@luau/global/math.fmod/param/1": {
-    "documentation": ""
+    "documentation": "The divisor."
   },
   "@luau/global/math.fmod/return/0": {
-    "documentation": ""
+    "documentation": "The remainder of the division of <code>x</code> by <code>y</code>."
   },
   "@luau/global/math.fmod": {
     "documentation": "Returns the remainder of the division of <code>x</code> by <code>y</code> that rounds the quotient towards zero.",
@@ -339,13 +339,13 @@
     "code_sample": ""
   },
   "@luau/global/math.frexp/param/0": {
-    "documentation": ""
+    "documentation": "The number to decompose into mantissa and exponent."
   },
   "@luau/global/math.frexp/return/0": {
-    "documentation": ""
+    "documentation": "The mantissa <code>m</code>, a value whose absolute value is in <code>[0.5, 1)</code> or zero."
   },
   "@luau/global/math.frexp/return/1": {
-    "documentation": ""
+    "documentation": "The exponent <code>e</code> such that <code>x = m * 2^e</code>."
   },
   "@luau/global/math.frexp": {
     "documentation": "Returns <code>m</code> and <code>e</code> such that <code>x</code> = <code>m</code>*<code>2</code>^<code>e</code>.",
@@ -363,10 +363,10 @@
     "code_sample": ""
   },
   "@luau/global/math.isfinite/param/0": {
-    "documentation": ""
+    "documentation": "The number to test."
   },
   "@luau/global/math.isfinite/return/0": {
-    "documentation": ""
+    "documentation": "True if <code>x</code> is neither NaN nor infinity, false otherwise."
   },
   "@luau/global/math.isfinite": {
     "documentation": "Returns true if <code>x</code> is a finite number.",
@@ -383,10 +383,10 @@
     "code_sample": ""
   },
   "@luau/global/math.isinf/param/0": {
-    "documentation": ""
+    "documentation": "The number to test."
   },
   "@luau/global/math.isinf/return/0": {
-    "documentation": ""
+    "documentation": "True if <code>x</code> is positive or negative infinity, false otherwise."
   },
   "@luau/global/math.isinf": {
     "documentation": "Returns true if <code>x</code> is positive or negative infinity and false otherwise.",
@@ -403,10 +403,10 @@
     "code_sample": ""
   },
   "@luau/global/math.isnan/param/0": {
-    "documentation": ""
+    "documentation": "The number to test."
   },
   "@luau/global/math.isnan/return/0": {
-    "documentation": ""
+    "documentation": "True if <code>x</code> is NaN, false otherwise."
   },
   "@luau/global/math.isnan": {
     "documentation": "Returns true if <code>x</code> is not a number (NaN) and false otherwise.",
@@ -423,13 +423,13 @@
     "code_sample": ""
   },
   "@luau/global/math.ldexp/param/0": {
-    "documentation": ""
+    "documentation": "The mantissa value."
   },
   "@luau/global/math.ldexp/param/1": {
-    "documentation": ""
+    "documentation": "The integer exponent."
   },
   "@luau/global/math.ldexp/return/0": {
-    "documentation": ""
+    "documentation": "The value <code>x * 2^e</code>."
   },
   "@luau/global/math.ldexp": {
     "documentation": "Returns <code>x</code>*<code>2</code>^<code>e</code> (<code>e</code> should be an integer).",
@@ -484,13 +484,13 @@
     "code_sample": ""
   },
   "@luau/global/math.log/param/0": {
-    "documentation": ""
+    "documentation": "The number to compute the logarithm of."
   },
   "@luau/global/math.log/param/1": {
     "documentation": "The base of the logarithm, the constant <code>e</code> by default."
   },
   "@luau/global/math.log/return/0": {
-    "documentation": ""
+    "documentation": "The logarithm of <code>x</code> in the given base."
   },
   "@luau/global/math.log": {
     "documentation": "Returns the logarithm of <code>x</code> using the given base.",
@@ -511,10 +511,10 @@
     "code_sample": ""
   },
   "@luau/global/math.log10/param/0": {
-    "documentation": ""
+    "documentation": "The number to compute the base-10 logarithm of."
   },
   "@luau/global/math.log10/return/0": {
-    "documentation": ""
+    "documentation": "The base-10 logarithm of <code>x</code>."
   },
   "@luau/global/math.log10": {
     "documentation": "Returns the base-10 logarithm of <code>x</code>.",
@@ -579,13 +579,13 @@
     "code_sample": ""
   },
   "@luau/global/math.max/param/0": {
-    "documentation": ""
+    "documentation": "The first number to compare."
   },
   "@luau/global/math.max/param/1": {
-    "documentation": ""
+    "documentation": "Additional numbers to compare."
   },
   "@luau/global/math.max/return/0": {
-    "documentation": ""
+    "documentation": "The largest value among all arguments."
   },
   "@luau/global/math.max": {
     "documentation": "Returns the maximum value among the numbers passed to the function.",
@@ -606,13 +606,13 @@
     "code_sample": ""
   },
   "@luau/global/math.min/param/0": {
-    "documentation": ""
+    "documentation": "The first number to compare."
   },
   "@luau/global/math.min/param/1": {
-    "documentation": ""
+    "documentation": "Additional numbers to compare."
   },
   "@luau/global/math.min/return/0": {
-    "documentation": ""
+    "documentation": "The smallest value among all arguments."
   },
   "@luau/global/math.min": {
     "documentation": "Returns the minimum value among the numbers passed to the function.",
@@ -633,13 +633,13 @@
     "code_sample": ""
   },
   "@luau/global/math.modf/param/0": {
-    "documentation": ""
+    "documentation": "The number to split into integral and fractional parts."
   },
   "@luau/global/math.modf/return/0": {
-    "documentation": ""
+    "documentation": "The integral part of <code>x</code>."
   },
   "@luau/global/math.modf/return/1": {
-    "documentation": ""
+    "documentation": "The fractional part of <code>x</code>."
   },
   "@luau/global/math.modf": {
     "documentation": "Returns two numbers: the integral part of <code>x</code> and the fractional part of <code>x</code>.",
@@ -657,16 +657,16 @@
     "code_sample": ""
   },
   "@luau/global/math.noise/param/0": {
-    "documentation": ""
+    "documentation": "The <strong>X</strong> coordinate of the sample point."
   },
   "@luau/global/math.noise/param/1": {
-    "documentation": ""
+    "documentation": "The <strong>Y</strong> coordinate of the sample point."
   },
   "@luau/global/math.noise/param/2": {
-    "documentation": ""
+    "documentation": "The <strong>Z</strong> coordinate of the sample point."
   },
   "@luau/global/math.noise/return/0": {
-    "documentation": ""
+    "documentation": "A Perlin noise value, typically between <code>-1</code> and <code>1</code>."
   },
   "@luau/global/math.noise": {
     "documentation": "Returns a Perlin noise value.",
@@ -691,13 +691,13 @@
     "code_sample": ""
   },
   "@luau/global/math.pow/param/0": {
-    "documentation": ""
+    "documentation": "The base value."
   },
   "@luau/global/math.pow/param/1": {
-    "documentation": ""
+    "documentation": "The exponent value."
   },
   "@luau/global/math.pow/return/0": {
-    "documentation": ""
+    "documentation": "The value <code>x</code> raised to the power <code>y</code>."
   },
   "@luau/global/math.pow": {
     "documentation": "Returns <code>x</code>^<code>y</code>.",
@@ -718,10 +718,10 @@
     "code_sample": ""
   },
   "@luau/global/math.rad/param/0": {
-    "documentation": ""
+    "documentation": "The angle in degrees to convert."
   },
   "@luau/global/math.rad/return/0": {
-    "documentation": ""
+    "documentation": "The angle <code>x</code> converted to radians."
   },
   "@luau/global/math.rad": {
     "documentation": "Returns the angle <code>x</code> (given in degrees) in radians.",
@@ -738,13 +738,13 @@
     "code_sample": ""
   },
   "@luau/global/math.random/param/0": {
-    "documentation": ""
+    "documentation": "When used alone, the upper bound of the integer range (lower bound is <code>1</code>). When used with <code>n</code>, the lower bound."
   },
   "@luau/global/math.random/param/1": {
-    "documentation": ""
+    "documentation": "The upper bound of the integer range."
   },
   "@luau/global/math.random/return/0": {
-    "documentation": ""
+    "documentation": "A pseudo-random number within the specified range."
   },
   "@luau/global/math.random": {
     "documentation": "Returns a random number within the range provided.",
@@ -765,7 +765,7 @@
     "code_sample": ""
   },
   "@luau/global/math.randomseed/param/0": {
-    "documentation": ""
+    "documentation": "The seed value for the pseudo-random number generator."
   },
   "@luau/global/math.randomseed": {
     "documentation": "Sets <code>x</code> as the seed for the pseudo-random generator.",
@@ -783,7 +783,7 @@
     "documentation": "The value to be rounded."
   },
   "@luau/global/math.round/return/0": {
-    "documentation": ""
+    "documentation": "The nearest integer to <code>x</code>, rounding away from zero for midpoints."
   },
   "@luau/global/math.round": {
     "documentation": "Returns the integer with the smallest difference between it and the given number.",
@@ -800,10 +800,10 @@
     "code_sample": ""
   },
   "@luau/global/math.sign/param/0": {
-    "documentation": ""
+    "documentation": "The number to determine the sign of."
   },
   "@luau/global/math.sign/return/0": {
-    "documentation": ""
+    "documentation": "<code>-1</code> if <code>x</code> is negative, <code>0</code> if <code>x</code> is zero, or <code>1</code> if <code>x</code> is positive."
   },
   "@luau/global/math.sign": {
     "documentation": "Returns <code>-1</code> if <code>x</code> is less than <code>0</code>, <code>0</code> if <code>x</code> equals <code>0</code>, or <code>1</code> if <code>x</code> is greater than <code>0</code>.",
@@ -820,10 +820,10 @@
     "code_sample": ""
   },
   "@luau/global/math.sin/param/0": {
-    "documentation": ""
+    "documentation": "The angle in radians."
   },
   "@luau/global/math.sin/return/0": {
-    "documentation": ""
+    "documentation": "The sine of <code>x</code>."
   },
   "@luau/global/math.sin": {
     "documentation": "Returns the sine of <code>x</code>, assumed to be in radians.",
@@ -840,10 +840,10 @@
     "code_sample": ""
   },
   "@luau/global/math.sinh/param/0": {
-    "documentation": ""
+    "documentation": "The number to compute the hyperbolic sine of."
   },
   "@luau/global/math.sinh/return/0": {
-    "documentation": ""
+    "documentation": "The hyperbolic sine of <code>x</code>."
   },
   "@luau/global/math.sinh": {
     "documentation": "Returns the hyperbolic sine of <code>x</code>.",
@@ -860,10 +860,10 @@
     "code_sample": ""
   },
   "@luau/global/math.sqrt/param/0": {
-    "documentation": ""
+    "documentation": "The number to compute the square root of."
   },
   "@luau/global/math.sqrt/return/0": {
-    "documentation": ""
+    "documentation": "The square root of <code>x</code>."
   },
   "@luau/global/math.sqrt": {
     "documentation": "Returns the square root of <code>x</code>.",
@@ -880,10 +880,10 @@
     "code_sample": ""
   },
   "@luau/global/math.tan/param/0": {
-    "documentation": ""
+    "documentation": "The angle in radians."
   },
   "@luau/global/math.tan/return/0": {
-    "documentation": ""
+    "documentation": "The tangent of <code>x</code>."
   },
   "@luau/global/math.tan": {
     "documentation": "Returns the tangent of <code>x</code>, assumed to be in radians.",
@@ -900,10 +900,10 @@
     "code_sample": ""
   },
   "@luau/global/math.tanh/param/0": {
-    "documentation": ""
+    "documentation": "The number to compute the hyperbolic tangent of."
   },
   "@luau/global/math.tanh/return/0": {
-    "documentation": ""
+    "documentation": "The hyperbolic tangent of <code>x</code>."
   },
   "@luau/global/math.tanh": {
     "documentation": "Returns the hyperbolic tangent of <code>x</code>.",
@@ -983,7 +983,7 @@
     "documentation": "The integer number of bits to shift by."
   },
   "@luau/global/bit32.arshift/return/0": {
-    "documentation": ""
+    "documentation": "The result of arithmetically shifting <code>x</code> by <code>disp</code> bits to the right."
   },
   "@luau/global/bit32.arshift": {
     "documentation": "Returns a number after its bits have been arithmetically shifted to the right by a given displacement.",
@@ -1004,10 +1004,10 @@
     "code_sample": ""
   },
   "@luau/global/bit32.band/param/0": {
-    "documentation": ""
+    "documentation": "The numbers to combine with bitwise AND."
   },
   "@luau/global/bit32.band/return/0": {
-    "documentation": ""
+    "documentation": "The bitwise AND of all provided numbers."
   },
   "@luau/global/bit32.band": {
     "documentation": "Returns the bitwise AND of all provided numbers.",
@@ -1024,10 +1024,10 @@
     "code_sample": ""
   },
   "@luau/global/bit32.bnot/param/0": {
-    "documentation": ""
+    "documentation": "The number to negate."
   },
   "@luau/global/bit32.bnot/return/0": {
-    "documentation": ""
+    "documentation": "The bitwise negation of <code>x</code>."
   },
   "@luau/global/bit32.bnot": {
     "documentation": "Returns the bitwise negation of a given number.",
@@ -1044,10 +1044,10 @@
     "code_sample": ""
   },
   "@luau/global/bit32.bor/param/0": {
-    "documentation": ""
+    "documentation": "The numbers to combine with bitwise OR."
   },
   "@luau/global/bit32.bor/return/0": {
-    "documentation": ""
+    "documentation": "The bitwise OR of all provided numbers."
   },
   "@luau/global/bit32.bor": {
     "documentation": "Returns the bitwise OR of all provided numbers.",
@@ -1064,10 +1064,10 @@
     "code_sample": ""
   },
   "@luau/global/bit32.btest/param/0": {
-    "documentation": ""
+    "documentation": "The numbers to test with bitwise AND."
   },
   "@luau/global/bit32.btest/return/0": {
-    "documentation": ""
+    "documentation": "True if the bitwise AND of all operands is non-zero, false otherwise."
   },
   "@luau/global/bit32.btest": {
     "documentation": "Returns a boolean describing whether the bitwise and of its operands is different from zero.",
@@ -1084,10 +1084,10 @@
     "code_sample": ""
   },
   "@luau/global/bit32.bxor/param/0": {
-    "documentation": ""
+    "documentation": "The numbers to combine with bitwise XOR."
   },
   "@luau/global/bit32.bxor/return/0": {
-    "documentation": ""
+    "documentation": "The bitwise XOR of all provided numbers."
   },
   "@luau/global/bit32.bxor": {
     "documentation": "Returns the bitwise XOR of all provided numbers.",
@@ -1104,10 +1104,10 @@
     "code_sample": ""
   },
   "@luau/global/bit32.byteswap/param/0": {
-    "documentation": ""
+    "documentation": "The number whose bytes to swap."
   },
   "@luau/global/bit32.byteswap/return/0": {
-    "documentation": ""
+    "documentation": "The number with its byte order reversed."
   },
   "@luau/global/bit32.byteswap": {
     "documentation": "Returns the given number with the order of the bytes swapped.",
@@ -1124,10 +1124,10 @@
     "code_sample": ""
   },
   "@luau/global/bit32.countlz/param/0": {
-    "documentation": ""
+    "documentation": "The number to count leading zeros in."
   },
   "@luau/global/bit32.countlz/return/0": {
-    "documentation": ""
+    "documentation": "The count of consecutive zero bits from the most significant bit, or 32 if <code>n</code> is zero."
   },
   "@luau/global/bit32.countlz": {
     "documentation": "Returns the number of consecutive zero bits in the 32-bit representation of the provided number starting from the left-most (most significant) bit.",
@@ -1144,10 +1144,10 @@
     "code_sample": ""
   },
   "@luau/global/bit32.countrz/param/0": {
-    "documentation": ""
+    "documentation": "The number to count trailing zeros in."
   },
   "@luau/global/bit32.countrz/return/0": {
-    "documentation": ""
+    "documentation": "The count of consecutive zero bits from the least significant bit, or 32 if <code>n</code> is zero."
   },
   "@luau/global/bit32.countrz": {
     "documentation": "Returns the number of consecutive zero bits in the 32-bit representation of the provided number starting from the right-most (least significant) bit.",
@@ -1164,16 +1164,16 @@
     "code_sample": ""
   },
   "@luau/global/bit32.extract/param/0": {
-    "documentation": ""
+    "documentation": "The number to extract bits from."
   },
   "@luau/global/bit32.extract/param/1": {
-    "documentation": ""
+    "documentation": "The zero-based position of the least significant bit to extract."
   },
   "@luau/global/bit32.extract/param/2": {
-    "documentation": ""
+    "documentation": "The number of bits to extract."
   },
   "@luau/global/bit32.extract/return/0": {
-    "documentation": ""
+    "documentation": "The unsigned number formed by the extracted bit range."
   },
   "@luau/global/bit32.extract": {
     "documentation": "Extract a range of bits from a number and return them as an unsigned number.",
@@ -1198,19 +1198,19 @@
     "code_sample": ""
   },
   "@luau/global/bit32.replace/param/0": {
-    "documentation": ""
+    "documentation": "The number in which to replace bits."
   },
   "@luau/global/bit32.replace/param/1": {
-    "documentation": ""
+    "documentation": "The replacement value to insert into the bit range."
   },
   "@luau/global/bit32.replace/param/2": {
-    "documentation": ""
+    "documentation": "The zero-based position of the least significant bit to replace."
   },
   "@luau/global/bit32.replace/param/3": {
-    "documentation": ""
+    "documentation": "The number of bits to replace."
   },
   "@luau/global/bit32.replace/return/0": {
-    "documentation": ""
+    "documentation": "A copy of <code>n</code> with the specified bit range replaced by <code>v</code>."
   },
   "@luau/global/bit32.replace": {
     "documentation": "Return a copy of a number with a range of bits replaced by a given value.",
@@ -1239,13 +1239,13 @@
     "code_sample": ""
   },
   "@luau/global/bit32.lrotate/param/0": {
-    "documentation": ""
+    "documentation": "The number whose bits to rotate."
   },
   "@luau/global/bit32.lrotate/param/1": {
-    "documentation": ""
+    "documentation": "The number of bit positions to rotate left."
   },
   "@luau/global/bit32.lrotate/return/0": {
-    "documentation": ""
+    "documentation": "The result of rotating <code>x</code> left by <code>disp</code> bits."
   },
   "@luau/global/bit32.lrotate": {
     "documentation": "Returns a number after its bits have been rotated to the left by a given number of times.",
@@ -1266,13 +1266,13 @@
     "code_sample": ""
   },
   "@luau/global/bit32.lshift/param/0": {
-    "documentation": ""
+    "documentation": "The number whose bits to shift."
   },
   "@luau/global/bit32.lshift/param/1": {
-    "documentation": ""
+    "documentation": "The number of bit positions to shift left."
   },
   "@luau/global/bit32.lshift/return/0": {
-    "documentation": ""
+    "documentation": "The result of logically shifting <code>x</code> left by <code>disp</code> bits."
   },
   "@luau/global/bit32.lshift": {
     "documentation": "Returns a number whose bits have been logically shifted to the left by a given displacement.",
@@ -1293,13 +1293,13 @@
     "code_sample": ""
   },
   "@luau/global/bit32.rrotate/param/0": {
-    "documentation": ""
+    "documentation": "The number whose bits to rotate."
   },
   "@luau/global/bit32.rrotate/param/1": {
-    "documentation": ""
+    "documentation": "The number of bit positions to rotate right."
   },
   "@luau/global/bit32.rrotate/return/0": {
-    "documentation": ""
+    "documentation": "The result of rotating <code>x</code> right by <code>disp</code> bits."
   },
   "@luau/global/bit32.rrotate": {
     "documentation": "Returns a number after its bits have been rotated to the right by a given number of times.",
@@ -1320,13 +1320,13 @@
     "code_sample": ""
   },
   "@luau/global/bit32.rshift/param/0": {
-    "documentation": ""
+    "documentation": "The number whose bits to shift."
   },
   "@luau/global/bit32.rshift/param/1": {
-    "documentation": ""
+    "documentation": "The number of bit positions to shift right."
   },
   "@luau/global/bit32.rshift/return/0": {
-    "documentation": ""
+    "documentation": "The result of logically shifting <code>x</code> right by <code>disp</code> bits."
   },
   "@luau/global/bit32.rshift": {
     "documentation": "Returns a number whose bits have been logically shifted to the right by a given displacement.",
@@ -1400,7 +1400,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.fromstring/param/0": {
-    "documentation": ""
+    "documentation": "The string whose bytes initialize the new buffer."
   },
   "@luau/global/buffer.fromstring/return/0": {
     "documentation": ""
@@ -1420,7 +1420,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.tostring/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to convert."
   },
   "@luau/global/buffer.tostring/return/0": {
     "documentation": ""
@@ -1440,7 +1440,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.len/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to get the size of."
   },
   "@luau/global/buffer.len/return/0": {
     "documentation": ""
@@ -1460,7 +1460,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readbits/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readbits/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1494,7 +1494,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readi8/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readi8/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1521,7 +1521,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readu8/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readu8/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1548,7 +1548,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readi16/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readi16/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1575,7 +1575,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readu16/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readu16/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1602,7 +1602,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readi32/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readi32/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1629,7 +1629,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readu32/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readu32/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1656,7 +1656,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readf32/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readf32/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1683,7 +1683,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readf64/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readf64/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1710,7 +1710,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writebits/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writebits/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1746,7 +1746,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writei8/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writei8/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1775,7 +1775,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writeu8/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writeu8/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1804,7 +1804,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writei16/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writei16/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1833,7 +1833,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writeu16/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writeu16/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1862,7 +1862,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writei32/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writei32/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1891,7 +1891,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writeu32/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writeu32/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1920,7 +1920,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writef32/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writef32/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1949,7 +1949,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writef64/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writef64/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -1978,7 +1978,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.readstring/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to read from."
   },
   "@luau/global/buffer.readstring/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -2012,7 +2012,7 @@
     "code_sample": ""
   },
   "@luau/global/buffer.writestring/param/0": {
-    "documentation": ""
+    "documentation": "The buffer to write to."
   },
   "@luau/global/buffer.writestring/param/1": {
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
@@ -2986,19 +2986,19 @@
     "code_sample": ""
   },
   "@luau/global/string.byte/param/0": {
-    "documentation": ""
+    "documentation": "The string to extract byte values from."
   },
   "@luau/global/string.byte/param/1": {
-    "documentation": ""
+    "documentation": "The starting index of the range of characters to convert."
   },
   "@luau/global/string.byte/param/2": {
-    "documentation": ""
+    "documentation": "The ending index of the range of characters to convert."
   },
   "@luau/global/string.byte/return/0": {
     "documentation": ""
   },
   "@luau/global/string.byte": {
-    "documentation": "Returns the internal numerical codes of the characters <code>s[i], s[i+1], ..., s[j]</code>. The default value for <code>i</code> is 1; the default value for <code>j</code> is <code>i</code>. These indices are corrected following the same rules of function string.sub.",
+    "documentation": "Returns the internal numerical codes of the characters <code>s[i], s[i+1], ..., s[j]</code>. The default value for <code>i</code> is <code>1</code>; the default value for <code>j</code> is <code>i</code>. These indices are corrected following the same rules of function string.sub.",
     "params": [
       {
         "name": "s",
@@ -3020,7 +3020,7 @@
     "code_sample": ""
   },
   "@luau/global/string.char/param/0": {
-    "documentation": ""
+    "documentation": "Zero or more integers in the range <code>[0, 255]</code>, each representing a byte value."
   },
   "@luau/global/string.char/return/0": {
     "documentation": ""
@@ -3049,7 +3049,7 @@
     "documentation": "The starting index for the search."
   },
   "@luau/global/string.find/param/3": {
-    "documentation": ""
+    "documentation": "If true, turns off pattern matching and performs a plain substring search."
   },
   "@luau/global/string.find/return/0": {
     "documentation": "The starting index of the match."
@@ -3085,10 +3085,10 @@
     "code_sample": ""
   },
   "@luau/global/string.format/param/0": {
-    "documentation": ""
+    "documentation": "A string containing format specifiers that control how subsequent arguments are formatted."
   },
   "@luau/global/string.format/param/1": {
-    "documentation": ""
+    "documentation": "Values to be formatted according to the specifiers in the format string."
   },
   "@luau/global/string.format/return/0": {
     "documentation": ""
@@ -3112,10 +3112,10 @@
     "code_sample": ""
   },
   "@luau/global/string.gmatch/param/0": {
-    "documentation": ""
+    "documentation": "The string to search for pattern matches."
   },
   "@luau/global/string.gmatch/param/1": {
-    "documentation": ""
+    "documentation": "The pattern to match repeatedly against the string."
   },
   "@luau/global/string.gmatch/return/0": {
     "documentation": ""
@@ -3184,7 +3184,7 @@
     "code_sample": ""
   },
   "@luau/global/string.len/param/0": {
-    "documentation": ""
+    "documentation": "The string to measure."
   },
   "@luau/global/string.len/return/0": {
     "documentation": ""
@@ -3204,7 +3204,7 @@
     "code_sample": ""
   },
   "@luau/global/string.lower/param/0": {
-    "documentation": ""
+    "documentation": "The string to convert to lowercase."
   },
   "@luau/global/string.lower/return/0": {
     "documentation": ""
@@ -3224,19 +3224,19 @@
     "code_sample": ""
   },
   "@luau/global/string.match/param/0": {
-    "documentation": ""
+    "documentation": "The string to search for a pattern match."
   },
   "@luau/global/string.match/param/1": {
-    "documentation": ""
+    "documentation": "The pattern to match against the string."
   },
   "@luau/global/string.match/param/2": {
-    "documentation": ""
+    "documentation": "The byte position at which to start searching."
   },
   "@luau/global/string.match/return/0": {
     "documentation": ""
   },
   "@luau/global/string.match": {
-    "documentation": "Looks for the first match of pattern in the string <code>s</code>. If a match is found, it is returned; otherwise, it returns <code>nil</code>. A third, optional numerical argument, init, specifies where to start the search.",
+    "documentation": "Looks for the first match of <code>pattern</code> in the string <code>s</code>.",
     "params": [
       {
         "name": "s",
@@ -3258,10 +3258,10 @@
     "code_sample": ""
   },
   "@luau/global/string.pack/param/0": {
-    "documentation": ""
+    "documentation": "A format string that describes the layout and types of the values to pack."
   },
   "@luau/global/string.pack/param/1": {
-    "documentation": ""
+    "documentation": "The values to serialize into binary form according to the format string."
   },
   "@luau/global/string.pack/return/0": {
     "documentation": ""
@@ -3285,7 +3285,7 @@
     "code_sample": ""
   },
   "@luau/global/string.packsize/param/0": {
-    "documentation": ""
+    "documentation": "A format string describing the packing layout (must not contain variable-length options <code>s</code> or <code>z</code>)."
   },
   "@luau/global/string.packsize/return/0": {
     "documentation": ""
@@ -3305,10 +3305,10 @@
     "code_sample": ""
   },
   "@luau/global/string.rep/param/0": {
-    "documentation": ""
+    "documentation": "The string to repeat."
   },
   "@luau/global/string.rep/param/1": {
-    "documentation": ""
+    "documentation": "The number of times to repeat the string."
   },
   "@luau/global/string.rep/return/0": {
     "documentation": ""
@@ -3332,7 +3332,7 @@
     "code_sample": ""
   },
   "@luau/global/string.reverse/param/0": {
-    "documentation": ""
+    "documentation": "The string to reverse."
   },
   "@luau/global/string.reverse/return/0": {
     "documentation": ""
@@ -3379,19 +3379,19 @@
     "code_sample": ""
   },
   "@luau/global/string.sub/param/0": {
-    "documentation": ""
+    "documentation": "The source string to extract a substring from."
   },
   "@luau/global/string.sub/param/1": {
-    "documentation": ""
+    "documentation": "The starting byte position of the substring (negative values count from the end)."
   },
   "@luau/global/string.sub/param/2": {
-    "documentation": ""
+    "documentation": "The ending byte position of the substring, inclusive (negative values count from the end)."
   },
   "@luau/global/string.sub/return/0": {
     "documentation": ""
   },
   "@luau/global/string.sub": {
-    "documentation": "Returns the substring of <code>s</code> that starts at <code>i</code> and continues until and including <code>j</code>. <code>i</code> and <code>j</code> can be negative. <code>i</code> defaults to 1 and <code>j</code> defaults to <code>-1</code>.",
+    "documentation": "Returns the substring of <code>s</code> that starts at <code>i</code> and continues until and including <code>j</code>. <code>i</code> and <code>j</code> can be negative. <code>i</code> defaults to <code>1</code> and <code>j</code> defaults to <code>-1</code>.",
     "params": [
       {
         "name": "s",
@@ -3413,13 +3413,13 @@
     "code_sample": ""
   },
   "@luau/global/string.unpack/param/0": {
-    "documentation": ""
+    "documentation": "The format string that describes how the binary data was packed."
   },
   "@luau/global/string.unpack/param/1": {
-    "documentation": ""
+    "documentation": "The binary string to unpack values from."
   },
   "@luau/global/string.unpack/param/2": {
-    "documentation": ""
+    "documentation": "The byte position in <code>data</code> at which to begin reading."
   },
   "@luau/global/string.unpack/return/0": {
     "documentation": "The values packed into the provided binary string, plus the index of the first unread byte."
@@ -3447,7 +3447,7 @@
     "code_sample": ""
   },
   "@luau/global/string.upper/param/0": {
-    "documentation": ""
+    "documentation": "The string to convert to uppercase."
   },
   "@luau/global/string.upper/return/0": {
     "documentation": ""
@@ -3727,7 +3727,7 @@
     "code_sample": ""
   },
   "@luau/global/coroutine.close/param/0": {
-    "documentation": ""
+    "documentation": "The coroutine thread to close."
   },
   "@luau/global/coroutine.close/return/0": {
     "documentation": "<code>true</code> unless the coroutine being closed is in an error state."
@@ -3751,10 +3751,10 @@
     "code_sample": ""
   },
   "@luau/global/coroutine.create/param/0": {
-    "documentation": ""
+    "documentation": "The Luau function to use as the coroutine body."
   },
   "@luau/global/coroutine.create/return/0": {
-    "documentation": ""
+    "documentation": "A new coroutine in the suspended state, ready to be resumed."
   },
   "@luau/global/coroutine.create": {
     "documentation": "Creates a new coroutine, with body f. f must be a Luau function.",
@@ -3783,16 +3783,16 @@
     "code_sample": ""
   },
   "@luau/global/coroutine.resume/param/0": {
-    "documentation": ""
+    "documentation": "The coroutine thread to resume."
   },
   "@luau/global/coroutine.resume/param/1": {
-    "documentation": ""
+    "documentation": "Arguments passed to the coroutine body function (on first resume) or returned from <code>yield()</code> inside the coroutine (on subsequent resumes)."
   },
   "@luau/global/coroutine.resume/return/0": {
-    "documentation": ""
+    "documentation": "<code>true</code> if the coroutine ran without errors, <code>false</code> if an error occurred."
   },
   "@luau/global/coroutine.resume/return/1": {
-    "documentation": ""
+    "documentation": "The values passed to <code>yield()</code> or returned by the body function on success, or the error message on failure."
   },
   "@luau/global/coroutine.resume": {
     "documentation": "Starts or continues the execution of coroutine <code>co</code>.",
@@ -3814,7 +3814,7 @@
     "code_sample": ""
   },
   "@luau/global/coroutine.running/return/0": {
-    "documentation": ""
+    "documentation": "The currently running coroutine, or <code>nil</code> if called from the main thread."
   },
   "@luau/global/coroutine.running": {
     "documentation": "Returns the running coroutine.",
@@ -3826,10 +3826,10 @@
     "code_sample": ""
   },
   "@luau/global/coroutine.status/param/0": {
-    "documentation": ""
+    "documentation": "The coroutine thread to query."
   },
   "@luau/global/coroutine.status/return/0": {
-    "documentation": ""
+    "documentation": "One of <code>\"running\"</code>, <code>\"suspended\"</code>, <code>\"normal\"</code>, or <code>\"dead\"</code>."
   },
   "@luau/global/coroutine.status": {
     "documentation": "Returns the status of coroutine co as a string.",
@@ -3846,10 +3846,10 @@
     "code_sample": ""
   },
   "@luau/global/coroutine.wrap/param/0": {
-    "documentation": ""
+    "documentation": "The Luau function to use as the coroutine body."
   },
   "@luau/global/coroutine.wrap/return/0": {
-    "documentation": ""
+    "documentation": "A wrapper function that resumes the coroutine each time it is called, returning the yielded or returned values directly (without the boolean status). Raises an error if the coroutine errors."
   },
   "@luau/global/coroutine.wrap": {
     "documentation": "Creates a new coroutine and returns a function that, when called, resumes the coroutine.",
@@ -3866,10 +3866,10 @@
     "code_sample": ""
   },
   "@luau/global/coroutine.yield/param/0": {
-    "documentation": ""
+    "documentation": "Values to return as additional results from the corresponding <code>resume()</code> call."
   },
   "@luau/global/coroutine.yield/return/0": {
-    "documentation": ""
+    "documentation": "The arguments passed to the next <code>resume()</code> call that continues this coroutine."
   },
   "@luau/global/coroutine.yield": {
     "documentation": "Suspends execution of the coroutine.",
@@ -3892,7 +3892,7 @@
     "documentation": "The text that will be shown in the error if the assertion fails."
   },
   "@luau/global/assert/return/0": {
-    "documentation": ""
+    "documentation": "All values originally passed to <code>assert</code> if the assertion succeeds."
   },
   "@luau/global/assert": {
     "documentation": "Throws an error if the provided <code>value</code> resolves to <code>false</code> or <code>nil</code>.",
@@ -3916,7 +3916,7 @@
     "documentation": "The name of the operation that should be performed by the garbage collector."
   },
   "@luau/global/collectgarbage/return/0": {
-    "documentation": ""
+    "documentation": "The result of the garbage collector operation; for the <code>count</code> option, returns the total memory in use in kilobytes."
   },
   "@luau/global/collectgarbage": {
     "documentation": "<strong>Deprecated:</strong> <br>Performs the specified operation of the garbage collector.",
@@ -3955,7 +3955,7 @@
     "code_sample": ""
   },
   "@luau/global/gcinfo/return/0": {
-    "documentation": ""
+    "documentation": "The total memory heap size in kilobytes."
   },
   "@luau/global/gcinfo": {
     "documentation": "Returns the total memory heap size in kilobytes.",
@@ -3970,7 +3970,7 @@
     "documentation": "The stack level (int) of the environment to be returned; or the function whose environment will be returned."
   },
   "@luau/global/getfenv/return/0": {
-    "documentation": ""
+    "documentation": "The environment table of the specified function or stack level."
   },
   "@luau/global/getfenv": {
     "documentation": "<strong>Deprecated:</strong> This function allows uncontrolled change of the global/function environment and disables script optimizations. Changes to the environment are not tracked by the script analysis tooling and may result in missing or incorrect warnings. As a replacement, consider using <code>debug.info()</code> instead.<br>Returns the current environment in use by the caller, as a dictionary.",
@@ -3990,7 +3990,7 @@
     "documentation": "The object to fetch the metatable of."
   },
   "@luau/global/getmetatable/return/0": {
-    "documentation": ""
+    "documentation": "The metatable of <code>t</code>, the value of the <code>__metatable</code> metamethod if set, or <code>nil</code> if no metatable exists."
   },
   "@luau/global/getmetatable": {
     "documentation": "Returns the metatable of the given table.",
@@ -4010,13 +4010,13 @@
     "documentation": "A table whose elements are to be iterated over."
   },
   "@luau/global/ipairs/return/0": {
-    "documentation": ""
+    "documentation": "An iterator function that returns the next index-value pair on each call."
   },
   "@luau/global/ipairs/return/1": {
-    "documentation": ""
+    "documentation": "The table <code>t</code> passed as the invariant state."
   },
   "@luau/global/ipairs/return/2": {
-    "documentation": ""
+    "documentation": "The initial control value <code>0</code>."
   },
   "@luau/global/ipairs": {
     "documentation": "Returns an iterator function and the table for use in a for loop.",
@@ -4041,7 +4041,7 @@
     "documentation": "An optional chunk name for error messages and debug information. If unspecified, Luau uses the <code>contents</code> string."
   },
   "@luau/global/loadstring/return/0": {
-    "documentation": ""
+    "documentation": "The compiled function on success, or <code>nil</code> followed by an error message string on failure."
   },
   "@luau/global/loadstring": {
     "documentation": "Returns the provided code as a function that can be executed.",
@@ -4062,10 +4062,10 @@
     "code_sample": ""
   },
   "@luau/global/newproxy/param/0": {
-    "documentation": ""
+    "documentation": "Whether to attach an empty metatable to the new userdata."
   },
   "@luau/global/newproxy/return/0": {
-    "documentation": ""
+    "documentation": "A new blank userdata, with an empty metatable attached if <code>addMetatable</code> is <code>true</code>."
   },
   "@luau/global/newproxy": {
     "documentation": "Creates a blank <code>userdata</code>, with the option for it to have a metatable.",
@@ -4088,10 +4088,10 @@
     "documentation": "The last key that was previously retrieved from a call to next."
   },
   "@luau/global/next/return/0": {
-    "documentation": ""
+    "documentation": "The next key in the table, or <code>nil</code> if the traversal is complete."
   },
   "@luau/global/next/return/1": {
-    "documentation": ""
+    "documentation": "The value associated with the returned key."
   },
   "@luau/global/next": {
     "documentation": "An iterator function for use in for loops.",
@@ -4116,10 +4116,13 @@
     "documentation": "An array or dictionary table to iterate over."
   },
   "@luau/global/pairs/return/0": {
-    "documentation": ""
+    "documentation": "The <code>next</code> function as the iterator."
   },
   "@luau/global/pairs/return/1": {
-    "documentation": ""
+    "documentation": "The table <code>t</code> passed as the invariant state."
+  },
+  "@luau/global/pairs/return/2": {
+    "documentation": "The initial control value <code>nil</code>."
   },
   "@luau/global/pairs": {
     "documentation": "Returns an iterator function and the provided table for use in a <code>for</code> loop.",
@@ -4131,7 +4134,8 @@
     ],
     "returns": [
       "@luau/global/pairs/return/0",
-      "@luau/global/pairs/return/1"
+      "@luau/global/pairs/return/1",
+      "@luau/global/pairs/return/2"
     ],
     "learn_more_link": "https://luau.org/library/#global-functions",
     "code_sample": "local scores = {\n    [\"John\"] = 5,\n    [\"Sally\"] = 10\n}\n\nfor name, score in pairs(scores) do\n    print(name .. \" has score: \" .. score)\nend"
@@ -4143,10 +4147,10 @@
     "documentation": "The arguments to send to <code>func</code> when executing."
   },
   "@luau/global/pcall/return/0": {
-    "documentation": ""
+    "documentation": "<code>true</code> if <code>func</code> executed without errors, <code>false</code> otherwise."
   },
   "@luau/global/pcall/return/1": {
-    "documentation": ""
+    "documentation": "All return values of <code>func</code> on success, or the error message on failure."
   },
   "@luau/global/pcall": {
     "documentation": "Runs the provided function and catches any error it throws, returning the function's success and its results.",
@@ -4189,7 +4193,7 @@
     "documentation": "The second variable to compare."
   },
   "@luau/global/rawequal/return/0": {
-    "documentation": ""
+    "documentation": "<code>true</code> if <code>v1</code> and <code>v2</code> are primitively equal without metamethod invocation, <code>false</code> otherwise."
   },
   "@luau/global/rawequal": {
     "documentation": "Returns whether <code>v1</code> is equal to <code>v2</code>, bypassing their metamethods.",
@@ -4216,7 +4220,7 @@
     "documentation": "The index to get from <code>t</code>."
   },
   "@luau/global/rawget/return/0": {
-    "documentation": ""
+    "documentation": "The value stored at <code>t[index]</code>, or <code>nil</code> if the key does not exist in the table itself."
   },
   "@luau/global/rawget": {
     "documentation": "Gets the real value of <code>table[index]</code>, bypassing any metamethods.",
@@ -4240,7 +4244,7 @@
     "documentation": "The table to be referenced."
   },
   "@luau/global/rawlen/return/0": {
-    "documentation": ""
+    "documentation": "The raw length of the table or string without metamethod invocation."
   },
   "@luau/global/rawlen": {
     "documentation": "Returns the length of the string or table, bypassing any metamethods.",
@@ -4266,7 +4270,7 @@
     "documentation": "The value to be set to a specified <code>index</code> in table <code>t</code>."
   },
   "@luau/global/rawset/return/0": {
-    "documentation": ""
+    "documentation": "The table <code>t</code> that was passed in, allowing chained calls."
   },
   "@luau/global/rawset": {
     "documentation": "Sets the real value of <code>table[index]</code>, bypassing any metamethods.",
@@ -4317,7 +4321,7 @@
     "documentation": "A tuple of arguments."
   },
   "@luau/global/select/return/0": {
-    "documentation": ""
+    "documentation": "All arguments after position <code>index</code>, or the count of arguments if <code>index</code> is <code>\"#\"</code>."
   },
   "@luau/global/select": {
     "documentation": "Returns all arguments after the given index.",
@@ -4344,7 +4348,7 @@
     "documentation": "The function environment table to set for the specified function."
   },
   "@luau/global/setfenv/return/0": {
-    "documentation": ""
+    "documentation": "The function whose environment was set, or no value if <code>f</code> is <code>0</code>."
   },
   "@luau/global/setfenv": {
     "documentation": "<strong>Deprecated:</strong> This function allows uncontrolled change of the global/function environment and disables script optimizations. Changes to the environment are not tracked by the script analysis tooling and may result in missing or incorrect warnings.<br>Sets the given function's environment.",
@@ -4371,7 +4375,7 @@
     "documentation": "If <code>nil</code>, the metatable of the given table <code>t</code> is removed. Otherwise, the metatable to set for the given table <code>t</code>."
   },
   "@luau/global/setmetatable/return/0": {
-    "documentation": ""
+    "documentation": "The table <code>t</code> that was passed in, with its metatable now set to <code>newMeta</code>."
   },
   "@luau/global/setmetatable": {
     "documentation": "Sets the given table's metatable.",
@@ -4398,7 +4402,7 @@
     "documentation": "The numerical base to convert <code>arg</code> into."
   },
   "@luau/global/tonumber/return/0": {
-    "documentation": ""
+    "documentation": "The numeric value of <code>arg</code> in the given base, or <code>nil</code> if conversion is not possible."
   },
   "@luau/global/tonumber": {
     "documentation": "Returns the provided value converted to a number, or <code>nil</code> if impossible.",
@@ -4422,7 +4426,7 @@
     "documentation": "The object to be converted into a string."
   },
   "@luau/global/tostring/return/0": {
-    "documentation": ""
+    "documentation": "A string representation of <code>e</code>, using the <code>__tostring</code> metamethod if available."
   },
   "@luau/global/tostring": {
     "documentation": "Returns the provided value converted to a string, or <code>nil</code> if impossible.",
@@ -4442,7 +4446,7 @@
     "documentation": "The object to return the type of."
   },
   "@luau/global/type/return/0": {
-    "documentation": ""
+    "documentation": "The basic type name of <code>v</code> as a string (e.g. <code>\"number\"</code>, <code>\"string\"</code>, <code>\"table\"</code>)."
   },
   "@luau/global/type": {
     "documentation": "Returns the basic type of the provided object.",
@@ -4468,7 +4472,7 @@
     "documentation": "The index of the last element to unpack."
   },
   "@luau/global/unpack/return/0": {
-    "documentation": ""
+    "documentation": "The elements <code>list[i]</code> through <code>list[j]</code> as separate return values."
   },
   "@luau/global/unpack": {
     "documentation": "Returns all elements from the given list as a tuple.",
@@ -4499,13 +4503,13 @@
     "documentation": "The function to be used as an error handle if xpcall catches an error."
   },
   "@luau/global/xpcall/param/2": {
-    "documentation": ""
+    "documentation": "Additional arguments passed to <code>f</code> when it is called."
   },
   "@luau/global/xpcall/return/0": {
-    "documentation": ""
+    "documentation": "<code>true</code> if <code>f</code> executed without errors, <code>false</code> otherwise."
   },
   "@luau/global/xpcall/return/1": {
-    "documentation": ""
+    "documentation": "All return values of <code>f</code> on success, or the result of <code>err(errorObject)</code> on failure."
   },
   "@luau/global/xpcall": {
     "documentation": "Similar to <code>pcall()</code> except it uses a custom error handler.",
@@ -4564,16 +4568,16 @@
     "code_sample": ""
   },
   "@luau/global/vector.create/param/0": {
-    "documentation": ""
+    "documentation": "The x component of the new vector."
   },
   "@luau/global/vector.create/param/1": {
-    "documentation": ""
+    "documentation": "The y component of the new vector."
   },
   "@luau/global/vector.create/param/2": {
-    "documentation": ""
+    "documentation": "The z component of the new vector. Defaults to <code>0</code> when omitted."
   },
   "@luau/global/vector.create/return/0": {
-    "documentation": ""
+    "documentation": "A new vector with the specified x, y, and z component values."
   },
   "@luau/global/vector.create": {
     "documentation": "Creates a new vector with the given component values.",
@@ -4598,10 +4602,10 @@
     "code_sample": ""
   },
   "@luau/global/vector.magnitude/param/0": {
-    "documentation": ""
+    "documentation": "The vector whose magnitude is computed."
   },
   "@luau/global/vector.magnitude/return/0": {
-    "documentation": ""
+    "documentation": "The Euclidean length of the vector."
   },
   "@luau/global/vector.magnitude": {
     "documentation": "Calculates the magnitude of a given vector.",
@@ -4618,10 +4622,10 @@
     "code_sample": ""
   },
   "@luau/global/vector.normalize/param/0": {
-    "documentation": ""
+    "documentation": "The vector to normalize."
   },
   "@luau/global/vector.normalize/return/0": {
-    "documentation": ""
+    "documentation": "A unit vector pointing in the same direction as the input."
   },
   "@luau/global/vector.normalize": {
     "documentation": "Computes the normalized version (unit vector) of a given vector.",
@@ -4638,13 +4642,13 @@
     "code_sample": ""
   },
   "@luau/global/vector.cross/param/0": {
-    "documentation": ""
+    "documentation": "The first operand vector."
   },
   "@luau/global/vector.cross/param/1": {
-    "documentation": ""
+    "documentation": "The second operand vector."
   },
   "@luau/global/vector.cross/return/0": {
-    "documentation": ""
+    "documentation": "A vector perpendicular to both inputs whose magnitude equals the area of the parallelogram they span."
   },
   "@luau/global/vector.cross": {
     "documentation": "Computes the cross product of two vectors.",
@@ -4665,13 +4669,13 @@
     "code_sample": ""
   },
   "@luau/global/vector.dot/param/0": {
-    "documentation": ""
+    "documentation": "The first operand vector."
   },
   "@luau/global/vector.dot/param/1": {
-    "documentation": ""
+    "documentation": "The second operand vector."
   },
   "@luau/global/vector.dot/return/0": {
-    "documentation": ""
+    "documentation": "The scalar dot product of the two vectors."
   },
   "@luau/global/vector.dot": {
     "documentation": "Computes the dot product of two vectors.",
@@ -4692,16 +4696,16 @@
     "code_sample": ""
   },
   "@luau/global/vector.angle/param/0": {
-    "documentation": ""
+    "documentation": "The first vector."
   },
   "@luau/global/vector.angle/param/1": {
-    "documentation": ""
+    "documentation": "The second vector."
   },
   "@luau/global/vector.angle/param/2": {
-    "documentation": ""
+    "documentation": "An optional reference axis used to determine the sign of the returned angle."
   },
   "@luau/global/vector.angle/return/0": {
-    "documentation": ""
+    "documentation": "The angle between the two vectors in radians, signed if an axis is provided."
   },
   "@luau/global/vector.angle": {
     "documentation": "Computes the angle between two vectors in radians.",
@@ -4726,10 +4730,10 @@
     "code_sample": ""
   },
   "@luau/global/vector.floor/param/0": {
-    "documentation": ""
+    "documentation": "The vector whose components are rounded down."
   },
   "@luau/global/vector.floor/return/0": {
-    "documentation": ""
+    "documentation": "A new vector with each component rounded down to the nearest integer."
   },
   "@luau/global/vector.floor": {
     "documentation": "Applies <code>math.floor()</code> to every component of the input vector.",
@@ -4746,10 +4750,10 @@
     "code_sample": ""
   },
   "@luau/global/vector.ceil/param/0": {
-    "documentation": ""
+    "documentation": "The vector whose components are rounded up."
   },
   "@luau/global/vector.ceil/return/0": {
-    "documentation": ""
+    "documentation": "A new vector with each component rounded up to the nearest integer."
   },
   "@luau/global/vector.ceil": {
     "documentation": "Applies <code>math.ceil()</code> to every component of the input vector.",
@@ -4766,10 +4770,10 @@
     "code_sample": ""
   },
   "@luau/global/vector.abs/param/0": {
-    "documentation": ""
+    "documentation": "The vector whose components are made absolute."
   },
   "@luau/global/vector.abs/return/0": {
-    "documentation": ""
+    "documentation": "A new vector with each component replaced by its absolute value."
   },
   "@luau/global/vector.abs": {
     "documentation": "Applies <code>math.abs()</code> to every component of the input vector.",
@@ -4786,10 +4790,10 @@
     "code_sample": ""
   },
   "@luau/global/vector.sign/param/0": {
-    "documentation": ""
+    "documentation": "The vector whose component signs are extracted."
   },
   "@luau/global/vector.sign/return/0": {
-    "documentation": ""
+    "documentation": "A new vector where each component is the sign of the corresponding input component."
   },
   "@luau/global/vector.sign": {
     "documentation": "Applies <code>math.sign()</code> to every component of the input vector.",
@@ -4806,16 +4810,16 @@
     "code_sample": ""
   },
   "@luau/global/vector.clamp/param/0": {
-    "documentation": ""
+    "documentation": "The vector whose components are clamped."
   },
   "@luau/global/vector.clamp/param/1": {
-    "documentation": ""
+    "documentation": "The vector of per-component minimum bounds."
   },
   "@luau/global/vector.clamp/param/2": {
-    "documentation": ""
+    "documentation": "The vector of per-component maximum bounds. Each component must be greater than or equal to the corresponding component of <code>min</code>."
   },
   "@luau/global/vector.clamp/return/0": {
-    "documentation": ""
+    "documentation": "A new vector with each component clamped between the corresponding components of <code>min</code> and <code>max</code>."
   },
   "@luau/global/vector.clamp": {
     "documentation": "Applies <code>math.clamp()</code> to every component of the input vector.",
@@ -4840,16 +4844,16 @@
     "code_sample": ""
   },
   "@luau/global/vector.lerp/param/0": {
-    "documentation": ""
+    "documentation": "The starting vector (returned when <code>alpha</code> is <code>0</code>)."
   },
   "@luau/global/vector.lerp/param/1": {
-    "documentation": ""
+    "documentation": "The ending vector (returned when <code>alpha</code> is <code>1</code>)."
   },
   "@luau/global/vector.lerp/param/2": {
-    "documentation": ""
+    "documentation": "The interpolation fraction. Not clamped to <code>[0, 1]</code>."
   },
   "@luau/global/vector.lerp/return/0": {
-    "documentation": ""
+    "documentation": "A vector interpolated component-wise between <code>vec1</code> and <code>vec2</code>."
   },
   "@luau/global/vector.lerp": {
     "documentation": "Returns a vector linearly interpolated between two vectors by a fractional alpha.",
@@ -4874,10 +4878,10 @@
     "code_sample": ""
   },
   "@luau/global/vector.max/param/0": {
-    "documentation": ""
+    "documentation": "One or more vectors to compare component-wise."
   },
   "@luau/global/vector.max/return/0": {
-    "documentation": ""
+    "documentation": "A new vector where each component is the maximum of the corresponding components across all inputs."
   },
   "@luau/global/vector.max": {
     "documentation": "Applies <code>math.max()</code> to the corresponding components of the input vectors.",
@@ -4894,10 +4898,10 @@
     "code_sample": ""
   },
   "@luau/global/vector.min/param/0": {
-    "documentation": ""
+    "documentation": "One or more vectors to compare component-wise."
   },
   "@luau/global/vector.min/return/0": {
-    "documentation": ""
+    "documentation": "A new vector where each component is the minimum of the corresponding components across all inputs."
   },
   "@luau/global/vector.min": {
     "documentation": "Applies <code>math.min()</code> to the corresponding components of the input vectors.",
