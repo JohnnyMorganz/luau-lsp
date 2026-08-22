@@ -11,6 +11,8 @@
 #include "LSP/DocumentationParser.hpp"
 #include "LSP/Diagnostics.hpp"
 
+LUAU_FASTFLAG(LuauSolverV2)
+
 #ifdef LSP_BUILD_WITH_SENTRY
 // sentry.h pulls in <windows.h>
 #ifdef _WIN32
@@ -920,7 +922,7 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
 
 void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params)
 {
-    Luau::DenseHashMap<WorkspaceFolderPtr, std::vector<lsp::FileEvent>> workspaceChanges{nullptr};
+    Luau::DenseHashMap2<WorkspaceFolderPtr, std::vector<lsp::FileEvent>> workspaceChanges{};
 
     for (const auto& change : params.changes)
     {

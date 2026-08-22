@@ -49,7 +49,7 @@ struct StringRequireResult
     const char* sortText;    // For completion sorting
 };
 
-using AliasMap = DenseHashMap<std::string, Luau::Config::AliasInfo>;
+using AliasMap = DenseHashMap2<std::string, Luau::Config::AliasInfo>;
 
 std::string requireNameFromModuleName(const Luau::ModuleName& name);
 std::optional<std::string> computeBestAliasedPath(const Uri& to, const AliasMap& availableAliases);

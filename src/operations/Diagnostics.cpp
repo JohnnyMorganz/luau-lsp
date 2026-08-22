@@ -7,6 +7,8 @@
 #include "Luau/TimeTrace.h"
 #include "LuauFileUtils.hpp"
 
+LUAU_FASTFLAG(LuauSolverV2)
+
 bool usingPullDiagnostics(const lsp::ClientCapabilities& capabilities)
 {
     return capabilities.textDocument && capabilities.textDocument->diagnostic;

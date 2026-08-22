@@ -9,6 +9,7 @@
 
 LUAU_FASTINT(LuauTypeInferRecursionLimit)
 LUAU_FASTINT(LuauTypeInferIterationLimit)
+LUAU_FASTFLAG(LuauSolverV2)
 
 // Taken from Luau/Autocomplete.cpp
 static bool checkOverloadMatch(Luau::TypePackId subTp, Luau::TypePackId superTp, Luau::NotNull<Luau::Scope> scope, Luau::TypeArena* typeArena,

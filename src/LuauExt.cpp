@@ -322,7 +322,7 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
 }
 
 // Returns [base, property] - base is important during intersections
-static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet<Luau::TypeId>& seenSet)
+static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet2<Luau::TypeId>& seenSet)
 {
     if (seenSet.contains(parentType))
         return {};
@@ -395,7 +395,7 @@ static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const 
 
 std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
 {
-    Luau::DenseHashSet<Luau::TypeId> seenSet{nullptr};
+    Luau::DenseHashSet2<Luau::TypeId> seenSet{};
     return lookupProp(parentType, name, seenSet);
 }
 

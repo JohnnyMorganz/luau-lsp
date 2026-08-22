@@ -45,7 +45,7 @@ void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau
                         info.at("code_sample").get_to(codeSample);
                     if (info.contains("keys"))
                     {
-                        Luau::DenseHashMap<std::string, Luau::DocumentationSymbol> keys{""};
+                        Luau::DenseHashMap2<std::string, Luau::DocumentationSymbol> keys{};
                         for (auto& [k, v] : info.at("keys").items())
                         {
                             keys[k] = v;
@@ -54,7 +54,7 @@ void parseDocumentation(const std::vector<std::string>& documentationFiles, Luau
                     }
                     else if (info.contains("overloads"))
                     {
-                        Luau::DenseHashMap<std::string, Luau::DocumentationSymbol> overloads{""};
+                        Luau::DenseHashMap2<std::string, Luau::DocumentationSymbol> overloads{};
                         for (auto& [sig, sym] : info.at("overloads").items())
                         {
                             overloads[sig] = sym;

@@ -35,7 +35,7 @@ RequireGraph computeRequireGraphFromRoot(const Luau::Frontend& frontend, const L
     RequireGraph result;
 
     // Breadth-first search from current node for its requires
-    Luau::Set<Luau::ModuleName> seenSet{{}};
+    Luau::Set<Luau::ModuleName> seenSet;
     std::queue<Luau::ModuleName> queue;
 
     queue.push(root);
@@ -141,7 +141,7 @@ struct ChunkedWriter
 
 std::string requireGraphToDot(const RequireGraph& requireGraph, const Luau::FileResolver& fileResolver)
 {
-    Luau::DenseHashMap<Luau::ModuleName, int> nodeIdMap{{}};
+    Luau::DenseHashMap2<Luau::ModuleName, int> nodeIdMap{};
 
     ChunkedWriter writer;
     writer.writeRaw("digraph luau_require_graph {\n");

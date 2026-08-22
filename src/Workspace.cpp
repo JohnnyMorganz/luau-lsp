@@ -101,7 +101,7 @@ void WorkspaceFolder::onDidSaveTextDocument(const lsp::DocumentUri& uri, const l
     auto config = client->getConfiguration(rootUri);
     if (isWorkspaceDiagnosticsEnabled(client, config))
     {
-        Luau::DenseHashSet<Luau::ModuleName> dependents{""};
+        Luau::DenseHashSet2<Luau::ModuleName> dependents{};
         frontend.traverseDependents(fileResolver.getModuleName(uri),
             [&dependents](Luau::SourceNode& sourceNode)
             {
