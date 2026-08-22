@@ -110,44 +110,57 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
     return source;
 }
 
+std::optional<AliasRequire> parseAliasRequire(const std::string& requiredString)
+{
+    if (requiredString.empty() || requiredString[0] != '@')
+        return std::nullopt;
+
+    size_t slashPos = requiredString.find('/');
+    std::string name = toLower(requiredString.substr(1, slashPos == std::string::npos ? std::string::npos : slashPos - 1));
+    std::string remainder = (slashPos == std::string::npos) ? "" : requiredString.substr(slashPos + 1);
+    return AliasRequire{std::move(name), std::move(remainder)};
+}
+
+static Luau::ModuleInfo joinVirtualPath(const std::string& base, const std::string& remainder)
+{
+    if (remainder.empty())
+        return Luau::ModuleInfo{base};
+    return Luau::ModuleInfo{base + "/" + remainder};
+}
+
 std::optional<Luau::ModuleInfo> RobloxPlatform::resolveStringRequire(
     const Luau::ModuleInfo* context, const std::string& requiredString, const Luau::TypeCheckLimits& limits)
 {
     if (!context)
         return std::nullopt;
 
-    if (!isVirtualPath(context->name))
-        return LSPPlatform::resolveStringRequire(context, requiredString, limits);
-
-    if (!requiredString.empty() && requiredString[0] == '@')
+    if (auto alias = parseAliasRequire(requiredString))
     {
         const auto& luauConfig = fileResolver->getConfig(context->name, limits);
+        const bool userDefined = luauConfig.aliases.find(alias->name) != nullptr;
 
-        size_t slashPos = requiredString.find('/');
-        std::string aliasName = requiredString.substr(1, slashPos == std::string::npos ? std::string::npos : slashPos - 1);
-        std::string aliasNameLower = toLower(aliasName);
+        // `@game` is absolute: it is rooted at the DataModel and reads nothing from the requirer.
+        // Resolve it before the filesystem fallback, so a file that the sourcemap does not cover
+        // still resolves it. A user-defined `game` alias in `.luaurc` still wins.
+        if (alias->name == kGameAlias && !userDefined && rootSourceNode)
+            return joinVirtualPath(rootSourceNode->virtualPath, alias->remainder);
 
-        if (aliasNameLower == "self")
-        {
-            std::string remainder = (slashPos == std::string::npos) ? "" : requiredString.substr(slashPos + 1);
-            if (remainder.empty())
-                return Luau::ModuleInfo{context->name};
-            return Luau::ModuleInfo{context->name + "/" + remainder};
-        }
-
-        if (luauConfig.aliases.find(aliasNameLower))
+        // Every other alias needs an instance context, so a file outside the sourcemap falls back
+        // to the filesystem.
+        if (!isVirtualPath(context->name))
             return LSPPlatform::resolveStringRequire(context, requiredString, limits);
 
-        if (aliasNameLower == "game" && rootSourceNode)
-        {
-            std::string remainder = (slashPos == std::string::npos) ? "" : requiredString.substr(slashPos + 1);
-            if (remainder.empty())
-                return Luau::ModuleInfo{rootSourceNode->virtualPath};
-            return Luau::ModuleInfo{rootSourceNode->virtualPath + "/" + remainder};
-        }
+        if (alias->name == "self")
+            return joinVirtualPath(context->name, alias->remainder);
+
+        if (userDefined)
+            return LSPPlatform::resolveStringRequire(context, requiredString, limits);
 
         return std::nullopt;
     }
+
+    if (!isVirtualPath(context->name))
+        return LSPPlatform::resolveStringRequire(context, requiredString, limits);
 
     auto parentPath = getParentPath(context->name);
     if (!parentPath)
