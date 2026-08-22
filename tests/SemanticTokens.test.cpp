@@ -141,4 +141,22 @@ TEST_CASE_FIXTURE(Fixture, "semantic_tokens_respects_cancellation")
     CHECK_THROWS_AS(workspace.semanticTokens(lsp::SemanticTokensParams{{{document}}}, cancellationToken), RequestCancelledException);
 }
 
+TEST_CASE_FIXTURE(Fixture, "array_sugar_type_does_not_produce_overlapping_synthetic_token")
+{
+    check(R"(
+local x: { string } = {}
+)");
+
+    auto tokens = getSemanticTokens(workspace.frontend, getMainModule(), getMainSourceModule());
+
+    // The synthetic `number` index type introduced by `{ T }` desugaring must not produce
+    // a semantic token, as it would overlap with the real `string` type reference token.
+    auto synthetic = getSemanticToken(tokens, Luau::Position{1, 9});
+    CHECK(!synthetic);
+
+    auto real = getSemanticToken(tokens, Luau::Position{1, 11});
+    REQUIRE(real);
+    CHECK_EQ(real->tokenType, lsp::SemanticTokenTypes::Type);
+}
+
 TEST_SUITE_END();
