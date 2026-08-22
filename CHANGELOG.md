@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.733
+- Sync to upstream Luau 0.735
 
 ## [1.69.0] - 2026-07-14
 
