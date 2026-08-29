@@ -63,8 +63,8 @@ struct SourceNode
     /// nodes detached from the tree (which `RobloxPlatform::clearSourcemapTypes` cannot reach)
     void clearCachedTypes() const;
 
-    bool containsFilePaths() const;
-    ordered_json toJson() const;
+    bool containsFilePaths(bool includeNonScripts = true) const;
+    ordered_json toJson(bool includeNonScripts = true) const;
 
     static SourceNode* fromJson(const json& j, Luau::TypedAllocator<SourceNode>& allocator);
 };
