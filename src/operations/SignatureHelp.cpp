@@ -119,7 +119,8 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
     std::optional<size_t> activeSignature = std::nullopt;
     std::vector<lsp::SignatureInformation> signatures{};
 
-    auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionType* ftv, bool isOverloaded = false)
+    auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionType* ftv, bool isOverloaded = false,
+                            size_t documentationIndexOffset = 0)
     {
         // Create the whole label
         std::string label = types::toStringNamedFunction(module, ftv, candidate->func, scope, opts);
@@ -167,7 +168,8 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
             // TODO: parse moonwave docs for param documentation?
             lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::Markdown, ""};
             if (baseDocumentationSymbol)
-                if (auto docs = printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx)))
+                if (auto docs = printDocumentation(
+                        client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx + documentationIndexOffset)))
                     parameterDocumentation.value = *docs;
 
             // Compute the label
@@ -201,7 +203,8 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
                 // TODO: parse moonwave docs for param documentation?
                 lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::Markdown, ""};
                 if (baseDocumentationSymbol)
-                    if (auto docs = printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx)))
+                    if (auto docs = printDocumentation(
+                            client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx + documentationIndexOffset)))
                         parameterDocumentation.value = *docs;
 
                 // Compute the label
@@ -249,8 +252,26 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
 
     // Handle __call metamethod
     if (const auto metamethod = findCallMetamethod(followedId))
+    {
         if (auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(*metamethod)))
-            addSignature(*metamethod, ftv);
+        {
+            auto [argHead, argTail] = Luau::flatten(ftv->argTypes);
+            if (!argHead.empty())
+            {
+                Luau::FunctionType trimmed = *ftv;
+                trimmed.argTypes = typeArena.addTypePack(std::vector<Luau::TypeId>(argHead.begin() + 1, argHead.end()), argTail);
+                if (!trimmed.argNames.empty())
+                    trimmed.argNames.erase(trimmed.argNames.begin());
+
+                auto trimmedTy = typeArena.addType(std::move(trimmed));
+                // the dropped argument still occupies index 0 in the documentation database
+                addSignature(trimmedTy, Luau::get<Luau::FunctionType>(trimmedTy), /* isOverloaded = */ false,
+                    /* documentationIndexOffset = */ 1);
+            }
+            else
+                addSignature(*metamethod, ftv);
+        }
+    }
 
     lsp::SignatureHelp help = lsp::SignatureHelp{signatures, activeSignature.value_or(0), activeParameter};
     platform->handleSignatureHelp(*textDocument, *sourceModule, position, help);
