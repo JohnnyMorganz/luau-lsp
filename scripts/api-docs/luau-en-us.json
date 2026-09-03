@@ -2177,10 +2177,10 @@
     "code_sample": ""
   },
   "@luau/global/os.difftime/param/0": {
-    "documentation": ""
+    "documentation": "The later time value, as returned by <code>os.time()</code>."
   },
   "@luau/global/os.difftime/param/1": {
-    "documentation": ""
+    "documentation": "The earlier time value, as returned by <code>os.time()</code>."
   },
   "@luau/global/os.difftime/return/0": {
     "documentation": ""
@@ -2319,7 +2319,7 @@
     "documentation": "A string that describes what the returned information should represent. It must only contain 0 or 1 instances of the characters <code>slnaf</code>, each representing a piece of information: <ul> <li><code>s</code> (<a href=\"/luau/strings.md\">string</a>) \u2014 The function source identifier,   equal to the full name of the script the function is defined in.</li> <li><code>l</code> (<a href=\"/luau/numbers.md\">number</a>) \u2014 The line number of the function   call represented by <code>level</code>.</li> <li><code>n</code> (<a href=\"/luau/strings.md\">string</a>) \u2014 The name of the function; may be   <code>nil</code> for anonymous functions and C functions without an assigned   debug name.</li> <li><code>a</code> (<a href=\"/luau/numbers.md\">number</a>, <a href=\"/luau/booleans.md\">boolean</a>) \u2014   Arity of the function, which refers to the parameter count and   whether the function is variadic.</li> <li><code>f</code> (<a href=\"/luau/functions.md\">function</a>) \u2014 The function which was   inspected.</li> </ul>"
   },
   "@luau/global/debug.info/overload/(number, string) -> Tuple/return/0": {
-    "documentation": ""
+    "documentation": "One value per character in <code>options</code>, in the order they appear: source identifier (<code>s</code>), line number (<code>l</code>), function name (<code>n</code>), parameter count and whether variadic (<code>a</code>), or the function itself (<code>f</code>)."
   },
   "@luau/global/debug.info/overload/(number, string) -> Tuple": {
     "documentation": "Traverses the entire stack of current thread and returns a string containing the call stack of target level details.",
@@ -2346,7 +2346,7 @@
     "documentation": "A string that describes what the returned information should represent. It must only contain 0 or 1 instances of the characters <code>slnaf</code>, each representing a piece of information: <ul> <li><code>s</code> (<a href=\"/luau/strings.md\">string</a>) \u2014 The function source identifier,   equal to the full name of the script the function is defined in.</li> <li><code>l</code> (<a href=\"/luau/numbers.md\">number</a>) \u2014 The line that <code>function</code> is   defined on.</li> <li><code>n</code> (<a href=\"/luau/strings.md\">string</a>) \u2014 The name of the function; may be   <code>nil</code> for anonymous functions and C functions without an assigned   debug name.</li> <li><code>a</code> (<a href=\"/luau/numbers.md\">number</a>, <a href=\"/luau/booleans.md\">boolean</a>) \u2014   Arity of the function, which refers to the parameter count and   whether the function is variadic.</li> <li><code>f</code> (<a href=\"/luau/functions.md\">function</a>) \u2014 The function which was   inspected.</li> </ul>"
   },
   "@luau/global/debug.info/overload/(function, string) -> Tuple/return/0": {
-    "documentation": ""
+    "documentation": "One value per character in <code>options</code>, in the order they appear: source identifier (<code>s</code>), line number (<code>l</code>), function name (<code>n</code>), parameter count and whether variadic (<code>a</code>), or the function itself (<code>f</code>)."
   },
   "@luau/global/debug.info/overload/(function, string) -> Tuple": {
     "documentation": "Traverses the entire stack of current thread and returns a string containing the call stack of target function details.",
@@ -2376,7 +2376,7 @@
     "documentation": "A string that describes what the returned information should represent. It must only contain 0 or 1 instances of the characters <code>slnaf</code>, each representing a piece of information: <ul> <li><code>s</code> (<a href=\"/luau/strings.md\">string</a>) \u2014 The function source identifier,   equal to the full name of the script the function is defined in.</li> <li><code>l</code> (<a href=\"/luau/numbers.md\">number</a>) \u2014 The line number of the function   call represented by <code>level</code>.</li> <li><code>n</code> (<a href=\"/luau/strings.md\">string</a>) \u2014 The name of the function; may be   <code>nil</code> for anonymous functions and C functions without an assigned   debug name.</li> <li><code>a</code> (<a href=\"/luau/numbers.md\">number</a>, <a href=\"/luau/booleans.md\">boolean</a>) \u2014   Arity of the function, which refers to the parameter count and   whether the function is variadic.</li> <li><code>f</code> (<a href=\"/luau/functions.md\">function</a>) \u2014 The function which was   inspected.</li> </ul>"
   },
   "@luau/global/debug.info/overload/(thread, number, string) -> Tuple/return/0": {
-    "documentation": ""
+    "documentation": "One value per character in <code>options</code>, in the order they appear: source identifier (<code>s</code>), line number (<code>l</code>), function name (<code>n</code>), parameter count and whether variadic (<code>a</code>), or the function itself (<code>f</code>)."
   },
   "@luau/global/debug.info/overload/(thread, number, string) -> Tuple": {
     "documentation": "Traverses the entire stack of target thread and returns a string containing the call stack of target level details.",
@@ -2401,7 +2401,7 @@
     "code_sample": ""
   },
   "@luau/global/debug.profilebegin/param/0": {
-    "documentation": "The text that this <a href=\"../../../studio/microprofiler/index.md\">MicroProfiler</a> label displays."
+    "documentation": "The text that this <a href=\"/performance-optimization/microprofiler/index.md\">MicroProfiler</a> label displays."
   },
   "@luau/global/debug.profilebegin": {
     "documentation": "Starts profiling for a label.",
@@ -2435,7 +2435,7 @@
     "code_sample": ""
   },
   "@luau/global/debug.setmemorycategory/param/0": {
-    "documentation": ""
+    "documentation": "The custom name to assign to the current thread's memory category in the Developer Console."
   },
   "@luau/global/debug.setmemorycategory/return/0": {
     "documentation": "The current thread's previous memory category."
@@ -2540,7 +2540,7 @@
     "documentation": "The ending index of the table concatenation."
   },
   "@luau/global/table.concat/return/0": {
-    "documentation": ""
+    "documentation": "The concatenated string of table elements joined by the separator."
   },
   "@luau/global/table.concat": {
     "documentation": "Returns the given range of table elements as a string where each element is separated by the given separator.",
@@ -2569,13 +2569,13 @@
     "code_sample": ""
   },
   "@luau/global/table.create/param/0": {
-    "documentation": ""
+    "documentation": "The number of elements to allocate in the array portion of the new table."
   },
   "@luau/global/table.create/param/1": {
-    "documentation": ""
+    "documentation": "The value to fill each element with. If omitted, elements are left as <code>nil</code>."
   },
   "@luau/global/table.create/return/0": {
-    "documentation": ""
+    "documentation": "A new table with the array portion pre-allocated to <code>count</code> elements, filled with <code>value</code> if provided."
   },
   "@luau/global/table.create": {
     "documentation": "Returns a new table populated with many instances of the specified value.",
@@ -2596,16 +2596,16 @@
     "code_sample": ""
   },
   "@luau/global/table.find/param/0": {
-    "documentation": ""
+    "documentation": "The array-like table to search through."
   },
   "@luau/global/table.find/param/1": {
-    "documentation": ""
+    "documentation": "The value to search for within the table."
   },
   "@luau/global/table.find/param/2": {
-    "documentation": ""
+    "documentation": "The index at which to begin searching. Defaults to <code>1</code>."
   },
   "@luau/global/table.find/return/0": {
-    "documentation": ""
+    "documentation": "The numeric index of the first occurrence of <code>needle</code>, or <code>nil</code> if not found."
   },
   "@luau/global/table.find": {
     "documentation": "Returns the index of the first occurrence of <code>needle</code> within <code>haystack</code> starting from <code>init</code>.",
@@ -2697,7 +2697,7 @@
     "documentation": "The table whose size is being measured."
   },
   "@luau/global/table.getn/return/0": {
-    "documentation": ""
+    "documentation": "The length of the array portion of the table, equivalent to the <code>#</code> operator."
   },
   "@luau/global/table.getn": {
     "documentation": "<strong>Deprecated:</strong> <br>Returns the number of elements in the table passed.",
@@ -2791,10 +2791,10 @@
     "code_sample": ""
   },
   "@luau/global/table.maxn/param/0": {
-    "documentation": ""
+    "documentation": "The table to scan for numeric keys."
   },
   "@luau/global/table.maxn/return/0": {
-    "documentation": ""
+    "documentation": "The largest positive numeric key in the table, or <code>0</code> if the table has no numeric keys."
   },
   "@luau/global/table.maxn": {
     "documentation": "Returns the maximum numeric key of the provided table, or zero if the table has no numeric keys.",
@@ -2859,10 +2859,10 @@
     "code_sample": ""
   },
   "@luau/global/table.pack/param/0": {
-    "documentation": ""
+    "documentation": "The values to store sequentially in the new table."
   },
   "@luau/global/table.pack/return/0": {
-    "documentation": ""
+    "documentation": "A new table with arguments at keys <code>1</code> through <code>n</code>, plus an <code>n</code> field storing the total argument count."
   },
   "@luau/global/table.pack": {
     "documentation": "Returns a new table containing the provided values.",
@@ -2885,7 +2885,7 @@
     "documentation": "The index of the element being removed."
   },
   "@luau/global/table.remove/return/0": {
-    "documentation": ""
+    "documentation": "The value of the element that was removed, or nothing if the position is out of bounds."
   },
   "@luau/global/table.remove": {
     "documentation": "Removes the specified element from the array, shifting later elements down to fill in the empty space if possible.",
@@ -2906,7 +2906,7 @@
     "code_sample": ""
   },
   "@luau/global/table.sort/param/0": {
-    "documentation": ""
+    "documentation": "The array to sort in place."
   },
   "@luau/global/table.sort/param/1": {
     "documentation": "An optional comparison function to be used when comparing elements in the table. This function receives two elements, and should return true if the first element should be sorted before the second in the final order."
@@ -2937,7 +2937,7 @@
     "documentation": "The index of the last element to unpack."
   },
   "@luau/global/table.unpack/return/0": {
-    "documentation": ""
+    "documentation": "The elements <code>list[i], list[i+1], ..., list[j]</code> as individual return values."
   },
   "@luau/global/table.unpack": {
     "documentation": "Returns all elements from the given list as a tuple.",
@@ -3483,10 +3483,10 @@
     "code_sample": ""
   },
   "@luau/global/utf8.char/param/0": {
-    "documentation": ""
+    "documentation": "Zero or more integer codepoints in the range <code>[0, 0x10ffff]</code> to encode."
   },
   "@luau/global/utf8.char/return/0": {
-    "documentation": ""
+    "documentation": "A string containing the concatenated UTF-8 byte sequences for each codepoint."
   },
   "@luau/global/utf8.char": {
     "documentation": "Converts zero or more codepoints to UTF-8 byte sequences.",
@@ -3506,13 +3506,13 @@
     "documentation": "The string to iterate over."
   },
   "@luau/global/utf8.codes/return/0": {
-    "documentation": ""
+    "documentation": "The iterator function that, on each call, returns the byte position and codepoint of the next character."
   },
   "@luau/global/utf8.codes/return/1": {
-    "documentation": ""
+    "documentation": "The input string (passed as the invariant state to the iterator)."
   },
   "@luau/global/utf8.codes/return/2": {
-    "documentation": ""
+    "documentation": "The initial control value (<code>0</code>) for the iterator."
   },
   "@luau/global/utf8.codes": {
     "documentation": "Returns an iterator function that iterates over all codepoints in a given string.",
@@ -3531,7 +3531,7 @@
     "code_sample": ""
   },
   "@luau/global/utf8.codepoint/param/0": {
-    "documentation": ""
+    "documentation": "The UTF-8 encoded string to extract codepoints from."
   },
   "@luau/global/utf8.codepoint/param/1": {
     "documentation": "The index of the codepoint that should be fetched from this string."
@@ -3540,7 +3540,7 @@
     "documentation": "The index of the last codepoint between <code>i</code> and <code>j</code> that will be returned. If excluded, this will default to the value of <code>i</code>."
   },
   "@luau/global/utf8.codepoint/return/0": {
-    "documentation": ""
+    "documentation": "The codepoints as integers for all characters that start between byte positions <code>i</code> and <code>j</code>."
   },
   "@luau/global/utf8.codepoint": {
     "documentation": "Returns the codepoints (as integers) from all codepoints in a given string.",
@@ -3565,7 +3565,7 @@
     "code_sample": ""
   },
   "@luau/global/utf8.len/param/0": {
-    "documentation": ""
+    "documentation": "The UTF-8 encoded string to measure."
   },
   "@luau/global/utf8.len/param/1": {
     "documentation": "The starting position."
@@ -3574,7 +3574,7 @@
     "documentation": "The ending position."
   },
   "@luau/global/utf8.len/return/0": {
-    "documentation": ""
+    "documentation": "The number of UTF-8 codepoints in the specified range, or <code>nil</code> followed by the byte position of the first invalid byte sequence."
   },
   "@luau/global/utf8.len": {
     "documentation": "Returns the number of UTF-8 codepoints in a given string.",
@@ -3599,16 +3599,16 @@
     "code_sample": ""
   },
   "@luau/global/utf8.offset/param/0": {
-    "documentation": ""
+    "documentation": "The UTF-8 encoded string to search within."
   },
   "@luau/global/utf8.offset/param/1": {
-    "documentation": ""
+    "documentation": "The character offset to seek. Positive values count forward, negative values count backward, and <code>0</code> finds the start of the character at byte position <code>i</code>."
   },
   "@luau/global/utf8.offset/param/2": {
-    "documentation": ""
+    "documentation": "The byte position from which to start counting. Defaults to <code>1</code> when <code>n</code> is non-negative and <code>#s + 1</code> when <code>n</code> is negative."
   },
   "@luau/global/utf8.offset/return/0": {
-    "documentation": ""
+    "documentation": "The byte position where the target codepoint begins, or <code>nil</code> if the character is not within the string."
   },
   "@luau/global/utf8.offset": {
     "documentation": "Returns the position (in bytes) where the encoding of the <code>n</code>\u2011th codepoint of <code>s</code> (counting from byte position <code>i</code>) starts.",
@@ -3633,16 +3633,16 @@
     "code_sample": ""
   },
   "@luau/global/utf8.graphemes/param/0": {
-    "documentation": ""
+    "documentation": "The UTF-8 encoded string to iterate over for grapheme clusters."
   },
   "@luau/global/utf8.graphemes/param/1": {
-    "documentation": ""
+    "documentation": "The starting byte position within the string. Negative values count from the end."
   },
   "@luau/global/utf8.graphemes/param/2": {
-    "documentation": ""
+    "documentation": "The ending byte position within the string. Negative values count from the end."
   },
   "@luau/global/utf8.graphemes/return/0": {
-    "documentation": ""
+    "documentation": "An iterator function that returns the start and end byte positions of each grapheme cluster."
   },
   "@luau/global/utf8.graphemes": {
     "documentation": "Returns an iterator function that iterates over the grapheme clusters of a given string.",
@@ -3667,10 +3667,10 @@
     "code_sample": ""
   },
   "@luau/global/utf8.nfcnormalize/param/0": {
-    "documentation": ""
+    "documentation": "The UTF-8 encoded string to normalize."
   },
   "@luau/global/utf8.nfcnormalize/return/0": {
-    "documentation": ""
+    "documentation": "The NFC-normalized string with decomposed characters composed into their precomposed equivalents."
   },
   "@luau/global/utf8.nfcnormalize": {
     "documentation": "Converts the input string to Normal Form C.",
@@ -3690,7 +3690,7 @@
     "documentation": "The string to convert."
   },
   "@luau/global/utf8.nfdnormalize/return/0": {
-    "documentation": ""
+    "documentation": "The NFD-normalized string with precomposed characters decomposed into their component parts."
   },
   "@luau/global/utf8.nfdnormalize": {
     "documentation": "Converts the input string to Normal Form D.",
