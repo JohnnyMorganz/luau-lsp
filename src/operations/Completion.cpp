@@ -8,6 +8,7 @@
 #include "Luau/TypeUtils.h"
 #include "Luau/TimeTrace.h"
 
+#include "LSP/ConfigLuau.hpp"
 #include "LSP/Completion.hpp"
 #include "LSP/Workspace.hpp"
 #include "LSP/LuauExt.hpp"
@@ -718,6 +719,7 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
     auto textDocument = fileResolver.getTextDocument(params.textDocument.uri);
     if (!textDocument)
         throw JsonRpcException(lsp::ErrorCode::RequestFailed, "No managed text document for " + params.textDocument.uri.toString());
+    const bool isConfigLuauFile = Luau::LanguageServer::ConfigLuau::isConfigLuauFile(params.textDocument.uri);
 
     std::unordered_set<std::string> tags;
 
@@ -792,6 +794,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
     for (auto& [name, entry] : result.entryMap)
     {
+        if (isConfigLuauFile && name == Luau::LanguageServer::ConfigLuau::kCheckFunctionName)
+            continue;
+
         // If this entry is a non-function property, and we are autocompleting after a `:`
         // then hide it if configured to do so
         if (!config.completion.showPropertiesOnMethodCall && entry.kind == Luau::AutocompleteEntryKind::Property && entry.indexedWithSelf &&

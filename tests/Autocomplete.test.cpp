@@ -62,6 +62,94 @@ struct FragmentAutocompleteFixture : Fixture
 
 TEST_SUITE_BEGIN("Autocomplete");
 
+TEST_CASE_FIXTURE(Fixture, "config_luau_autocompletes_top_level_return_fields")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        return {
+            |
+        }
+    )");
+
+    auto uri = newDocument(".config.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "luau"));
+    CHECK_FALSE(getItem(result, "__luau_lsp_config_check"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "config_luau_autocompletes_control_flow_return_fields")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        if true then
+            return {
+                |
+            }
+        end
+    )");
+
+    auto uri = newDocument(".config.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "luau"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "config_luau_autocompletes_luau_fields")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        return {
+            luau = {
+                |
+            }
+        }
+    )");
+
+    auto uri = newDocument(".config.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "languagemode"));
+    CHECK(getItem(result, "lint"));
+    CHECK(getItem(result, "globals"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "config_luau_autocompletes_lint_warning_fields")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        return {
+            luau = {
+                lint = {
+                    |
+                },
+            },
+        }
+    )");
+
+    auto uri = newDocument(".config.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "UnknownGlobal"));
+    CHECK(getItem(result, "LocalUnused"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "function_autocomplete_has_documentation")
 {
     auto [source, marker] = sourceWithMarker(R"(
