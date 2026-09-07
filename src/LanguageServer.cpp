@@ -922,7 +922,7 @@ void LanguageServer::onDidChangeWorkspaceFolders(const lsp::DidChangeWorkspaceFo
 
 void LanguageServer::onDidChangeWatchedFiles(const lsp::DidChangeWatchedFilesParams& params)
 {
-    Luau::DenseHashMap2<WorkspaceFolderPtr, std::vector<lsp::FileEvent>> workspaceChanges{};
+    Luau::DenseHashMap<WorkspaceFolderPtr, std::vector<lsp::FileEvent>> workspaceChanges{};
 
     for (const auto& change : params.changes)
     {
