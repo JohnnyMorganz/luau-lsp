@@ -2287,6 +2287,74 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_game_alias_children")
     checkFolderCompletionExists(result, "ServerScriptService", "@game/ServerScriptService");
 }
 
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_game_alias_children_from_non_sourcemap_file")
+{
+    // Regression test: `@game` is absolute, so a file that the sourcemap does not cover still
+    // completes against the DataModel.
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@game/|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("dist/main.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    checkFolderCompletionExists(result, "ReplicatedStorage", "@game/ReplicatedStorage");
+    checkFolderCompletionExists(result, "ServerScriptService", "@game/ServerScriptService");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_nested_game_alias_children_from_non_sourcemap_file")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("@game/ReplicatedStorage/Shared/|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("dist/main.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    checkFileCompletionExists(result, "ModuleA", "@game/ReplicatedStorage/Shared/ModuleA");
+    checkFileCompletionExists(result, "ModuleB", "@game/ReplicatedStorage/Shared/ModuleB");
+    checkFolderCompletionExists(result, "Nested", "@game/ReplicatedStorage/Shared/Nested");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_offers_game_alias_from_non_sourcemap_file")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("dist/main.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "@game"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "sourcemap_autocomplete_shows_self_alias_children")
 {
     client->globalConfig.completion.imports.stringRequires.enabled = true;

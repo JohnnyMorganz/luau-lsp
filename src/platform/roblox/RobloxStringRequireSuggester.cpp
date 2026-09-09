@@ -39,15 +39,9 @@ std::unique_ptr<Luau::RequireNode> SourceNodeRequireNode::resolvePathToNode(cons
             }
         }
 
-        size_t slashPos = requireString.find('/');
-        std::string aliasName = requireString.substr(1, slashPos == std::string::npos ? std::string::npos : slashPos - 1);
-        std::string aliasNameLower = toLower(aliasName);
-
-        if (aliasNameLower == "game" && rootNode)
+        if (auto alias = parseAliasRequire(requireString); alias && alias->name == kGameAlias && rootNode)
         {
-            std::string remainder = (slashPos == std::string::npos) ? "" : requireString.substr(slashPos + 1);
-            auto targetNode = rootNode->walkPath(remainder);
-            if (targetNode)
+            if (auto targetNode = rootNode->walkPath(alias->remainder))
                 return std::make_unique<SourceNodeRequireNode>(targetNode, rootNode, mainRequirerNodeConfig, workspaceFolder);
         }
 
@@ -88,9 +82,8 @@ std::vector<Luau::RequireAlias> SourceNodeRequireNode::getAvailableAliases() con
         results.emplace_back(Luau::RequireAlias{aliasInfo.originalCase, {"Alias"}});
 
     // Add built-in @game alias if not user-defined
-    std::string gameLower = "game";
-    if (!mainRequirerNodeConfig->aliases.find(gameLower))
-        results.emplace_back(Luau::RequireAlias{"game", {"Alias"}});
+    if (!mainRequirerNodeConfig->aliases.find(kGameAlias))
+        results.emplace_back(Luau::RequireAlias{kGameAlias, {"Alias"}});
 
     if (auto filePath = node->getScriptFilePath())
     {
@@ -102,6 +95,36 @@ std::vector<Luau::RequireAlias> SourceNodeRequireNode::getAvailableAliases() con
     return results;
 }
 
+std::unique_ptr<Luau::RequireNode> SourcemapAwareFileRequireNode::resolvePathToNode(const std::string& requireString) const
+{
+    LUAU_ASSERT(mainRequirerNodeConfig);
+
+    // `@game` is rooted at the DataModel, so it resolves against the sourcemap root even though this
+    // file has no node. A user-defined `game` alias in `.luaurc` still wins, and every other form
+    // keeps the filesystem behaviour.
+    if (auto alias = parseAliasRequire(requireString);
+        alias && alias->name == kGameAlias && rootNode && !mainRequirerNodeConfig->aliases.find(kGameAlias))
+    {
+        if (auto targetNode = rootNode->walkPath(alias->remainder))
+            return std::make_unique<SourceNodeRequireNode>(targetNode, rootNode, mainRequirerNodeConfig, workspaceFolder);
+        return nullptr;
+    }
+
+    return FileRequireNode::resolvePathToNode(requireString);
+}
+
+std::vector<Luau::RequireAlias> SourcemapAwareFileRequireNode::getAvailableAliases() const
+{
+    LUAU_ASSERT(mainRequirerNodeConfig);
+
+    auto results = FileRequireNode::getAvailableAliases();
+
+    if (rootNode && !mainRequirerNodeConfig->aliases.find(kGameAlias))
+        results.emplace_back(Luau::RequireAlias{kGameAlias, {"Alias"}});
+
+    return results;
+}
+
 std::unique_ptr<Luau::RequireNode> RobloxStringRequireSuggester::getNode(const Luau::ModuleName& name) const
 {
     auto config = std::make_shared<const Luau::Config>(configResolver->getConfig(name, workspaceFolder->limits));
@@ -109,9 +132,11 @@ std::unique_ptr<Luau::RequireNode> RobloxStringRequireSuggester::getNode(const L
     if (auto it = platform->virtualPathsToSourceNodes.find(name); it != platform->virtualPathsToSourceNodes.end())
         return std::make_unique<SourceNodeRequireNode>(it->second, platform->rootSourceNode, std::move(config), workspaceFolder);
 
-    // Fall back to filesystem-based node for modules not in the sourcemap
+    // Fall back to filesystem-based node for modules not in the sourcemap. It still offers `@game`,
+    // which does not depend on the requirer having a node.
     if (auto realUri = platform->resolveToRealPath(name))
-        return std::make_unique<FileRequireNode>(*realUri, realUri->isDirectory(), workspaceFolder, std::move(config));
+        return std::make_unique<SourcemapAwareFileRequireNode>(
+            *realUri, realUri->isDirectory(), platform->rootSourceNode, workspaceFolder, std::move(config));
 
     return nullptr;
 }
