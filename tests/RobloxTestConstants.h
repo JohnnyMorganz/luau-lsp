@@ -90,3 +90,52 @@ static const std::string SOURCEMAP_FOR_SERVER_CLIENT_BOUNDARY_AUTO_IMPORTS = R"(
     ]
 }
 )";
+
+static const std::string SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS = R"(
+{
+    "name": "game",
+    "className": "DataModel",
+    "children": [
+        {
+            "name": "Workspace",
+            "className": "Workspace",
+            "children": [
+                {"name": "LegacyScript", "className": "Script", "filePaths": ["workspace/LegacyScript.lua"]},
+                {"name": "MyLocalScript", "className": "LocalScript", "filePaths": ["workspace/MyLocalScript.client.luau"]}
+            ]
+        },
+        {
+            "name": "ReplicatedStorage",
+            "className": "ReplicatedStorage",
+            "children": [
+                {"name": "SharedModule", "className": "ModuleScript", "filePaths": ["shared/SharedModule.luau"]},
+                {
+                    "name": "Features",
+                    "className": "Folder",
+                    "children": [
+                        {"name": "main", "className": "Script", "filePaths": ["features/main.client.luau"]},
+                        {"name": "boot", "className": "Script", "filePaths": ["features/boot.server.luau"]},
+                        {"name": "Widget", "className": "Script", "filePaths": ["features/Widget/init.client.luau"]}
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "ServerScriptService",
+            "className": "ServerScriptService",
+            "children": [{"name": "ServerModule", "className": "ModuleScript", "filePaths": ["server/ServerModule.luau"]}]
+        },
+        {
+            "name": "StarterPlayer",
+            "className": "StarterPlayer",
+            "children": [
+                {
+                    "name": "StarterPlayerScripts",
+                    "className": "StarterPlayerScripts",
+                    "children": [{"name": "ClientModule", "className": "ModuleScript", "filePaths": ["client/ClientModule.luau"]}]
+                }
+            ]
+        }
+    ]
+}
+)";
