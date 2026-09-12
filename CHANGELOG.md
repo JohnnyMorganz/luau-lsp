@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed `@self` string-require aliases resolving from the filesystem instead of the sourcemap tree for non-DataModel roots ([#1511](https://github.com/JohnnyMorganz/luau-lsp/issues/1511))
+- Fixed Signature Help showing the implicit first argument of a `__call` metamethod, which is supplied by the table being called rather than by the caller ([#1597](https://github.com/JohnnyMorganz/luau-lsp/issues/1597))
 
 ### Changed
 
