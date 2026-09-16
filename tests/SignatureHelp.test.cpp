@@ -78,14 +78,242 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_shows_for_call_metamethod")
     REQUIRE(result);
     REQUIRE_EQ(result->signatures.size(), 1);
 
-    CHECK_EQ(result->signatures[0].label, "function tbl(self: any, meow: string): ()");
+    CHECK_EQ(result->signatures[0].label, "function tbl(meow: string): ()");
     REQUIRE(result->signatures[0].documentation);
     CHECK_EQ(result->signatures[0].documentation->value, "some documentation\n");
     REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 1);
+
+    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(0).label), std::vector<size_t>{13, 25});
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_does_not_show_implicit_self_on_call_metamethod")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local module = setmetatable({}, {
+            __call = function(self, value: string)
+            end,
+        })
+
+        module(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+
+    CHECK_EQ(result->signatures[0].label, "function module(value: string): ()");
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 1);
+    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(0).label), std::vector<size_t>{16, 29});
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_on_call_metamethod_taking_only_self_has_no_parameters")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local module = setmetatable({}, {
+            __call = function(self)
+            end,
+        })
+
+        module(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+
+    CHECK_EQ(result->signatures[0].label, "function module(): ()");
+    REQUIRE(result->signatures[0].parameters);
+    CHECK_EQ(result->signatures[0].parameters->size(), 0);
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_on_variadic_call_metamethod_keeps_varargs")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local module = setmetatable({}, {
+            __call = function(self, ...: string)
+            end,
+        })
+
+        module(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+
+    CHECK_EQ(result->signatures[0].label, "function module(...: string): ()");
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 1);
+    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(0).label), std::vector<size_t>{16, 27});
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_on_call_metamethod_keeps_original_parameter_documentation_indices")
+{
+    loadDefinition("@test", R"(
+        type Callable = typeof(setmetatable({} :: {}, {} :: { __call: (any, value: string, other: number) -> () }))
+        declare foo: Callable
+    )");
+
+    client->documentation["@test/global/foo/param/0"] = Luau::BasicDocumentation{"documentation for self", "", ""};
+    client->documentation["@test/global/foo/param/1"] = Luau::BasicDocumentation{"documentation for value", "", ""};
+    client->documentation["@test/global/foo/param/2"] = Luau::BasicDocumentation{"documentation for other", "", ""};
+
+    auto [source, marker] = sourceWithMarker(R"(
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+    REQUIRE(result->signatures[0].parameters);
     REQUIRE_EQ(result->signatures[0].parameters->size(), 2);
 
-    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(0).label), std::vector<size_t>{13, 22});
-    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(1).label), std::vector<size_t>{24, 36});
+    CHECK_EQ(result->signatures[0].parameters->at(0).documentation->value, "documentation for value");
+    CHECK_EQ(result->signatures[0].parameters->at(1).documentation->value, "documentation for other");
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_on_variadic_call_metamethod_keeps_original_documentation_index")
+{
+    loadDefinition("@test", R"(
+        type Callable = typeof(setmetatable({} :: {}, {} :: { __call: (any, ...string) -> () }))
+        declare foo: Callable
+    )");
+
+    client->documentation["@test/global/foo/param/0"] = Luau::BasicDocumentation{"documentation for self", "", ""};
+    client->documentation["@test/global/foo/param/1"] = Luau::BasicDocumentation{"documentation for varargs", "", ""};
+
+    auto [source, marker] = sourceWithMarker(R"(
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 1);
+
+    CHECK_EQ(result->signatures[0].parameters->at(0).documentation->value, "documentation for varargs");
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_on_ordinary_function_keeps_parameter_documentation_indices")
+{
+    loadDefinition("@test", R"(
+        declare function bar(first: string, second: number): ()
+    )");
+
+    client->documentation["@test/global/bar/param/0"] = Luau::BasicDocumentation{"documentation for first", "", ""};
+    client->documentation["@test/global/bar/param/1"] = Luau::BasicDocumentation{"documentation for second", "", ""};
+
+    auto [source, marker] = sourceWithMarker(R"(
+        bar(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 2);
+
+    CHECK_EQ(result->signatures[0].parameters->at(0).documentation->value, "documentation for first");
+    CHECK_EQ(result->signatures[0].parameters->at(1).documentation->value, "documentation for second");
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_on_call_metamethod_with_mixed_named_and_unnamed_arguments")
+{
+    loadDefinition("@test", R"(
+        type Callable = typeof(setmetatable({} :: {}, {} :: { __call: (any, string, other: number) -> () }))
+        declare foo: Callable
+    )");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        foo(|)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+
+    CHECK_EQ(result->signatures[0].label, "function foo(string, other: number): ()");
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 2);
+
+    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(0).label), std::vector<size_t>{13, 19});
+    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(1).label), std::vector<size_t>{21, 34});
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_on_call_metamethod_tracks_active_parameter")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local module = setmetatable({}, {
+            __call = function(self, first: string, second: number)
+            end,
+        })
+
+        module("a", |)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+
+    CHECK_EQ(result->signatures[0].label, "function module(first: string, second: number): ()");
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 2);
+
+    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(0).label), std::vector<size_t>{16, 29});
+    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(1).label), std::vector<size_t>{31, 45});
+
+    CHECK_EQ(result->activeParameter, 1);
 }
 
 TEST_CASE_FIXTURE(Fixture, "signature_help_respects_cancellation")
