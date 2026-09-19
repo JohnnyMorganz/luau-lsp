@@ -1,33 +1,27 @@
 ---
-name: luau-lsp-release
+name: release
 description: >
-  Releases a new version of JohnnyMorganz/luau-lsp end-to-end: determines the
-  next version from CHANGELOG.md, triggers the generate-release GitHub Actions
-  workflow, waits for the auto-populated draft GitHub release to be built, and
+  Releases a new version of luau-lsp end-to-end: determines the next version
+  from CHANGELOG.md, triggers the generate-release GitHub Actions workflow,
+  waits for the auto-populated draft GitHub release to be built, and
   composes a copy-pasteable announcement message. Use this skill whenever the
   user asks to release luau-lsp, cut a new luau-lsp version, publish a
   luau-lsp release, or run the luau-lsp release workflow — even if they
   phrase it casually like "ship it" or "do the release".
 compatibility: >
-  Uses the GitHub MCP server tools (mcp__github__*) exclusively — no `gh`
-  CLI, no browser, works the same locally and in Claude Code on the web.
-  The only step that cannot be automated is clicking "Publish release" on
-  GitHub itself (there is no MCP tool for that) — see Phase 4.
+  Uses the GitHub MCP server tools (mcp__github__*) exclusively. The only
+  step that cannot be automated is clicking "Publish release" on GitHub
+  itself (there is no MCP tool for that) — see Phase 4.
 ---
 
 # luau-lsp Release Workflow
 
-This skill automates the release process for
-[JohnnyMorganz/luau-lsp](https://github.com/JohnnyMorganz/luau-lsp) using
-only the `mcp__github__*` GitHub MCP tools — it needs neither the `gh` CLI
-nor a browser, so it runs the same way locally and in a cloud session.
-
-Release-note composition and the draft GitHub release itself are built by
-`release.yml` in CI (see `scripts/compose_release_notes.py`), not by this
-skill — that used to require `gh release edit` after the fact, which isn't
-available here. This skill's job is to determine the version, trigger the
-workflows, watch them, and hand back a summary plus an announcement you can
-paste elsewhere.
+This skill drives the release process for this repository via the
+`mcp__github__*` GitHub MCP tools. Release-note composition and the draft
+GitHub release itself are built by `release.yml` in CI (see
+`scripts/compose_release_notes.py`) — this skill's job is to determine the
+version, trigger the workflows, watch them, and hand back a summary plus an
+announcement you can paste elsewhere.
 
 **Heads up before Phase 2:** triggering `generate-release.yml` pushes a
 commit + tag to `main`, which in turn kicks off `release.yml` — that
@@ -140,12 +134,12 @@ The top commit's message should be `vX.Y.Z` (from `scripts/release.py`).
 ## Phase 3 — Wait for the Draft Release
 
 Pushing the tag (done automatically by `scripts/release.py` inside
-`generate-release.yml`) triggers `release.yml`. Its `create-release` job now
+`generate-release.yml`) triggers `release.yml`. Its `create-release` job
 composes the full release body itself — from the versioned CHANGELOG.md
 section plus GitHub's auto-generated "External Contributions" notes (see
 `scripts/compose_release_notes.py`) — and creates the draft release with
 that body already filled in, before the build/upload jobs run. There is
-nothing for this skill to compose or edit here anymore.
+nothing for this skill to compose or edit here.
 
 Poll until the draft exists:
 
@@ -199,8 +193,7 @@ Expected assets: `luau-lsp-linux-arm64.zip`, `luau-lsp-linux-x86_64.zip`,
 user with their sizes.
 
 **This is where automation stops.** There is no MCP tool to flip a release
-from draft to published (the equivalent of `gh release edit --draft=false
---discussion-category=Announcements`), so give the user:
+from draft to published, so give the user:
 
 - The release URL (`html_url`).
 - Confirmation that all 5 expected assets are attached (or which are
