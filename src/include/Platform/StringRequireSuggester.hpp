@@ -29,7 +29,7 @@ public:
     std::vector<std::unique_ptr<Luau::RequireNode>> getChildren() const override;
     std::vector<Luau::RequireAlias> getAvailableAliases() const override;
 
-private:
+protected:
     Uri uri;
     bool isDirectory = false;
 
