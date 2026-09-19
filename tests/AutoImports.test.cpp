@@ -2230,4 +2230,89 @@ TEST_CASE_FIXTURE(Fixture, "string_requires_server_can_see_server")
     CHECK(getItem(result, "SharedModule"));
 }
 
+
+TEST_CASE_FIXTURE(Fixture, "instance_requires_run_context_client_script_acts_as_client")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = false;
+    loadSourcemap(SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("features/main.client.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "SharedModule"));
+    CHECK(getItem(result, "ClientModule"));
+
+    CHECK_FALSE(getItem(result, "ServerModule"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "instance_requires_run_context_server_script_acts_as_server")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = false;
+    loadSourcemap(SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("features/boot.server.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "SharedModule"));
+    CHECK(getItem(result, "ServerModule"));
+
+    CHECK_FALSE(getItem(result, "ClientModule"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_requires_run_context_client_script_acts_as_client")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("features/main.client.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "SharedModule"));
+    CHECK(getItem(result, "ClientModule"));
+
+    CHECK_FALSE(getItem(result, "ServerModule"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_requires_run_context_server_script_acts_as_server")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("features/boot.server.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "SharedModule"));
+    CHECK(getItem(result, "ServerModule"));
+
+    CHECK_FALSE(getItem(result, "ClientModule"));
+}
+
 TEST_SUITE_END();

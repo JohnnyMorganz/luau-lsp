@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Fixed `@self` string-require aliases resolving from the filesystem instead of the sourcemap tree for non-DataModel roots ([#1511](https://github.com/JohnnyMorganz/luau-lsp/issues/1511))
+- Auto-import server/client boundary filtering now respects `.client.luau`/`.server.luau` file suffixes, fixing misclassification of `RunContext = Client` scripts emitted by Rojo's `emitLegacyScripts: false` ([#1594](https://github.com/JohnnyMorganz/luau-lsp/issues/1594))
 
 ### Changed
 
