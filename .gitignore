@@ -50,3 +50,5 @@ trace.json
 
 # Python venvs
 .venv
+build_asan/
+build_tsan/
