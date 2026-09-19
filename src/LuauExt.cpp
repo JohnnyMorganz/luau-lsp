@@ -395,7 +395,7 @@ static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const 
 
 std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
 {
-    Luau::DenseHashSet<Luau::TypeId> seenSet{nullptr};
+    Luau::DenseHashSet<Luau::TypeId> seenSet{};
     return lookupProp(parentType, name, seenSet);
 }
 

@@ -1437,7 +1437,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_does_not_include_modules_that_are_alr
 
 TEST_CASE_FIXTURE(Fixture, "string_require_uses_aliases")
 {
-    AliasMap aliases{""};
+    AliasMap aliases{};
     aliases["Packages"] = {Uri::file("Packages").fsPath(), "", "Packages"};
     auto style = ImportRequireStyle::Auto;
 
@@ -1447,7 +1447,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_uses_aliases")
 
 TEST_CASE_FIXTURE(Fixture, "dont_use_aliases_when_always_relative_specified")
 {
-    AliasMap aliases{""};
+    AliasMap aliases{};
     aliases["Packages"] = {Uri::file("Packages").fsPath(), "", "Packages"};
     auto style = ImportRequireStyle::AlwaysRelative;
 
@@ -1457,7 +1457,7 @@ TEST_CASE_FIXTURE(Fixture, "dont_use_aliases_when_always_relative_specified")
 
 TEST_CASE_FIXTURE(Fixture, "always_use_possible_aliases_when_always_absolute_specified")
 {
-    AliasMap aliases{""};
+    AliasMap aliases{};
     aliases["project"] = {Uri::file("project").fsPath(), "", "project"};
     auto style = ImportRequireStyle::AlwaysAbsolute;
 
@@ -1469,7 +1469,7 @@ TEST_CASE_FIXTURE(Fixture, "always_use_possible_aliases_when_always_absolute_spe
 
 TEST_CASE_FIXTURE(Fixture, "string_require_compute_best_alias")
 {
-    AliasMap aliases{""};
+    AliasMap aliases{};
     aliases["project"] = {Uri::file("project").fsPath(), "", "Project"};
     aliases["packages"] = {Uri::file("packages").fsPath(), "", "Packages"};
     aliases["nestedproject"] = {Uri::file("project/nested").fsPath(), "", "NestedProject"};
@@ -1559,7 +1559,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_includes_aliased_files_from_external_
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_correctly_for_init_luau_file")
 {
-    AliasMap aliases{""};
+    AliasMap aliases{};
     auto style = ImportRequireStyle::Auto;
 
     auto from = Uri::file("project/code/init.luau");
@@ -1569,7 +1569,7 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolves_correctly_for_init_luau_file
 
 TEST_CASE_FIXTURE(Fixture, "string_require_resolves_to_directory_that_contains_init_luau_file")
 {
-    AliasMap aliases{""};
+    AliasMap aliases{};
     auto style = ImportRequireStyle::Auto;
 
     auto from = Uri::file("project/file.luau");
@@ -2587,6 +2587,91 @@ TEST_CASE_FIXTURE(Fixture, "string_requires_server_can_see_server")
 
     CHECK(getItem(result, "ServerStorageModule"));
     CHECK(getItem(result, "SharedModule"));
+}
+
+
+TEST_CASE_FIXTURE(Fixture, "instance_requires_run_context_client_script_acts_as_client")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = false;
+    loadSourcemap(SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("features/main.client.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "SharedModule"));
+    CHECK(getItem(result, "ClientModule"));
+
+    CHECK_FALSE(getItem(result, "ServerModule"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "instance_requires_run_context_server_script_acts_as_server")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = false;
+    loadSourcemap(SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("features/boot.server.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "SharedModule"));
+    CHECK(getItem(result, "ServerModule"));
+
+    CHECK_FALSE(getItem(result, "ClientModule"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_requires_run_context_client_script_acts_as_client")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("features/main.client.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "SharedModule"));
+    CHECK(getItem(result, "ClientModule"));
+
+    CHECK_FALSE(getItem(result, "ServerModule"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_requires_run_context_server_script_acts_as_server")
+{
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS);
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("features/boot.server.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    CHECK(getItem(result, "SharedModule"));
+    CHECK(getItem(result, "ServerModule"));
+
+    CHECK_FALSE(getItem(result, "ClientModule"));
 }
 
 TEST_SUITE_END();

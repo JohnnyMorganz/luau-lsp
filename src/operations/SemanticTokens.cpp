@@ -85,8 +85,9 @@ struct SemanticTokensVisitor : public Luau::AstVisitor
     // We apply visitors in these locations to try and check for synthetic tokens, and mark them as such
     bool visit(Luau::AstTypeTable* table) override
     {
-        // If the indexer location is the same as a result type, the indexer was synthetically added
-        if (table->indexer && table->indexer->indexType->location == table->indexer->resultType->location)
+        // Prevent overlapping tokens for `{ T }` sugar (e.g. `{ string }`): the parser gives the synthetic
+        // `number` index type a zero-width location, which we use to detect and skip it here.
+        if (table->indexer && table->indexer->indexType->location.begin == table->indexer->indexType->location.end)
             syntheticTypes.emplace(table->indexer->indexType);
         return true;
     }

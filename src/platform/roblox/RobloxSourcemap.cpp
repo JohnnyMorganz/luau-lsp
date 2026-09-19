@@ -1,6 +1,7 @@
 #include "Luau/TypeFwd.h"
 #include "Platform/RobloxPlatform.hpp"
 
+#include "LSP/Utils.hpp"
 #include "LSP/Workspace.hpp"
 #include "Luau/BuiltinDefinitions.h"
 #include "Luau/ConstraintSolver.h"
@@ -475,6 +476,23 @@ bool RobloxPlatform::updateSourceMap()
     }
 }
 
+// Rojo's `emitLegacyScripts: false` maps `*.client.luau` to a `Script` with
+// `RunContext = Client` (and `*.server.luau` to `RunContext = Server`). The sourcemap
+// cannot express RunContext, so the class name alone would misclassify these as server
+// scripts (#1594). For scripts emitted by Rojo's default sync rules, the file suffix
+// reflects the run context, so it takes precedence over the bare `Script` class.
+static std::optional<ScriptContext> scriptContextFromFilePathSuffix(const SourceNode* node)
+{
+    if (auto filePath = node->getScriptFilePath())
+    {
+        if (endsWith(*filePath, ".client.lua") || endsWith(*filePath, ".client.luau"))
+            return ScriptContext::Client;
+        if (endsWith(*filePath, ".server.lua") || endsWith(*filePath, ".server.luau"))
+            return ScriptContext::Server;
+    }
+    return std::nullopt;
+}
+
 void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base, ScriptContext parentNameContext)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::writePathsToMap", "LSP");
@@ -486,10 +504,10 @@ void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base, 
         realPathsToSourceNodes.insert_or_assign(*realPath, node);
     }
 
-    if (node->className == "Script")
-        node->scriptContext = ScriptContext::Server;
-    else if (node->className == "LocalScript")
-        node->scriptContext = ScriptContext::Client;
+    if (node->className == "LocalScript")
+        node->scriptContext = ScriptContext::Client; // client by class invariant, never overridden
+    else if (node->className == "Script")
+        node->scriptContext = scriptContextFromFilePathSuffix(node).value_or(ScriptContext::Server);
     else
         node->scriptContext = parentNameContext;
 
