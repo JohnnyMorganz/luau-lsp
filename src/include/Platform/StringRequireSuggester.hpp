@@ -29,8 +29,6 @@ public:
     std::vector<std::unique_ptr<Luau::RequireNode>> getChildren() const override;
     std::vector<Luau::RequireAlias> getAvailableAliases() const override;
 
-    // Protected rather than private so a platform can subclass this node and keep its filesystem
-    // behaviour while it adds platform-specific aliases.
 protected:
     Uri uri;
     bool isDirectory = false;
