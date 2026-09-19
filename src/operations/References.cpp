@@ -73,7 +73,7 @@ static bool isSameTable(const Luau::TypeId a, const Luau::TypeId b)
     if (isSameTableDirect(a, b))
         return true;
 
-    Luau::DenseHashSet<Luau::TypeId> visited{nullptr};
+    Luau::DenseHashSet<Luau::TypeId> visited{};
 
     if (Luau::get<Luau::MetatableType>(Luau::follow(a)))
     {

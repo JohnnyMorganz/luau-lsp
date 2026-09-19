@@ -28,7 +28,7 @@ struct Client
     /// A registered documentation file passed by the client
     std::vector<std::string> documentationFiles{};
     /// Parsed documentation database
-    Luau::DocumentationDatabase documentation{""};
+    Luau::DocumentationDatabase documentation{};
     /// Global configuration. These are the default settings that we will use if we don't have the workspace stored in configStore
     ClientConfiguration globalConfig{};
 
