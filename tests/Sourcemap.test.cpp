@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "RobloxTestConstants.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "Protocol/Workspace.hpp"
 #include "LuauFileUtils.hpp"
@@ -1881,6 +1882,53 @@ TEST_CASE_FIXTURE(Fixture, "source_node_get_script_context_resolution")
     auto clientModule = (*starterPlayer)->findChild("ClientModule");
     REQUIRE(clientModule);
     CHECK_EQ((*clientModule)->scriptContext, ScriptContext::Client);
+}
+
+
+TEST_CASE_FIXTURE(Fixture, "script_context_resolution_respects_file_path_suffixes")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    REQUIRE(platform);
+
+    loadSourcemap(SOURCEMAP_FOR_RUN_CONTEXT_AUTO_IMPORTS);
+    REQUIRE(platform->rootSourceNode);
+    auto root = platform->rootSourceNode;
+
+    // RunContext-style client script: Script class + .client.luau suffix -> Client
+    auto replicatedStorage = root->findChild("ReplicatedStorage");
+    REQUIRE(replicatedStorage);
+    auto features = (*replicatedStorage)->findChild("Features");
+    REQUIRE(features);
+    auto mainScript = (*features)->findChild("main");
+    REQUIRE(mainScript);
+    CHECK_EQ((*mainScript)->scriptContext, ScriptContext::Client);
+
+    // RunContext-style server script: Script class + .server.luau suffix -> Server
+    auto bootScript = (*features)->findChild("boot");
+    REQUIRE(bootScript);
+    CHECK_EQ((*bootScript)->scriptContext, ScriptContext::Server);
+
+    // A folder synced from init.client.luau: the suffix is on the init file
+    auto widget = (*features)->findChild("Widget");
+    REQUIRE(widget);
+    CHECK_EQ((*widget)->scriptContext, ScriptContext::Client);
+
+    // No suffix: class name fallback is preserved
+    auto workspaceNode = root->findChild("Workspace");
+    REQUIRE(workspaceNode);
+    auto legacyScript = (*workspaceNode)->findChild("LegacyScript");
+    REQUIRE(legacyScript);
+    CHECK_EQ((*legacyScript)->scriptContext, ScriptContext::Server);
+
+    // LocalScript: unconditionally Client (class invariant, suffix never consulted)
+    auto localScript = (*workspaceNode)->findChild("MyLocalScript");
+    REQUIRE(localScript);
+    CHECK_EQ((*localScript)->scriptContext, ScriptContext::Client);
+
+    // ModuleScript still inherits from its container
+    auto sharedModule = (*replicatedStorage)->findChild("SharedModule");
+    REQUIRE(sharedModule);
+    CHECK_EQ((*sharedModule)->scriptContext, ScriptContext::Shared);
 }
 
 TEST_SUITE_END();
