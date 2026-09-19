@@ -669,6 +669,14 @@ void LanguageServer::processInputLoop()
             }
         }
     }
+
+    // Signal the message processor thread to stop when stdin closes
+    {
+        std::unique_lock lock(messagesMutex);
+        shutdownRequested = true;
+    }
+    messagesCv.notify_all();
+    messageProcessorThread.join();
 }
 
 bool LanguageServer::requestedShutdown()

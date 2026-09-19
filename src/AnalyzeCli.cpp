@@ -10,6 +10,10 @@
 #include "Luau/PrettyPrinter.h"
 #include "LuauFileUtils.hpp"
 #include "LSP/LuauExt.hpp"
+#include "glob/match.h"
+#include <nlohmann/json.hpp>
+#include <algorithm>
+#include <filesystem>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -176,34 +180,568 @@ void applySettings(const std::string& settingsContents, CliClient& client)
                      "Please manually configure necessary FFlags\n";
 }
 
-std::unordered_map<std::string, std::string> processDefinitionsFilePaths(const argparse::ArgumentParser& program)
+// Recursively find all *.d.luau files in a directory
+static std::vector<std::string> findDefinitionFilesInDirectory(const std::string& dirPath)
+{
+    std::vector<std::string> definitionFiles;
+
+    try
+    {
+        for (const auto& entry : std::filesystem::recursive_directory_iterator(dirPath))
+        {
+            if (entry.is_regular_file())
+            {
+                const auto& path = entry.path();
+                // Match files ending in .d.luau
+                if (path.extension() == ".luau")
+                {
+                    auto stem = path.stem().string();
+                    if (stem.size() > 2 && stem.substr(stem.size() - 2) == ".d")
+                    {
+                        definitionFiles.push_back(path.string());
+                    }
+                }
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "warning: failed to read directory '" << dirPath << "': " << e.what() << "\n";
+    }
+
+    return definitionFiles;
+}
+
+// Expand a glob pattern to matching file paths
+// Supports: *, ?, [...], ** (recursive directory match)
+static std::vector<std::string> expandGlobPattern(const std::string& pattern)
+{
+    std::vector<std::string> matchingFiles;
+
+    // Find the first glob character
+    size_t globPos = pattern.find_first_of("*?[");
+    if (globPos == std::string::npos)
+    {
+        // No glob characters, treat as a literal path
+        if (std::filesystem::exists(pattern))
+        {
+            matchingFiles.push_back(pattern);
+        }
+        return matchingFiles;
+    }
+
+    // Find the last directory separator before the first glob character
+    size_t lastSep = pattern.find_last_of("/\\", globPos);
+
+    std::string basePath;
+    std::string globPart;
+
+    if (lastSep == std::string::npos)
+    {
+        // No directory separator before glob, use current directory
+        basePath = ".";
+        globPart = pattern;
+    }
+    else
+    {
+        basePath = pattern.substr(0, lastSep);
+        globPart = pattern.substr(lastSep + 1);
+    }
+
+    // If base path is empty, use current directory
+    if (basePath.empty())
+    {
+        basePath = ".";
+    }
+    else
+    {
+        // Remove trailing separator if present
+        while (basePath.size() > 1 && (basePath.back() == '/' || basePath.back() == '\\'))
+        {
+            basePath.pop_back();
+        }
+    }
+
+    // Check if base path exists
+    if (!std::filesystem::exists(basePath) || !std::filesystem::is_directory(basePath))
+    {
+        std::cerr << "warning: base directory '" << basePath << "' does not exist or is not a directory\n";
+        return matchingFiles;
+    }
+
+    // Handle ** pattern
+    size_t doubleStarPos = globPart.find("**");
+    if (doubleStarPos != std::string::npos)
+    {
+        // Extract prefix (before **) and suffix (after **)
+        std::string prefix = globPart.substr(0, doubleStarPos);
+        std::string suffix = globPart.substr(doubleStarPos + 2);
+
+        // Remove trailing separator from prefix
+        if (!prefix.empty() && (prefix.back() == '/' || prefix.back() == '\\'))
+        {
+            prefix.pop_back();
+        }
+
+        // Remove leading separator from suffix
+        if (!suffix.empty() && (suffix.front() == '/' || suffix.front() == '\\'))
+        {
+            suffix = suffix.substr(1);
+        }
+
+        // Build the full prefix path
+        std::string prefixPath = basePath;
+        if (!prefix.empty())
+        {
+            prefixPath += "/" + prefix;
+        }
+
+        // If prefix path exists, recursively match
+        if (std::filesystem::exists(prefixPath) && std::filesystem::is_directory(prefixPath))
+        {
+            try
+            {
+                for (const auto& entry : std::filesystem::recursive_directory_iterator(prefixPath))
+                {
+                    if (entry.is_regular_file())
+                    {
+                        auto relativePath = std::filesystem::relative(entry.path(), basePath).string();
+
+                        // For matching, try filename against suffix and full relative path
+                        bool matches = false;
+
+                        if (suffix.empty())
+                        {
+                            // No suffix after **, match all files
+                            matches = true;
+                        }
+                        else
+                        {
+                            // Try to match the suffix against the filename
+                            auto fileName = entry.path().filename().string();
+                            matches = glob::glob_match(fileName, suffix);
+
+                            // Also try matching the full relative path
+                            if (!matches)
+                            {
+                                matches = glob::glob_match(relativePath, suffix);
+                            }
+                        }
+
+                        if (matches)
+                        {
+                            matchingFiles.push_back(entry.path().string());
+                        }
+                    }
+                }
+            }
+            catch (const std::exception& e)
+            {
+                std::cerr << "warning: failed to iterate directory '" << prefixPath << "': " << e.what() << "\n";
+            }
+        }
+    }
+    else
+    {
+        // No ** pattern, use regular recursive matching
+        try
+        {
+            for (const auto& entry : std::filesystem::recursive_directory_iterator(basePath))
+            {
+                if (entry.is_regular_file())
+                {
+                    auto relativePath = std::filesystem::relative(entry.path(), basePath).string();
+
+                    if (glob::glob_match(relativePath, globPart))
+                    {
+                        matchingFiles.push_back(entry.path().string());
+                    }
+                }
+            }
+        }
+        catch (const std::exception& e)
+        {
+            std::cerr << "warning: failed to iterate directory '" << basePath << "': " << e.what() << "\n";
+        }
+    }
+
+    return matchingFiles;
+}
+
+// Extract package name from file path
+static std::string extractPackageNameFromPath(const std::string& filePath)
+{
+    auto path = std::filesystem::path(filePath);
+    auto fileName = path.filename().string();
+
+    // Check if it's a .d.luau file
+    if (fileName.size() > 7 && fileName.substr(fileName.size() - 7) == ".d.luau")
+    {
+        // Remove .d.luau extension
+        return "@" + fileName.substr(0, fileName.size() - 7);
+    }
+
+    // For other files, use stem
+    return "@" + path.stem().string();
+}
+
+// Find project root by walking up from CWD looking for .git directory
+static std::optional<std::string> findProjectRoot()
+{
+    auto cwd = Luau::FileUtils::getCurrentWorkingDirectory();
+    if (!cwd)
+        return std::nullopt;
+
+    std::filesystem::path current(*cwd);
+    std::filesystem::path original = current;
+
+    // Walk up looking for .git directory
+    while (true)
+    {
+        std::filesystem::path gitDir = current / ".git";
+        if (std::filesystem::exists(gitDir) && std::filesystem::is_directory(gitDir))
+            return current.string();
+
+        // If we've reached root, stop
+        if (current.parent_path() == current)
+            break;
+
+        current = current.parent_path();
+    }
+
+    // No .git found, return CWD
+    return original.string();
+}
+
+// Load config file from JSON
+static std::optional<ConfigFileData> parseConfigJson(const std::string& contents, const std::string& configPath)
+{
+    ConfigFileData config;
+
+    // Get directory of config file for resolving relative paths
+    std::filesystem::path configDir = std::filesystem::path(configPath).parent_path();
+
+    try
+    {
+        auto json = nlohmann::json::parse(contents);
+        // NOTE: no exception throwing expected, json::parse handles syntax errors
+
+        // Parse "definitions" array
+        if (json.contains("definitions") && json["definitions"].is_array())
+        {
+            for (const auto& item : json["definitions"])
+            {
+                if (item.is_string())
+                {
+                    std::string value = item.get<std::string>();
+                    // Resolve @name=path entries: path is relative to config file dir
+                    size_t eqIndex = value.find('=');
+                    if (eqIndex != std::string::npos)
+                    {
+                        std::string pathPart = value.substr(eqIndex + 1);
+                        if (!Luau::FileUtils::isAbsolutePath(pathPart))
+                        {
+                            std::filesystem::path resolved = configDir / pathPart;
+                            value = value.substr(0, eqIndex + 1) + resolved.string();
+                        }
+                    }
+                    // Also resolve glob patterns and bare file paths
+                    else if (value.find_first_of("*?[") != std::string::npos || !Luau::FileUtils::isAbsolutePath(value))
+                    {
+                        if (!Luau::FileUtils::isAbsolutePath(value))
+                        {
+                            // Strip VFS @ prefix (e.g. "@A/pub/**/*.d.luau" → "pub/**/*.d.luau")
+                            std::string fsPath = value;
+                            if (fsPath.size() > 1 && fsPath[0] == '@')
+                            {
+                                size_t slashPos = fsPath.find('/');
+                                if (slashPos != std::string::npos)
+                                    fsPath = fsPath.substr(slashPos + 1);
+                            }
+                            std::filesystem::path resolved = configDir / fsPath;
+                            value = resolved.string();
+                        }
+                    }
+                    config.definitions.push_back(value);
+                }
+            }
+        }
+
+        // Parse "definitionsDir" array
+        if (json.contains("definitionsDir") && json["definitionsDir"].is_array())
+        {
+            for (const auto& item : json["definitionsDir"])
+            {
+                if (item.is_string())
+                {
+                    std::string dirPath = item.get<std::string>();
+                    if (!Luau::FileUtils::isAbsolutePath(dirPath))
+                    {
+                        std::filesystem::path resolved = configDir / dirPath;
+                        dirPath = resolved.string();
+                    }
+                    config.definitionsDir.push_back(dirPath);
+                }
+            }
+        }
+
+        // Parse "docs" array
+        if (json.contains("docs") && json["docs"].is_array())
+        {
+            for (const auto& item : json["docs"])
+            {
+                if (item.is_string())
+                {
+                    std::string docPath = item.get<std::string>();
+                    if (!Luau::FileUtils::isAbsolutePath(docPath))
+                    {
+                        std::filesystem::path resolved = configDir / docPath;
+                        docPath = resolved.string();
+                    }
+                    config.docs.push_back(docPath);
+                }
+            }
+        }
+
+        // Parse "platform" string
+        if (json.contains("platform") && json["platform"].is_string())
+            config.platform = json["platform"].get<std::string>();
+
+        // Parse "baseLuaurc" string
+        if (json.contains("baseLuaurc") && json["baseLuaurc"].is_string())
+        {
+            std::string luaurcPath = json["baseLuaurc"].get<std::string>();
+            if (!Luau::FileUtils::isAbsolutePath(luaurcPath))
+            {
+                std::filesystem::path resolved = configDir / luaurcPath;
+                luaurcPath = resolved.string();
+            }
+            config.baseLuaurc = luaurcPath;
+        }
+    }
+    catch (const nlohmann::json::parse_error& e)
+    {
+        std::cerr << "warning: failed to parse config file '" << configPath << "': " << e.what() << "\n";
+        return std::nullopt;
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "warning: error reading config file '" << configPath << "': " << e.what() << "\n";
+        return std::nullopt;
+    }
+
+    return config;
+}
+
+// Merge two ConfigFileData: base is overridden/supplemented by overlay
+static ConfigFileData mergeConfigData(const ConfigFileData& base, const ConfigFileData& overlay)
+{
+    ConfigFileData result = base;
+
+    // Arrays: concatenate, skip exact-duplicate paths
+    auto addUnique = [](std::vector<std::string>& target, const std::vector<std::string>& source)
+    {
+        for (const auto& item : source)
+        {
+            if (std::find(target.begin(), target.end(), item) == target.end())
+                target.push_back(item);
+        }
+    };
+
+    addUnique(result.definitions, overlay.definitions);
+    addUnique(result.definitionsDir, overlay.definitionsDir);
+    addUnique(result.docs, overlay.docs);
+
+    // Scalars: overlay wins if non-empty
+    if (!overlay.platform.empty())
+        result.platform = overlay.platform;
+    if (!overlay.baseLuaurc.empty())
+        result.baseLuaurc = overlay.baseLuaurc;
+
+    return result;
+}
+
+std::optional<ConfigFileData> loadConfigFile(const std::optional<std::string>& configPath)
+{
+    if (configPath)
+    {
+        // Explicit path provided, use it directly (no merge)
+        auto contents = Luau::FileUtils::readFile(*configPath);
+        if (!contents)
+        {
+            std::cerr << "warning: failed to read config file '" << *configPath << "'\n";
+            return std::nullopt;
+        }
+        return parseConfigJson(*contents, *configPath);
+    }
+
+    // Auto-discover: walk from project root down to CWD, collect all configs, merge
+    auto projectRoot = findProjectRoot();
+    if (!projectRoot)
+        return std::nullopt;
+
+    std::filesystem::path root(*projectRoot);
+    auto cwd = Luau::FileUtils::getCurrentWorkingDirectory();
+    if (!cwd)
+        return std::nullopt;
+
+    // Collect directories from CWD up to root, then reverse
+    std::vector<std::filesystem::path> dirPath;
+    std::filesystem::path cwdPath(*cwd);
+    std::filesystem::path current = cwdPath;
+
+    while (true)
+    {
+        dirPath.push_back(current);
+        if (current == root || current.parent_path() == current)
+            break;
+        current = current.parent_path();
+        // Don't go above root
+        if (current < root && root.string().find(current.string()) != 0)
+            break;
+    }
+    // Reverse so root is first, CWD is last (closest)
+    std::reverse(dirPath.begin(), dirPath.end());
+
+    // Collect and merge configs
+    std::optional<ConfigFileData> merged;
+    for (const auto& dir : dirPath)
+    {
+        std::filesystem::path candidate = dir / "luau-lsp-settings.json";
+        if (std::filesystem::exists(candidate))
+        {
+            auto contents = Luau::FileUtils::readFile(candidate.string());
+            if (contents)
+            {
+                auto config = parseConfigJson(*contents, candidate.string());
+                if (config)
+                {
+                    if (merged)
+                        merged = mergeConfigData(*merged, *config);
+                    else
+                        merged = config;
+                }
+            }
+        }
+    }
+
+    return merged;
+}
+
+std::unordered_map<std::string, std::string> processDefinitionsFilePaths(
+    const argparse::ArgumentParser& program, const std::optional<ConfigFileData>& configData)
 {
     std::unordered_map<std::string, std::string> definitionsFiles{};
-    size_t backwardsCompatibilityNameSuffix = 0;
+
+    // First, process config file definitions (if any)
+    if (configData)
+    {
+        for (const auto& definition : configData->definitions)
+        {
+            size_t eqIndex = definition.find('=');
+            if (eqIndex != std::string::npos)
+            {
+                std::string packageName = definition.substr(0, eqIndex);
+                std::string filePath = definition.substr(eqIndex + 1, definition.length());
+
+                if (!Luau::startsWith(packageName, "@"))
+                    packageName = "@" + packageName;
+
+                definitionsFiles.emplace(packageName, filePath);
+            }
+            else if (definition.find_first_of("*?[") != std::string::npos)
+            {
+                auto matchedFiles = expandGlobPattern(definition);
+                for (const auto& filePath : matchedFiles)
+                {
+                    auto packageName = extractPackageNameFromPath(filePath);
+                    if (!definitionsFiles.count(packageName))
+                        definitionsFiles.emplace(packageName, filePath);
+                }
+            }
+            else
+            {
+                auto packageName = extractPackageNameFromPath(definition);
+                if (!definitionsFiles.count(packageName))
+                    definitionsFiles.emplace(packageName, definition);
+            }
+        }
+
+        for (const auto& dirPath : configData->definitionsDir)
+        {
+            auto definitionFiles = findDefinitionFilesInDirectory(dirPath);
+            for (const auto& filePath : definitionFiles)
+            {
+                auto path = std::filesystem::path(filePath);
+                auto stem = path.stem().string();
+                auto packageName = "@" + stem.substr(0, stem.size() - 2);
+
+                if (!definitionsFiles.count(packageName))
+                    definitionsFiles.emplace(packageName, filePath);
+            }
+        }
+    }
+
+    // Then, process CLI definitions (they override config file values)
     for (const auto& definition : program.get<std::vector<std::string>>("--definitions"))
     {
-        std::string packageName = definition;
-        std::string filePath = definition;
-
         size_t eqIndex = definition.find('=');
-        if (eqIndex == std::string::npos)
+        if (eqIndex != std::string::npos)
         {
-            // TODO: Remove Me - backwards compatibility
-            packageName = "@roblox";
-            if (backwardsCompatibilityNameSuffix > 0)
-                packageName += std::to_string(backwardsCompatibilityNameSuffix);
-            backwardsCompatibilityNameSuffix += 1;
+            // Explicit @name=path mapping - CLI always wins over config
+            std::string packageName = definition.substr(0, eqIndex);
+            std::string filePath = definition.substr(eqIndex + 1, definition.length());
+
+            if (!Luau::startsWith(packageName, "@"))
+                packageName = "@" + packageName;
+
+            definitionsFiles.insert_or_assign(packageName, filePath);
         }
         else
         {
-            packageName = definition.substr(0, eqIndex);
-            filePath = definition.substr(eqIndex + 1, definition.length());
+            // Check if this looks like a glob pattern
+            if (definition.find_first_of("*?[") != std::string::npos)
+            {
+                // Glob pattern - expand and use extractPackageNameFromPath
+                auto matchedFiles = expandGlobPattern(definition);
+                for (const auto& filePath : matchedFiles)
+                {
+                    auto packageName = extractPackageNameFromPath(filePath);
+                    if (!definitionsFiles.count(packageName))
+                    {
+                        definitionsFiles.emplace(packageName, filePath);
+                    }
+                }
+            }
+            else
+            {
+                // Bare file path - use extractPackageNameFromPath directly
+                auto packageName = extractPackageNameFromPath(definition);
+                if (!definitionsFiles.count(packageName))
+                {
+                    definitionsFiles.emplace(packageName, definition);
+                }
+            }
         }
+    }
 
-        if (!Luau::startsWith(packageName, "@"))
-            packageName = "@" + packageName;
+    // Process --definitions-dir flags
+    for (const auto& dirPath : program.get<std::vector<std::string>>("--definitions-dir"))
+    {
+        auto definitionFiles = findDefinitionFilesInDirectory(dirPath);
+        for (const auto& filePath : definitionFiles)
+        {
+            // Extract package name from filename: foo.d.luau -> @foo
+            auto path = std::filesystem::path(filePath);
+            auto stem = path.stem().string();  // "foo.d"
+            auto packageName = "@" + stem.substr(0, stem.size() - 2);  // remove ".d"
 
-        definitionsFiles.emplace(packageName, filePath);
+            // Only add if not already defined via --definitions
+            if (!definitionsFiles.count(packageName))
+            {
+                definitionsFiles.emplace(packageName, filePath);
+            }
+        }
     }
 
     return definitionsFiles;
@@ -227,6 +765,22 @@ int startAnalyze(const argparse::ArgumentParser& program)
         return 1;
     }
 
+    // Load config file (if any)
+    auto configData = loadConfigFile(program.present<std::string>("--config"));
+
+    // Apply config file values for platform if CLI not specified
+    if (configData && !configData->platform.empty() && !program.present("--platform"))
+    {
+        if (configData->platform == "standard")
+            client.globalConfig.platform.type = LSPPlatformConfig::Standard;
+        else if (configData->platform == "roblox")
+            client.globalConfig.platform.type = LSPPlatformConfig::Roblox;
+    }
+
+    // Apply config file values for baseLuaurc if CLI not specified
+    if (!baseLuaurc && configData && !configData->baseLuaurc.empty())
+        baseLuaurc = configData->baseLuaurc;
+
     if (settingsPath)
     {
         if (std::optional<std::string> contents = Luau::FileUtils::readFile(*settingsPath))
@@ -243,7 +797,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
     // Apply CLI args after settings so they take precedence
     auto cliIgnoreGlobs = program.get<std::vector<std::string>>("--ignore");
     client.globalConfig.ignoreGlobs.insert(client.globalConfig.ignoreGlobs.end(), cliIgnoreGlobs.begin(), cliIgnoreGlobs.end());
-    for (const auto& [key, value] : processDefinitionsFilePaths(program))
+    for (const auto& [key, value] : processDefinitionsFilePaths(program, configData))
         client.definitionsFiles.insert_or_assign(key, value);
 
     auto filesArg = program.present<std::vector<std::string>>("files");

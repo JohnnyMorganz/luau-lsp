@@ -85,10 +85,21 @@ int startLanguageServer(const argparse::ArgumentParser& program)
     _setmode(_fileno(stdout), _O_BINARY);
 #endif
 
-    auto definitionsFiles = processDefinitionsFilePaths(program);
+    auto configData = loadConfigFile(program.present<std::string>("--config"));
+
+    auto definitionsFiles = processDefinitionsFilePaths(program, configData);
     auto documentationFiles = program.get<std::vector<std::string>>("--docs");
     auto baseLuaurc = program.present<std::string>("--base-luaurc");
     auto transportPipeFile = program.present<std::string>("--pipe");
+
+    // Config file provides fallback values for --docs and --base-luaurc if CLI not specified
+    if (configData)
+    {
+        if (documentationFiles.empty() && !configData->docs.empty())
+            documentationFiles = configData->docs;
+        if (!baseLuaurc && !configData->baseLuaurc.empty())
+            baseLuaurc = configData->baseLuaurc;
+    }
 
     std::optional<Luau::Config> defaultConfig = std::nullopt;
     if (baseLuaurc)
@@ -238,11 +249,19 @@ int main(int argc, char** argv)
         .default_value(false)
         .implicit_value(true);
     analyze_command.add_argument("--sourcemap").help("path to a Rojo-style instance sourcemap to understand the DataModel").metavar("PATH");
+    analyze_command.add_argument("--config")
+        .help("path to a luau-lsp config file (JSON). Skips auto-discovery if provided")
+        .metavar("PATH");
     analyze_command.add_argument("--definitions", "--defs")
         .help("A path to a Luau definitions file to load into the global namespace")
         .default_value<std::vector<std::string>>({})
         .append()
         .metavar("@NAME=PATH");
+    analyze_command.add_argument("--definitions-dir")
+        .help("A directory containing .d.luau definition files to load recursively")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("PATH");
     analyze_command.add_argument("--ignore")
         .help("file glob pattern for ignoring error outputs")
         .default_value<std::vector<std::string>>({})
@@ -259,11 +278,19 @@ int main(int argc, char** argv)
     lsp_command.add_description("Start the language server");
     lsp_command.add_epilog("This will start up a server which listens to LSP messages on stdin, and responds on stdout");
     lsp_command.add_parents(parent_parser);
+    lsp_command.add_argument("--config")
+        .help("path to a luau-lsp config file (JSON). Skips auto-discovery if provided")
+        .metavar("PATH");
     lsp_command.add_argument("--definitions")
         .help("path to a Luau definitions file to load into the global namespace")
         .default_value<std::vector<std::string>>({})
         .append()
         .metavar("@NAME=PATH");
+    lsp_command.add_argument("--definitions-dir")
+        .help("A directory containing .d.luau definition files to load recursively")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("PATH");
     lsp_command.add_argument("--docs", "--documentation")
         .help("path to a Luau documentation database for loaded definitions")
         .default_value<std::vector<std::string>>({})

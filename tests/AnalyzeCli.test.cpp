@@ -158,6 +158,11 @@ TEST_CASE("parse_definitions_files_handles_new_syntax")
         .default_value<std::vector<std::string>>({})
         .append()
         .metavar("PATH");
+    program.add_argument("--definitions-dir")
+        .help("A directory containing .d.luau definition files")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("DIR");
 
     std::vector<std::string> arguments{
         "", "--definitions:@roblox=example_path.d.luau", "--definitions:@lune=lune.d.luau", "--definitions:no_at_sign=path.d.luau"};
@@ -181,6 +186,11 @@ TEST_CASE("parse_definitions_files_handles_legacy_syntax")
         .default_value<std::vector<std::string>>({})
         .append()
         .metavar("PATH");
+    program.add_argument("--definitions-dir")
+        .help("A directory containing .d.luau definition files")
+        .default_value<std::vector<std::string>>({})
+        .append()
+        .metavar("DIR");
 
     std::vector<std::string> arguments{"", "--definitions=example_path.d.luau", "--definitions=lune.d.luau"};
     program.parse_args(arguments);
@@ -188,8 +198,8 @@ TEST_CASE("parse_definitions_files_handles_legacy_syntax")
     auto definitionsFiles = processDefinitionsFilePaths(program);
 
     CHECK_EQ(definitionsFiles, std::unordered_map<std::string, std::string>{
-                                   {"@roblox", "example_path.d.luau"},
-                                   {"@roblox1", "lune.d.luau"},
+                                   {"@example_path", "example_path.d.luau"},
+                                   {"@lune", "lune.d.luau"},
                                });
 }
 
