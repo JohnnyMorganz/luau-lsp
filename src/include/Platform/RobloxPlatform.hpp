@@ -29,6 +29,19 @@ inline bool isScriptContextCompatible(ScriptContext from, ScriptContext target)
     return from == target;
 }
 
+/// The lowercase alias name and the path that follows it, for a require of the form `@alias/remainder`.
+struct AliasRequire
+{
+    std::string name;
+    std::string remainder;
+};
+
+/// Splits an alias require into its parts. Returns nullopt when the string is not an alias require.
+std::optional<AliasRequire> parseAliasRequire(const std::string& requiredString);
+
+/// The name of the built-in alias that resolves against the sourcemap root.
+const std::string kGameAlias = "game";
+
 struct SourceNode
 {
     const SourceNode* parent = nullptr; // Can be null! NOT POPULATED BY SOURCEMAP, must be written to manually

@@ -102,11 +102,13 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
     if (!it)
         return std::nullopt;
     auto followedId = Luau::follow(*it);
+    const auto metamethod = findCallMetamethod(followedId);
+    const bool hasImplicitSelf = candidate->self || metamethod.has_value();
 
     // Construct a type pack from the current list of arguments for overload matching
     Luau::TypeArena typeArena;
     std::vector<Luau::TypeId> argumentTys;
-    if (candidate->self)
+    if (hasImplicitSelf)
         argumentTys.push_back(followedId);
     for (auto&& arg : candidate->args)
         if (auto ty = module->astTypes.find(arg))
@@ -115,12 +117,12 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
 
     types::ToStringNamedFunctionOpts opts;
     opts.hideTableKind = !config.hover.showTableKinds;
+    opts.hideSelf = hasImplicitSelf;
 
     std::optional<size_t> activeSignature = std::nullopt;
     std::vector<lsp::SignatureInformation> signatures{};
 
-    auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionType* ftv, bool isOverloaded = false,
-                            size_t documentationIndexOffset = 0)
+    auto addSignature = [&](const Luau::TypeId& ty, const Luau::FunctionType* ftv, bool isOverloaded = false)
     {
         // Create the whole label
         std::string label = types::toStringNamedFunction(module, ftv, candidate->func, scope, opts);
@@ -160,16 +162,15 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
 
         for (; it != Luau::end(ftv->argTypes); it++, idx++)
         {
-            // If the function has self, and the caller has called as a method (i.e., :), then omit the self parameter
-            if (idx == 0 && candidate->self)
+            // Method calls and __call metamethods receive their first argument implicitly.
+            if (idx == 0 && hasImplicitSelf)
                 continue;
 
             // Show parameter documentation
             // TODO: parse moonwave docs for param documentation?
             lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::Markdown, ""};
             if (baseDocumentationSymbol)
-                if (auto docs = printDocumentation(
-                        client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx + documentationIndexOffset)))
+                if (auto docs = printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx)))
                     parameterDocumentation.value = *docs;
 
             // Compute the label
@@ -203,8 +204,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
                 // TODO: parse moonwave docs for param documentation?
                 lsp::MarkupContent parameterDocumentation{lsp::MarkupKind::Markdown, ""};
                 if (baseDocumentationSymbol)
-                    if (auto docs = printDocumentation(
-                            client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx + documentationIndexOffset)))
+                    if (auto docs = printDocumentation(client->documentation, *baseDocumentationSymbol + "/param/" + std::to_string(idx)))
                         parameterDocumentation.value = *docs;
 
                 // Compute the label
@@ -251,25 +251,13 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
                 addSignature(part, candidateFunctionType, /* isOverloaded = */ true);
 
     // Handle __call metamethod
-    if (const auto metamethod = findCallMetamethod(followedId))
+    if (metamethod)
     {
         if (auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(*metamethod)))
         {
-            auto [argHead, argTail] = Luau::flatten(ftv->argTypes);
-            if (!argHead.empty())
-            {
-                Luau::FunctionType trimmed = *ftv;
-                trimmed.argTypes = typeArena.addTypePack(std::vector<Luau::TypeId>(argHead.begin() + 1, argHead.end()), argTail);
-                if (!trimmed.argNames.empty())
-                    trimmed.argNames.erase(trimmed.argNames.begin());
-
-                auto trimmedTy = typeArena.addType(std::move(trimmed));
-                // the dropped argument still occupies index 0 in the documentation database
-                addSignature(trimmedTy, Luau::get<Luau::FunctionType>(trimmedTy), /* isOverloaded = */ false,
-                    /* documentationIndexOffset = */ 1);
-            }
-            else
-                addSignature(*metamethod, ftv);
+            Luau::FunctionType callable = *ftv;
+            callable.hasSelf = true;
+            addSignature(*metamethod, &callable);
         }
     }
 

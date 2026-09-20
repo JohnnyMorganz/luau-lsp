@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Platform/StringRequireSuggester.hpp"
+
 #include "Luau/Config.h"
 #include "Luau/ConfigResolver.h"
 #include "Luau/FileResolver.h"
@@ -34,6 +36,26 @@ private:
     const SourceNode* rootNode;
     std::shared_ptr<const Luau::Config> mainRequirerNodeConfig;
     WorkspaceFolder* workspaceFolder;
+};
+
+/// A requirer that the sourcemap does not cover, such as build output. It keeps its filesystem
+/// identity for relative requires and `.luaurc` aliases, and adds the built-in `@game` alias, which
+/// is absolute and so needs the sourcemap root rather than the requirer.
+class SourcemapAwareFileRequireNode : public FileRequireNode
+{
+public:
+    SourcemapAwareFileRequireNode(Uri uri, bool isDirectory, const SourceNode* rootNode, WorkspaceFolder* workspaceFolder,
+        std::shared_ptr<const Luau::Config> mainRequirerNodeConfig)
+        : FileRequireNode(std::move(uri), isDirectory, workspaceFolder, std::move(mainRequirerNodeConfig))
+        , rootNode(rootNode)
+    {
+    }
+
+    std::unique_ptr<Luau::RequireNode> resolvePathToNode(const std::string& path) const override;
+    std::vector<Luau::RequireAlias> getAvailableAliases() const override;
+
+private:
+    const SourceNode* rootNode;
 };
 
 class RobloxStringRequireSuggester : public Luau::RequireSuggester

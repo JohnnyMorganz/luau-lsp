@@ -395,4 +395,39 @@ TEST_CASE("analyze_resolves_non_mirrored_relative_requires_with_sourcemap")
     CHECK(analyzeFile(workspace, moduleAPath, ReportFormat::Default, false));
 }
 
+TEST_CASE("analyze_resolves_game_requires_from_file_outside_sourcemap")
+{
+    // `@game` is absolute, so it must resolve from build output that the sourcemap does not cover.
+    TempDir t("analyze_game_requires_outside_sourcemap");
+
+    t.write_child("sourcemap.json", R"({
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "Util",
+                        "className": "ModuleScript",
+                        "filePaths": ["packages/util/Util.luau"]
+                    }
+                ]
+            }
+        ]
+    })");
+    t.write_child("packages/util/Util.luau", "return { value = 42 }");
+    // dist/ has no sourcemap node.
+    t.write_child("dist/main.luau", "local _ = require('@game/ReplicatedStorage/Util')");
+
+    CliClient client;
+    initRobloxCliClient(client);
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
+
+    auto mainPath = Uri::file(t.path() + "/dist/main.luau").fsPath();
+    CHECK(analyzeFile(workspace, mainPath, ReportFormat::Default, false));
+}
+
 TEST_SUITE_END();

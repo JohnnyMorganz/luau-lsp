@@ -140,6 +140,139 @@ TEST_CASE_FIXTURE(Fixture, "signature_help_on_call_metamethod_taking_only_self_h
     CHECK_EQ(result->signatures[0].parameters->size(), 0);
 }
 
+TEST_CASE_FIXTURE(Fixture, "signature_help_hides_call_metamethod_self_when_accessed_by_index")
+{
+    std::string call;
+    std::string expectedLabel;
+    std::vector<size_t> expectedOffsets;
+    SUBCASE("dot")
+    {
+        call = "container.callable(|)";
+        expectedLabel = "function container.callable(value: string): ()";
+        expectedOffsets = {28, 41};
+    }
+    SUBCASE("bracket")
+    {
+        call = "container[\"callable\"](|)";
+        expectedLabel = "function container['callable'](value: string): ()";
+        expectedOffsets = {31, 44};
+    }
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local container = {
+            callable = setmetatable({}, {
+                __call = function(self: any, value: string)
+                end,
+            }),
+        }
+    )" + call);
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+    CHECK_EQ(result->signatures[0].label, expectedLabel);
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), 1);
+    CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(0).label), expectedOffsets);
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_only_hides_method_self_for_colon_calls")
+{
+    loadDefinition("@test", R"(
+        declare extern type Widget with
+            function method(self, value: string): ()
+        end
+        declare object: Widget
+    )");
+
+    std::string call;
+    std::string expectedLabel;
+    std::vector<std::vector<size_t>> expectedOffsets;
+    SUBCASE("colon")
+    {
+        call = "object:method(|)";
+        expectedLabel = "function Widget:method(value: string): ()";
+        expectedOffsets = {{23, 36}};
+    }
+    SUBCASE("dot")
+    {
+        call = "object.method(|)";
+        expectedLabel = "function Widget.method(self: Widget, value: string): ()";
+        expectedOffsets = {{23, 35}, {37, 50}};
+    }
+    SUBCASE("detached")
+    {
+        call = "local method = object.method\nmethod(|)";
+        expectedLabel = "function method(self: Widget, value: string): ()";
+        expectedOffsets = {{16, 28}, {30, 43}};
+    }
+
+    auto [source, marker] = sourceWithMarker(call);
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.signatureHelp(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(result->signatures.size(), 1);
+    CHECK_EQ(result->signatures[0].label, expectedLabel);
+    REQUIRE(result->signatures[0].parameters);
+    REQUIRE_EQ(result->signatures[0].parameters->size(), expectedOffsets.size());
+    for (size_t i = 0; i < expectedOffsets.size(); ++i)
+        CHECK_EQ(std::get<std::vector<size_t>>(result->signatures[0].parameters->at(i).label), expectedOffsets[i]);
+}
+
+TEST_CASE_FIXTURE(Fixture, "signature_help_on_callable_preserves_explicit_metamethod_signature_and_hover")
+{
+    auto [source, marker] = sourceWithMarker(dedent(R"(
+        local mt = {}
+        function mt.__call(self: any, value: string)
+        end
+        local module = setmetatable({}, mt)
+        module(|)
+        mt.__call(module, "a")
+        mt:__call("a")
+    )"));
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams hoverParams;
+    hoverParams.textDocument = lsp::TextDocumentIdentifier{uri};
+    // A colon call makes an accidental change to the shared function's hasSelf visible in hover.
+    hoverParams.position = lsp::Position{marker.line + 2, 4};
+    auto hoverBefore = workspace.hover(hoverParams, nullptr);
+    REQUIRE(hoverBefore);
+    CHECK_EQ(hoverBefore->contents.value, codeBlock("luau", "function mt:__call(self: any, value: string): ()"));
+
+    lsp::SignatureHelpParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    auto callableResult = workspace.signatureHelp(params, nullptr);
+    REQUIRE(callableResult);
+    REQUIRE_EQ(callableResult->signatures.size(), 1);
+    CHECK_EQ(callableResult->signatures[0].label, "function module(value: string): ()");
+
+    params.position = lsp::Position{marker.line + 1, 10};
+    auto explicitResult = workspace.signatureHelp(params, nullptr);
+    REQUIRE(explicitResult);
+    REQUIRE_EQ(explicitResult->signatures.size(), 1);
+    CHECK_EQ(explicitResult->signatures[0].label, "function mt.__call(self: any, value: string): ()");
+    REQUIRE(explicitResult->signatures[0].parameters);
+    REQUIRE_EQ(explicitResult->signatures[0].parameters->size(), 2);
+    CHECK_EQ(std::get<std::vector<size_t>>(explicitResult->signatures[0].parameters->at(0).label), std::vector<size_t>{19, 28});
+    CHECK_EQ(std::get<std::vector<size_t>>(explicitResult->signatures[0].parameters->at(1).label), std::vector<size_t>{30, 43});
+
+    auto hoverAfter = workspace.hover(hoverParams, nullptr);
+    REQUIRE(hoverAfter);
+    CHECK_EQ(hoverAfter->contents.value, hoverBefore->contents.value);
+}
+
 TEST_CASE_FIXTURE(Fixture, "signature_help_on_variadic_call_metamethod_keeps_varargs")
 {
     auto [source, marker] = sourceWithMarker(R"(

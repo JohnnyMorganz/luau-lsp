@@ -141,7 +141,7 @@ struct ChunkedWriter
 
 std::string requireGraphToDot(const RequireGraph& requireGraph, const Luau::FileResolver& fileResolver)
 {
-    Luau::DenseHashMap2<Luau::ModuleName, int> nodeIdMap{};
+    Luau::DenseHashMap<Luau::ModuleName, int> nodeIdMap{};
 
     ChunkedWriter writer;
     writer.writeRaw("digraph luau_require_graph {\n");

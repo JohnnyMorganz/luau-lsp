@@ -71,6 +71,7 @@ std::string toStringNamedFunction(const Luau::ModulePtr& module, const Luau::Fun
     opts.hideNamedFunctionTypeParameters = false;
     opts.hideTableKind = stringOpts.hideTableKind;
     opts.useLineBreaks = stringOpts.multiline;
+    opts.hideFunctionSelfArgument = stringOpts.hideSelf;
     if (scope)
         opts.scope = *scope;
     auto functionString = Luau::toStringNamedFunction("", *ftv, opts);
@@ -116,7 +117,7 @@ std::string toStringNamedFunction(const Luau::ModulePtr& module, const Luau::Fun
         parentIt = module->astTypes.find(indexName->expr);
         methodName = std::string(1, indexName->op) + indexName->index.value;
         // If we are calling this as a method ':', we should implicitly hide self, and recompute the functionString
-        opts.hideFunctionSelfArgument = indexName->op == ':';
+        opts.hideFunctionSelfArgument = stringOpts.hideSelf || indexName->op == ':';
         functionString = Luau::toStringNamedFunction("", *ftv, opts);
         replaceAll(functionString, "_: ", "");
         // We can try and give a temporary base name from what we can infer by the index, and then attempt to improve it with proper information
@@ -322,7 +323,7 @@ std::optional<Luau::Location> lookupTypeLocation(const Luau::Scope& deepScope, c
 }
 
 // Returns [base, property] - base is important during intersections
-static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet2<Luau::TypeId>& seenSet)
+static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name, Luau::DenseHashSet<Luau::TypeId>& seenSet)
 {
     if (seenSet.contains(parentType))
         return {};
@@ -395,7 +396,7 @@ static std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const 
 
 std::vector<PropLookup> lookupProp(const Luau::TypeId& parentType, const Luau::Name& name)
 {
-    Luau::DenseHashSet2<Luau::TypeId> seenSet{};
+    Luau::DenseHashSet<Luau::TypeId> seenSet{};
     return lookupProp(parentType, name, seenSet);
 }
 
