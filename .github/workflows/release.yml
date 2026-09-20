@@ -98,6 +98,9 @@ jobs:
 
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -210,8 +213,8 @@ jobs:
 
       - name: Publish Extension
         working-directory: editors/code
-        run: npx @vscode/vsce publish --pat ${{ secrets.MARKETPLACE_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
+        run: npx @vscode/vsce publish --oidc --target ${{ join(matrix.code-target, ' ') }}
 
       - name: Publish OpenVSX Extension
         working-directory: editors/code
-        run: npx ovsx publish --pat ${{ secrets.OVSX_TOKEN }} --target ${{ join(matrix.code-target, ' ') }}
+        run: npx ovsx publish --trusted-publishing --target ${{ join(matrix.code-target, ' ') }}
