@@ -24,11 +24,17 @@ CHANGELOG_FILE = "CHANGELOG.md"
 EXCLUDED_AUTHORS = {
     "JohnnyMorganz",
     "dependabot",
-    "dependabot[bot]",
     "github-actions",
-    "github-actions[bot]",
     "luau-language-server-helper",
 }
+
+
+def _normalize_author(mention: str) -> str:
+    name = mention.lstrip("@")
+    if name.endswith("[bot]"):
+        name = name[: -len("[bot]")]
+    return name
+
 
 assert len(sys.argv) == 2, "Usage: scripts/compose_release_notes.py <version>"
 VERSION = sys.argv[1]
@@ -92,7 +98,7 @@ def clean_external_contributions(notes: str) -> str:
         kept_bullets = []
         for line in bullets:
             match = re.search(r"by (@[\w.\-\[\]]+)", line)
-            if match and match.group(1).lstrip("@") in EXCLUDED_AUTHORS:
+            if match and _normalize_author(match.group(1)) in EXCLUDED_AUTHORS:
                 continue
             kept_bullets.append(line)
         contributions_block = "\n".join([heading, *kept_bullets]) if kept_bullets else None
