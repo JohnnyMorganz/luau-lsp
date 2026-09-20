@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Added `"luau-lsp.analyzeLuaFiles"` setting to control whether standard `.lua` files are analyzed in addition to `.luau` files.
 - Added a new auto-import require style `completion.imports.requireStyle: "nearestAbsolute"` which requires modules relative to the nearest fixed variable that resolves to a known ancestor instance (e.g. `local Main = script:FindFirstAncestor("PluginName")` or `local Main = script.Parent.Parent`), producing requires like `require(Main.X.Y)`. Falls back to `auto` when no such variable is an ancestor of the module
 
 ### Fixed
