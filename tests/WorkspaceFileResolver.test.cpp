@@ -787,6 +787,61 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_resolves_nonexistent_path")
     CHECK_EQ(result->name, "game/NonExistent/Module");
 }
 
+TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_resolves_from_non_sourcemap_file")
+{
+    // Regression test: `@game` is absolute, so it must resolve from a file that the sourcemap
+    // does not cover, such as build output.
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto mainPath = tempDir.touch_child("dist/main.luau");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(
+        &baseContext, "@game/ReplicatedStorage/Shared/ModuleA", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(result->name, "game/ReplicatedStorage/Shared/ModuleA");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_game_alias_from_non_sourcemap_file_respects_user_alias")
+{
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto mainPath = tempDir.touch_child("dist/main.luau");
+    auto gameDirModule = tempDir.touch_child("game_alias/MyModule.luau");
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "game": "game_alias"
+        }
+    }
+    )");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@game/MyModule", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(Uri::file(result->name), Uri::file(gameDirModule));
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_self_alias_from_non_sourcemap_file_falls_back_to_filesystem")
+{
+    // `@self` needs the requirer, so a file outside the sourcemap keeps the filesystem behaviour.
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(SOURCEMAP_FOR_STRING_REQUIRES);
+
+    auto mainPath = tempDir.touch_child("standalone/main.luau");
+    auto otherPath = tempDir.touch_child("standalone/other.luau");
+
+    Luau::ModuleInfo baseContext{mainPath};
+    auto result = workspace.fileResolver.platform->resolveStringRequire(&baseContext, "@self/other", workspace.limits);
+
+    REQUIRE(result.has_value());
+    CHECK_EQ(Uri::file(result->name), Uri::file(otherPath));
+}
+
 TEST_CASE_FIXTURE(Fixture, "sourcemap_self_alias_resolves_from_module")
 {
     client->globalConfig.completion.imports.stringRequires.enabled = true;
