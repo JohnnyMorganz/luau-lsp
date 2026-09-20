@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed Signature Help showing the implicit first argument of a `__call` metamethod, which is supplied by the table being called rather than by the caller ([#1597](https://github.com/JohnnyMorganz/luau-lsp/issues/1597))
+
 ## [1.70.0] - 2026-09-20
 
 ### Added
