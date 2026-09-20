@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.70.0] - 2026-09-20
+
 ### Added
 
 - Added `"luau-lsp.analyzeLuaFiles"` setting to control whether standard `.lua` files are analyzed in addition to `.luau` files.
