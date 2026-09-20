@@ -14,7 +14,7 @@
   "bugs": {
     "url": "https://github.com/JohnnyMorganz/luau-lsp/issues"
   },
-  "version": "1.69.0",
+  "version": "1.70.0",
   "engines": {
     "vscode": "^1.82.0"
   },
@@ -230,6 +230,12 @@
             "**/_Index/**"
           ],
           "scope": "resource"
+        },
+        "luau-lsp.analyzeLuaFiles": {
+          "markdownDescription": "Whether to analyze standard `.lua` files. If disabled, only `.luau` files will be analyzed. Note: You may also need to configure `\"files.associations\": {\"*.lua\": \"lua\"}` in your settings to restore standard Lua syntax highlighting and behavior for `.lua` files.",
+          "type": "boolean",
+          "default": true,
+          "scope": "window"
         },
         "luau-lsp.platform.type": {
           "markdownDescription": "Platform-specific support features",
