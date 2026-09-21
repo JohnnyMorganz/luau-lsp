@@ -19962,6 +19962,10 @@ declare User: {
 	fromString: ((userStr: string) -> User),
 }
 
+declare InstanceHandle: {
+	new: ((instance: Instance?) -> InstanceHandle),
+}
+
 
 export type RaycastResult<T = BasePart> = {
     Instance: T,
