@@ -2638,6 +2638,26 @@
                 }
             ],
             "Name": "User"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "new",
+                    "Parameters": [
+                        {
+                            "Name": "instance",
+                            "Type": {
+                                "Name": "Instance?"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "InstanceHandle"
+                    }
+                }
+            ],
+            "Name": "InstanceHandle"
         }
     ],
     "DataTypes": [
