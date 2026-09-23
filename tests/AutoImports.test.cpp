@@ -2077,6 +2077,154 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_prefers_alias_over_game_path_w
     CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local ModuleB = require(\"@combat/ModuleB\")\n");
 }
 
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_alias_to_init_luau_uses_directory_path")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "pkg": "packages"
+        }
+    })");
+
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    loadSourcemap(R"(
+{
+    "name": "Game",
+    "className": "DataModel",
+    "children": [
+        {"name": "ReplicatedStorage", "className": "ReplicatedStorage", "children": [
+            {"name": "ModuleA", "className": "ModuleScript", "filePaths": ["src/ModuleA.luau"]}
+        ]},
+        {"name": "ServerScriptService", "className": "ServerScriptService", "children": [
+            {"name": "Test", "className": "ModuleScript", "filePaths": ["packages/Test/init.luau"]}
+        ]}
+    ]
+}
+)");
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("src/ModuleA.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "Test");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Test = require(\"@pkg/Test\")\n");
+
+    // The inserted require resolves back to the init.luau module
+    tempDir.write_child("packages/Test/init.luau", "return {}");
+    Luau::ModuleInfo context{workspace.fileResolver.getModuleName(uri)};
+    auto resolved = workspace.platform->resolveStringRequire(&context, "@pkg/Test", workspace.limits);
+    REQUIRE(resolved);
+    CHECK_EQ(resolved->name, "game/ServerScriptService/Test");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_alias_init_luau_edge_cases")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "pkg": "packages"
+        }
+    })");
+
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::AlwaysAbsolute;
+    loadSourcemap(R"(
+{
+    "name": "Game",
+    "className": "DataModel",
+    "children": [
+        {"name": "ReplicatedStorage", "className": "ReplicatedStorage", "children": [
+            {"name": "Test", "className": "ModuleScript", "filePaths": ["packages/Test/init.luau"], "children": [
+                {"name": "Helper", "className": "ModuleScript", "filePaths": ["packages/Test/Helper.luau"]}
+            ]},
+            {"name": "Outer", "className": "Folder", "children": [
+                {"name": "Inner", "className": "ModuleScript", "filePaths": ["packages/Outer/Inner/init.luau"]}
+            ]},
+            {"name": "Legacy", "className": "ModuleScript", "filePaths": ["packages/Legacy/init.lua"]}
+        ]},
+        {"name": "ServerScriptService", "className": "ServerScriptService", "children": [
+            {"name": "Main", "className": "ModuleScript", "filePaths": ["src/Main.luau"]}
+        ]}
+    ]
+}
+)");
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("src/Main.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto checkImport = [&](const std::string& name, const std::string& expected)
+    {
+        auto imports = filterAutoImports(result, name);
+        REQUIRE_EQ(imports.size(), 1);
+        REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+        CHECK_EQ(imports[0].additionalTextEdits[0].newText, expected);
+    };
+
+    // A non-init file inside the init.luau directory keeps its own filename
+    checkImport("Helper", "local Helper = require(\"@pkg/Test/Helper\")\n");
+    // A nested init.luau resolves to its own directory
+    checkImport("Inner", "local Inner = require(\"@pkg/Outer/Inner\")\n");
+    // init.lua is treated the same as init.luau
+    checkImport("Legacy", "local Legacy = require(\"@pkg/Legacy\")\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_alias_pointing_at_init_luau_directory")
+{
+    loadLuaurc(R"(
+    {
+        "aliases": {
+            "Test": "packages/Test"
+        }
+    })");
+
+    client->globalConfig.completion.imports.enabled = true;
+    client->globalConfig.completion.imports.stringRequires.enabled = true;
+    client->globalConfig.completion.imports.requireStyle = ImportRequireStyle::AlwaysAbsolute;
+    loadSourcemap(R"(
+{
+    "name": "Game",
+    "className": "DataModel",
+    "children": [
+        {"name": "ReplicatedStorage", "className": "ReplicatedStorage", "children": [
+            {"name": "Test", "className": "ModuleScript", "filePaths": ["packages/Test/init.luau"]}
+        ]},
+        {"name": "ServerScriptService", "className": "ServerScriptService", "children": [
+            {"name": "Main", "className": "ModuleScript", "filePaths": ["src/Main.luau"]}
+        ]}
+    ]
+}
+)");
+
+    auto [source, marker] = sourceWithMarker(R"(|)");
+    auto uri = newDocument("src/Main.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+    auto imports = filterAutoImports(result, "Test");
+
+    REQUIRE_EQ(imports.size(), 1);
+    REQUIRE_EQ(imports[0].additionalTextEdits.size(), 1);
+    CHECK_EQ(imports[0].additionalTextEdits[0].newText, "local Test = require(\"@Test\")\n");
+}
+
 TEST_CASE_FIXTURE(Fixture, "sourcemap_auto_import_init_luau_uses_self_for_child")
 {
     client->globalConfig.completion.imports.enabled = true;
