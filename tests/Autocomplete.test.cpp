@@ -1282,6 +1282,68 @@ TEST_CASE_FIXTURE(Fixture, "string_require_resolve_init_luau_relative_to_parent_
     checkFileCompletionExists(result, "sibling.luau", "./sibling");
 }
 
+TEST_CASE_FIXTURE(Fixture, "string_require_keeps_dots_in_directory_names")
+{
+    tempDir.write_child("Folder.suffix/init.luau", "return {}");
+    tempDir.write_child("Plain.dir/child.luau", "return {}");
+    tempDir.write_child("Directory/init.luau", "return {}");
+    tempDir.write_child("Module.luau", "return {}");
+    tempDir.write_child("Legacy.lua", "return {}");
+    tempDir.write_child("Main.client.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("source.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    // Directories keep their full name, including anything after a dot
+    checkFolderCompletionExists(result, "Folder.suffix", "./Folder.suffix");
+    checkFolderCompletionExists(result, "Plain.dir", "./Plain.dir");
+    checkFolderCompletionExists(result, "Directory", "./Directory");
+
+    // Files only have their final extension removed
+    checkFileCompletionExists(result, "Module.luau", "./Module");
+    checkFileCompletionExists(result, "Legacy.lua", "./Legacy");
+    checkFileCompletionExists(result, "Main.client.luau", "./Main.client");
+    checkFileCompletionExists(result, "source.luau", "./source");
+
+    // The inserted path resolves back to the directory's init.luau
+    Luau::ModuleInfo context{workspace.fileResolver.getModuleName(uri)};
+    auto resolved = workspace.platform->resolveStringRequire(&context, "./Folder.suffix", workspace.limits);
+    REQUIRE(resolved);
+    CHECK_EQ(Uri::file(resolved->name), workspace.rootUri.resolvePath("Folder.suffix/init.luau"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "string_require_lists_children_of_directory_with_dot_in_name")
+{
+    tempDir.write_child("Folder.suffix/child.luau", "return {}");
+
+    auto [source, marker] = sourceWithMarker(R"(
+        --!strict
+        local x = require("./Folder.suffix/|")
+    )");
+
+    auto uri = newDocument(tempDir.write_child("source.luau", source), source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    REQUIRE_EQ(result.size(), 2);
+    checkFolderCompletionExists(result, "..", "./Folder.suffix");
+    checkFileCompletionExists(result, "child.luau", "./Folder.suffix/child");
+}
+
 TEST_CASE_FIXTURE(Fixture, "string_require_shows_self_alias_if_in_init_file")
 {
     auto [source, marker] = sourceWithMarker(R"(
