@@ -2,6 +2,7 @@
 #include "LSP/Workspace.hpp"
 
 #include <algorithm>
+#include <functional>
 
 #include "Luau/Ast.h"
 #include "Luau/AstQuery.h"
@@ -103,16 +104,19 @@ struct InlayHintVisitor : public Luau::AstVisitor
     const Client* client;
     const TextDocument* textDocument;
     WorkspaceFileResolver* fileResolver;
+    std::function<Luau::ModulePtr(const Luau::ModuleName&)> getModule;
     std::vector<lsp::InlayHint> hints{};
     Luau::ToStringOptions stringOptions;
 
     explicit InlayHintVisitor(const Luau::ModulePtr& module, const ClientConfiguration& config, const Client* client,
-        const TextDocument* textDocument, WorkspaceFileResolver* fileResolver)
+        const TextDocument* textDocument, WorkspaceFileResolver* fileResolver,
+        std::function<Luau::ModulePtr(const Luau::ModuleName&)> getModule = nullptr)
         : module(module)
         , config(config)
         , client(client)
         , textDocument(textDocument)
         , fileResolver(fileResolver)
+        , getModule(std::move(getModule))
 
     {
         stringOptions.maxTableLength = 30;
@@ -135,6 +139,52 @@ struct InlayHintVisitor : public Luau::AstVisitor
         hint.label.push_back(lsp::InlayHintLabelPart{prefix});
         auto parts = toInlayHintLabelParts(result, client, fileResolver);
         hint.label.insert(hint.label.end(), parts.begin(), parts.end());
+    }
+
+    // A module that exports only types returns an empty table, so the hint for a local bound to it read `: {}`.
+    // That says nothing about the module, and inserting it adds an annotation with no meaning.
+    // Instead the hint names the types the module exports, and it cannot be inserted.
+    std::optional<lsp::InlayHint> typeOnlyModuleHint(const Luau::AstLocal* var, Luau::TypeId ty, const Luau::Scope& scope)
+    {
+        if (!getModule)
+            return std::nullopt;
+
+        auto table = Luau::get<Luau::TableType>(ty);
+        if (!table || !table->props.empty() || table->indexer)
+            return std::nullopt;
+
+        auto importedName = lookupImportedModule(scope, var->name.value);
+        if (!importedName)
+            return std::nullopt;
+
+        auto importedModule = getModule(*importedName);
+        if (!importedModule || importedModule->exportedTypeBindings.empty())
+            return std::nullopt;
+
+        // The order the module declares its types in
+        std::vector<std::pair<Luau::Position, std::string>> names;
+        for (const auto& [name, typeFun] : importedModule->exportedTypeBindings)
+            names.emplace_back(typeFun.definitionLocation ? typeFun.definitionLocation->begin : Luau::Position{0, 0}, name);
+        std::sort(names.begin(), names.end());
+
+        constexpr size_t maxShown = 3;
+        std::string label = ": types ";
+        std::string tooltip = "A module that exports only types:\n";
+        for (size_t i = 0; i < names.size(); i++)
+        {
+            if (i < maxShown)
+                label += (i > 0 ? ", " : "") + names[i].second;
+            tooltip += "\n- `" + names[i].second + "`";
+        }
+        if (names.size() > maxShown)
+            label += ", +" + std::to_string(names.size() - maxShown);
+
+        lsp::InlayHint hint;
+        hint.kind = lsp::InlayHintKind::Type;
+        hint.position = textDocument->convertPosition(var->location.end);
+        hint.label.push_back(lsp::InlayHintLabelPart{label});
+        hint.tooltip = tooltip;
+        return hint;
     }
 
     bool visit(Luau::AstStatLocal* local) override
@@ -177,6 +227,12 @@ struct InlayHintVisitor : public Luau::AstVisitor
                     // showing an inlay hint
                     if (Luau::equalsLower(typeString, var->name.value))
                         continue;
+
+                    if (auto typeOnly = typeOnlyModuleHint(var, followedTy, *scope))
+                    {
+                        hints.emplace_back(*typeOnly);
+                        continue;
+                    }
 
                     lsp::InlayHint hint;
                     hint.kind = lsp::InlayHintKind::Type;
@@ -409,7 +465,10 @@ lsp::InlayHintResult WorkspaceFolder::inlayHint(const lsp::InlayHintParams& para
     if (!sourceModule || !module)
         return {};
 
-    InlayHintVisitor visitor{module, config, client, textDocument, &fileResolver};
+    InlayHintVisitor visitor{module, config, client, textDocument, &fileResolver, [&](const Luau::ModuleName& name)
+        {
+            return getModule(name, /* forAutocomplete: */ config.hover.strictDatamodelTypes);
+        }};
     visitor.visit(sourceModule->root);
 
     return visitor.hints;

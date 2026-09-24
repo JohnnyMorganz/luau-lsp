@@ -43,6 +43,44 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_local_definition")
     CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{1, 15}, {1, 15}});
 }
 
+TEST_CASE_FIXTURE(Fixture, "a_module_that_exports_only_types_hints_its_types_and_cannot_be_inserted")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    newDocument("types.luau", R"(
+        export type User = { name: string }
+        export type Id = number
+        export type Role = "admin" | "guest"
+        export type Team = { members: { User } }
+        return {}
+    )");
+
+    auto result = processInlayHint(this, R"(
+        local Types = require("types.luau")
+    )");
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 19});
+    CHECK_EQ(labelToString(result[0].label), ": types User, Id, Role, +1");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, "A module that exports only types:\n\n- `User`\n- `Id`\n- `Role`\n- `Team`");
+    CHECK(result[0].textEdits.empty());
+}
+
+TEST_CASE_FIXTURE(Fixture, "a_module_that_exports_values_keeps_its_type_hint")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    newDocument("values.luau", R"(
+        export type User = { name: string }
+        return { version = 1 }
+    )");
+
+    auto result = processInlayHint(this, R"(
+        local Values = require("values.luau")
+    )");
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(labelToString(result[0].label), ": { version: number }");
+}
+
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_multiple_local_definition")
 {
     client->globalConfig.inlayHints.variableTypes = true;

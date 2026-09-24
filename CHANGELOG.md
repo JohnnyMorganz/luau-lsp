@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- A local bound to a module that exports only types now shows an inlay hint naming those types, such as `: types User, Id`, in place of `: {}`. The tooltip lists every exported type, and the hint cannot be inserted, since the empty table it would write is not what the module offers
+
 ## [1.70.0] - 2026-09-20
 
 ### Added
