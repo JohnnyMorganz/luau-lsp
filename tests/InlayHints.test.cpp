@@ -47,6 +47,7 @@ TEST_CASE_FIXTURE(Fixture, "a_module_that_exports_only_types_hints_its_types_and
 {
     client->globalConfig.inlayHints.variableTypes = true;
     newDocument("types.luau", R"(
+        --- A person who can sign in
         export type User = { name: string }
         export type Id = number
         export type Role = "admin" | "guest"
@@ -62,8 +63,18 @@ TEST_CASE_FIXTURE(Fixture, "a_module_that_exports_only_types_hints_its_types_and
     CHECK_EQ(result[0].position, lsp::Position{1, 19});
     CHECK_EQ(labelToString(result[0].label), ": { type User, type Id, type Role, type Team }");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
-    CHECK_EQ(result[0].tooltip, "A module that exports only types:\n\n- `type User`\n- `type Id`\n- `type Role`\n- `type Team`");
+    CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK(result[0].textEdits.empty());
+
+    // Each name shows the documentation of its type and links to its definition
+    REQUIRE_EQ(result[0].label[1].value, "type User");
+    REQUIRE(result[0].label[1].tooltip);
+    CHECK_EQ(result[0].label[1].tooltip->kind, lsp::MarkupKind::Markdown);
+    CHECK_EQ(result[0].label[1].tooltip->value, "A person who can sign in\n");
+    REQUIRE(result[0].label[1].location);
+    CHECK_EQ(result[0].label[1].location->range.start.line, 2);
+    REQUIRE_EQ(result[0].label[3].value, "type Id");
+    CHECK_EQ(result[0].label[3].tooltip, std::nullopt);
 }
 
 TEST_CASE_FIXTURE(Fixture, "a_long_type_only_module_hint_is_cut_at_the_hint_length")
@@ -83,6 +94,12 @@ TEST_CASE_FIXTURE(Fixture, "a_long_type_only_module_hint_is_cut_at_the_hint_leng
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(labelToString(result[0].label), ": { type First, type Second, ... }");
     CHECK(result[0].textEdits.empty());
+
+    // The cut names are listed on the ellipsis
+    auto more = result[0].label[result[0].label.size() - 2];
+    REQUIRE_EQ(more.value, ", ...");
+    REQUIRE(more.tooltip);
+    CHECK_EQ(more.tooltip->value, "Also exports:\n\n- `type Third`");
 }
 
 TEST_CASE_FIXTURE(Fixture, "a_module_that_exports_values_keeps_its_type_hint")
