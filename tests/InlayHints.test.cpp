@@ -43,6 +43,91 @@ TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_local_definition")
     CHECK_EQ(result[0].textEdits[0].range, lsp::Range{{1, 15}, {1, 15}});
 }
 
+TEST_CASE_FIXTURE(Fixture, "a_module_that_exports_only_types_hints_its_types_and_cannot_be_inserted")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    newDocument("types.luau", R"(
+        --- A person who can sign in
+        export type User = { name: string }
+        export type Id = number
+        export type Role = "admin" | "guest"
+        export type Team = { members: { User } }
+        return {}
+    )");
+
+    auto result = processInlayHint(this, R"(
+        local Types = require("types.luau")
+    )");
+    REQUIRE_EQ(result.size(), 1);
+
+    CHECK_EQ(result[0].position, lsp::Position{1, 19});
+    CHECK_EQ(labelToString(result[0].label), ": { type User, type Id, type Role, type Team }");
+    CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
+    CHECK_EQ(result[0].tooltip, std::nullopt);
+    CHECK(result[0].textEdits.empty());
+
+    // Each name links to its type. The editor shows the hover there and follows the definition found there.
+    REQUIRE_EQ(result[0].label[1].value, "type User");
+    REQUIRE(result[0].label[1].location);
+    auto location = *result[0].label[1].location;
+    CHECK_EQ(location.range.start, lsp::Position{2, 8});
+
+    lsp::HoverParams hoverParams;
+    hoverParams.textDocument = lsp::TextDocumentIdentifier{location.uri};
+    hoverParams.position = location.range.start;
+    auto hover = workspace.hover(hoverParams, nullptr);
+    REQUIRE(hover);
+    CHECK(hover->contents.value.find("A person who can sign in") != std::string::npos);
+
+    lsp::DefinitionParams definitionParams;
+    definitionParams.textDocument = lsp::TextDocumentIdentifier{location.uri};
+    definitionParams.position = location.range.start;
+    auto definition = workspace.gotoDefinition(definitionParams, nullptr);
+    REQUIRE_EQ(definition.size(), 1);
+    CHECK_EQ(definition[0].uri, location.uri);
+    CHECK_EQ(definition[0].range, location.range);
+}
+
+TEST_CASE_FIXTURE(Fixture, "a_long_type_only_module_hint_is_cut_at_the_hint_length")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    client->globalConfig.inlayHints.typeHintMaxLength = 30;
+    newDocument("many.luau", R"(
+        export type First = number
+        export type Second = number
+        export type Third = number
+        return {}
+    )");
+
+    auto result = processInlayHint(this, R"(
+        local Many = require("many.luau")
+    )");
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(labelToString(result[0].label), ": { type First, type Second, ... }");
+    CHECK(result[0].textEdits.empty());
+
+    // The cut names are listed on the ellipsis
+    auto more = result[0].label[result[0].label.size() - 2];
+    REQUIRE_EQ(more.value, ", ...");
+    REQUIRE(more.tooltip);
+    CHECK_EQ(more.tooltip->value, "Also exports:\n\n- `type Third`");
+}
+
+TEST_CASE_FIXTURE(Fixture, "a_module_that_exports_values_keeps_its_type_hint")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    newDocument("values.luau", R"(
+        export type User = { name: string }
+        return { version = 1 }
+    )");
+
+    auto result = processInlayHint(this, R"(
+        local Values = require("values.luau")
+    )");
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(labelToString(result[0].label), ": { version: number }");
+}
+
 TEST_CASE_FIXTURE(Fixture, "show_inlay_hint_on_multiple_local_definition")
 {
     client->globalConfig.inlayHints.variableTypes = true;

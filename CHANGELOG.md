@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- A local bound to a module that exports only types now shows an inlay hint listing those types, such as `: { type User, type Id }`, in place of `: {}`. Each type name links to its definition, which gives it the hover and Go to Definition of the type. The hint cannot be inserted, since the empty table it would write is not what the module offers
+
+### Fixed
+
+- Go to Definition on a type alias declaration now returns the alias, as it does for a reference to the alias. An editor asks for this when it follows a link to the alias, such as an inlay hint label part
+
 ## [1.70.0] - 2026-09-20
 
 ### Added
