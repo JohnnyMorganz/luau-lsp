@@ -60,9 +60,28 @@ TEST_CASE_FIXTURE(Fixture, "a_module_that_exports_only_types_hints_its_types_and
     REQUIRE_EQ(result.size(), 1);
 
     CHECK_EQ(result[0].position, lsp::Position{1, 19});
-    CHECK_EQ(labelToString(result[0].label), ": types User, Id, Role, +1");
+    CHECK_EQ(labelToString(result[0].label), ": { type User, type Id, type Role, type Team }");
     CHECK_EQ(result[0].kind, lsp::InlayHintKind::Type);
-    CHECK_EQ(result[0].tooltip, "A module that exports only types:\n\n- `User`\n- `Id`\n- `Role`\n- `Team`");
+    CHECK_EQ(result[0].tooltip, "A module that exports only types:\n\n- `type User`\n- `type Id`\n- `type Role`\n- `type Team`");
+    CHECK(result[0].textEdits.empty());
+}
+
+TEST_CASE_FIXTURE(Fixture, "a_long_type_only_module_hint_is_cut_at_the_hint_length")
+{
+    client->globalConfig.inlayHints.variableTypes = true;
+    client->globalConfig.inlayHints.typeHintMaxLength = 30;
+    newDocument("many.luau", R"(
+        export type First = number
+        export type Second = number
+        export type Third = number
+        return {}
+    )");
+
+    auto result = processInlayHint(this, R"(
+        local Many = require("many.luau")
+    )");
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(labelToString(result[0].label), ": { type First, type Second, ... }");
     CHECK(result[0].textEdits.empty());
 }
 

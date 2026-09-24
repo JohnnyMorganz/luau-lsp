@@ -167,17 +167,22 @@ struct InlayHintVisitor : public Luau::AstVisitor
             names.emplace_back(typeFun.definitionLocation ? typeFun.definitionLocation->begin : Luau::Position{0, 0}, name);
         std::sort(names.begin(), names.end());
 
-        constexpr size_t maxShown = 3;
-        std::string label = ": types ";
+        // `{ type User, type Id }`, cut at the length every type hint keeps
+        std::string label = ": { ";
         std::string tooltip = "A module that exports only types:\n";
         for (size_t i = 0; i < names.size(); i++)
         {
-            if (i < maxShown)
-                label += (i > 0 ? ", " : "") + names[i].second;
-            tooltip += "\n- `" + names[i].second + "`";
+            std::string entry = (i > 0 ? ", " : "") + ("type " + names[i].second);
+            if (label.size() + entry.size() + 2 > config.inlayHints.typeHintMaxLength && i > 0)
+            {
+                if (label.find("...") == std::string::npos)
+                    label += ", ...";
+            }
+            else if (label.find("...") == std::string::npos)
+                label += entry;
+            tooltip += "\n- `type " + names[i].second + "`";
         }
-        if (names.size() > maxShown)
-            label += ", +" + std::to_string(names.size() - maxShown);
+        label += " }";
 
         lsp::InlayHint hint;
         hint.kind = lsp::InlayHintKind::Type;
