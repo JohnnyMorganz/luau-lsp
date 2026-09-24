@@ -142,7 +142,7 @@ struct InlayHintVisitor : public Luau::AstVisitor
     // A module that exports only types returns an empty table, so the hint for a local bound to it read `: {}`.
     // That says nothing about the module, and inserting it adds an annotation with no meaning.
     // Instead the hint names the types the module exports, and it cannot be inserted.
-    // Each name shows the documentation of its type and links to its definition.
+    // Each name links to the definition of its type, so the editor shows the hover and the definition found there.
     std::optional<lsp::InlayHint> typeOnlyModuleHint(const Luau::AstLocal* var, Luau::TypeId ty, const Luau::Scope& scope)
     {
         if (!workspace)
@@ -197,8 +197,6 @@ struct InlayHintVisitor : public Luau::AstVisitor
             if (document)
                 part.location =
                     lsp::Location{document->uri(), lsp::Range{document->convertPosition(location.begin), document->convertPosition(location.end)}};
-            if (auto documentation = printMoonwaveDocumentation(workspace->getComments(*importedName, location)); !documentation.empty())
-                part.tooltip = lsp::MarkupContent{lsp::MarkupKind::Markdown, documentation};
             hint.label.push_back(part);
         }
 

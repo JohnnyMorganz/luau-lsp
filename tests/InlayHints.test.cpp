@@ -66,15 +66,26 @@ TEST_CASE_FIXTURE(Fixture, "a_module_that_exports_only_types_hints_its_types_and
     CHECK_EQ(result[0].tooltip, std::nullopt);
     CHECK(result[0].textEdits.empty());
 
-    // Each name shows the documentation of its type and links to its definition
+    // Each name links to its type. The editor shows the hover there and follows the definition found there.
     REQUIRE_EQ(result[0].label[1].value, "type User");
-    REQUIRE(result[0].label[1].tooltip);
-    CHECK_EQ(result[0].label[1].tooltip->kind, lsp::MarkupKind::Markdown);
-    CHECK_EQ(result[0].label[1].tooltip->value, "A person who can sign in\n");
     REQUIRE(result[0].label[1].location);
-    CHECK_EQ(result[0].label[1].location->range.start.line, 2);
-    REQUIRE_EQ(result[0].label[3].value, "type Id");
-    CHECK_EQ(result[0].label[3].tooltip, std::nullopt);
+    auto location = *result[0].label[1].location;
+    CHECK_EQ(location.range.start, lsp::Position{2, 8});
+
+    lsp::HoverParams hoverParams;
+    hoverParams.textDocument = lsp::TextDocumentIdentifier{location.uri};
+    hoverParams.position = location.range.start;
+    auto hover = workspace.hover(hoverParams, nullptr);
+    REQUIRE(hover);
+    CHECK(hover->contents.value.find("A person who can sign in") != std::string::npos);
+
+    lsp::DefinitionParams definitionParams;
+    definitionParams.textDocument = lsp::TextDocumentIdentifier{location.uri};
+    definitionParams.position = location.range.start;
+    auto definition = workspace.gotoDefinition(definitionParams, nullptr);
+    REQUIRE_EQ(definition.size(), 1);
+    CHECK_EQ(definition[0].uri, location.uri);
+    CHECK_EQ(definition[0].range, location.range);
 }
 
 TEST_CASE_FIXTURE(Fixture, "a_long_type_only_module_hint_is_cut_at_the_hint_length")

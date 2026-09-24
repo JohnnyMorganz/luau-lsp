@@ -188,6 +188,12 @@ lsp::DefinitionResult WorkspaceFolder::gotoDefinition(const lsp::DefinitionParam
         result.emplace_back(lsp::Location{referenceTextDocument->uri(),
             lsp::Range{referenceTextDocument->convertPosition(location->begin), referenceTextDocument->convertPosition(location->end)}});
     }
+    else if (auto typeAlias = node->as<Luau::AstStatTypeAlias>())
+    {
+        // A type alias is its own definition. An editor asks for it when it follows a link to the alias, such as an inlay hint label part.
+        result.emplace_back(lsp::Location{params.textDocument.uri,
+            lsp::Range{textDocument->convertPosition(typeAlias->location.begin), textDocument->convertPosition(typeAlias->location.end)}});
+    }
 
     // Fallback: if no results found so far, we can try checking if this is within a require statement
     if (result.empty())
