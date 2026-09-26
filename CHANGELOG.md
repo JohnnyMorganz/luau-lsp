@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Hover on a local declared with `const` now reads `const x: T` instead of `local x: T`, at the declaration and at every use
 
+### Changed
+
+- Sync to upstream Luau 0.740
+
 ## [1.70.0] - 2026-09-20
 
 ### Added
