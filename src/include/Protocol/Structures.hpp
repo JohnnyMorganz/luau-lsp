@@ -154,12 +154,88 @@ struct MarkupContent
 };
 NLOHMANN_DEFINE_OPTIONAL(MarkupContent, kind, value)
 
+/**
+ * A string value used as a snippet is a template which allows to insert text
+ * and to control the editor cursor when insertion happens.
+ *
+ * A snippet can define tab stops and placeholders with `$1`, `$2`
+ * and `${3:foo}`. `$0` defines the final tab stop, it defaults to
+ * the end of the snippet. Variables are defined with `$name` and
+ * `${name:default value}`.
+ *
+ * @since 3.18.0
+ */
+struct StringValue
+{
+    std::string kind = "snippet";
+    std::string value;
+};
+NLOHMANN_DEFINE_OPTIONAL(StringValue, kind, value)
+
+/**
+ * An interactive text edit.
+ *
+ * @since 3.18.0
+ */
+struct SnippetTextEdit
+{
+    Range range;
+    StringValue snippet;
+};
+NLOHMANN_DEFINE_OPTIONAL(SnippetTextEdit, range, snippet)
+} // namespace lsp
+
+namespace nlohmann
+{
+// An edit in a `TextDocumentEdit` is either a plain `TextEdit` or, when the client
+// supports it, a `SnippetTextEdit` (@since 3.18.0) carrying a cursor/tabstop-aware snippet.
+template<>
+struct adl_serializer<std::variant<lsp::TextEdit, lsp::SnippetTextEdit>>
+{
+    static void to_json(json& j, const std::variant<lsp::TextEdit, lsp::SnippetTextEdit>& data)
+    {
+        if (auto textEdit = std::get_if<lsp::TextEdit>(&data))
+            j = *textEdit;
+        else if (auto snippetTextEdit = std::get_if<lsp::SnippetTextEdit>(&data))
+            j = *snippetTextEdit;
+    }
+
+    static void from_json(const json& j, std::variant<lsp::TextEdit, lsp::SnippetTextEdit>& data)
+    {
+        if (j.contains("snippet"))
+            data = j.get<lsp::SnippetTextEdit>();
+        else
+            data = j.get<lsp::TextEdit>();
+    }
+};
+} // namespace nlohmann
+
+namespace lsp
+{
+/**
+ * Describes textual changes on a single text document, optionally including
+ * `SnippetTextEdit`s (@since 3.18.0) alongside plain `TextEdit`s.
+ */
+struct TextDocumentEdit
+{
+    VersionedTextDocumentIdentifier textDocument;
+    std::vector<std::variant<TextEdit, SnippetTextEdit>> edits;
+};
+NLOHMANN_DEFINE_OPTIONAL(TextDocumentEdit, textDocument, edits)
+
 struct WorkspaceEdit
 {
     // TODO: this is optional and there are other options provided
     std::unordered_map<Uri, std::vector<TextEdit>, UriHash> changes{};
+
+    /**
+     * Versioned document changes for a single document, used instead of
+     * `changes` when we need to encode `SnippetTextEdit`s
+     * (@since 3.18.0), which are only permitted here.
+     */
+    std::optional<std::vector<TextDocumentEdit>> documentChanges = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(WorkspaceEdit, changes)
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceEdit, changes, documentChanges)
 
 // Alias a std::optional to PartialResponse
 // If it contains std::nullopt, we shouldn't send a result.

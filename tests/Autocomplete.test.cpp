@@ -1,3 +1,5 @@
+#include <variant>
+
 #include "doctest.h"
 #include "Fixture.h"
 #include "RobloxTestConstants.h"
@@ -1425,6 +1427,31 @@ static std::vector<lsp::TextEdit> requireEndAutocompletionEdits(const TestClient
     return editParams.edit.changes[uri];
 }
 
+static void enableSnippetTextEditSupport(lsp::ClientCapabilities& capabilities)
+{
+    capabilities.workspace = lsp::ClientWorkspaceCapabilities{};
+    capabilities.workspace->workspaceEdit = lsp::WorkspaceEditClientCapabilities{};
+    capabilities.workspace->workspaceEdit->documentChanges = true;
+    capabilities.workspace->workspaceEdit->snippetEditSupport = true;
+}
+
+static std::vector<std::variant<lsp::TextEdit, lsp::SnippetTextEdit>> requireEndAutocompletionDocumentChangeEdits(
+    const TestClient* client, const Uri& uri)
+{
+    REQUIRE(!client->requestQueue.empty());
+    auto request = client->requestQueue.back();
+    REQUIRE_EQ(request.first, "workspace/applyEdit");
+    REQUIRE(request.second);
+
+    lsp::ApplyWorkspaceEditParams editParams = request.second.value();
+    CHECK(editParams.edit.changes.empty());
+    REQUIRE(editParams.edit.documentChanges);
+    REQUIRE_EQ(editParams.edit.documentChanges->size(), 1);
+    CHECK_EQ(editParams.edit.documentChanges->at(0).textDocument.uri, uri);
+
+    return editParams.edit.documentChanges->at(0).edits;
+}
+
 TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function")
 {
     client->globalConfig.completion.autocompleteEnd = true;
@@ -1471,6 +1498,66 @@ TEST_CASE_FIXTURE(Fixture, "autocomplete_end_inside_of_function_call")
     REQUIRE_EQ(edits.size(), 1);
     CHECK_EQ(edits[0].range, lsp::Range{{marker.line, 0}, {marker.line + 1, 0}});
     CHECK_EQ(edits[0].newText, "\n        end)\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_end_for_incomplete_function_uses_document_changes_when_snippet_text_edit_supported")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+    enableSnippetTextEditSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        function foo()
+            |
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params, nullptr);
+    auto edits = requireEndAutocompletionDocumentChangeEdits(client.get(), uri);
+    REQUIRE_EQ(edits.size(), 1);
+
+    // No cursor movement is needed here, so this stays a plain TextEdit even though snippets are supported
+    auto* textEdit = std::get_if<lsp::TextEdit>(&edits[0]);
+    REQUIRE(textEdit);
+    CHECK_EQ(textEdit->range, lsp::Range{{marker.line + 1, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(textEdit->newText, "        end\n");
+}
+
+TEST_CASE_FIXTURE(Fixture, "autocomplete_end_inside_of_function_call_uses_snippet_text_edit_when_supported")
+{
+    client->globalConfig.completion.autocompleteEnd = true;
+    enableSnippetTextEditSupport(client->capabilities);
+
+    auto [source, marker] = sourceWithMarker(R"(
+        call(function()
+        |)
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+    params.context = lsp::CompletionContext{};
+    params.context->triggerCharacter = "\n";
+
+    auto result = workspace.completion(params, nullptr);
+    auto edits = requireEndAutocompletionDocumentChangeEdits(client.get(), uri);
+    REQUIRE_EQ(edits.size(), 1);
+
+    // The cursor needs to move back onto the blank line left behind, so this is now a SnippetTextEdit
+    // carrying a `$0` tabstop instead of a plain TextEdit plus a `$/command` cursor-move notification
+    auto* snippetEdit = std::get_if<lsp::SnippetTextEdit>(&edits[0]);
+    REQUIRE(snippetEdit);
+    CHECK_EQ(snippetEdit->range, lsp::Range{{marker.line, 0}, {marker.line + 1, 0}});
+    CHECK_EQ(snippetEdit->snippet.kind, "snippet");
+    CHECK_EQ(snippetEdit->snippet.value, "\n$0        end)\n");
 }
 
 TEST_CASE_FIXTURE(Fixture, "autocomplete_then_in_if_statement_no_condition")

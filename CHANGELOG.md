@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Autocomplete-end (automatic `then`/`do`/`end` insertion) now uses the LSP 3.18 `SnippetTextEdit` to place the cursor when the client advertises `workspace.workspaceEdit.snippetEditSupport`, instead of a plain text edit plus a custom `$/command` cursor-move notification. Clients that don't declare the capability keep the old behaviour unchanged ([#1540](https://github.com/JohnnyMorganz/luau-lsp/issues/1540))
+- VSCode extension: bumped `vscode-languageclient` to `10.1.2`, which declares `snippetEditSupport` and natively applies `SnippetTextEdit`s, so the above autocomplete-end cursor placement now works in VSCode without the custom `$/command` notification. This raises the minimum supported VSCode version to `1.91.0` ([#1540](https://github.com/JohnnyMorganz/luau-lsp/issues/1540))
 - Sync to upstream Luau 0.740
 
 ## [1.70.0] - 2026-09-20

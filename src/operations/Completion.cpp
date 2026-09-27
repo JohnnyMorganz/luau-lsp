@@ -1,5 +1,6 @@
 #include <unordered_set>
 #include <utility>
+#include <variant>
 
 #include "Luau/AstQuery.h"
 #include "Luau/Autocomplete.h"
@@ -63,6 +64,30 @@ static Luau::AstNode* getParentNode(const std::vector<Luau::AstNode*> ancestry)
         return *it;
     }
     return nullptr;
+}
+
+// SnippetTextEdit (@since LSP 3.18.0) lets us place the cursor via a `$0` tabstop directly in the
+// inserted text, rather than relying on a plain TextEdit plus a client-specific cursor-move command.
+// It can only be sent through `documentChanges`, so both capabilities are required.
+static bool canUseSnippetTextEdits(const lsp::ClientCapabilities& capabilities)
+{
+    return capabilities.workspace && capabilities.workspace->workspaceEdit && capabilities.workspace->workspaceEdit->documentChanges &&
+           capabilities.workspace->workspaceEdit->snippetEditSupport;
+}
+
+// Escape characters with special meaning in snippet syntax (`\`, `$`, `}`) so that arbitrary source
+// text (e.g. the rest of the line being pushed after an inserted `end`) is treated as a literal.
+static std::string escapeSnippetText(const std::string& text)
+{
+    std::string result;
+    result.reserve(text.size());
+    for (char c : text)
+    {
+        if (c == '\\' || c == '$' || c == '}')
+            result += '\\';
+        result += c;
+    }
+    return result;
 }
 
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
@@ -149,7 +174,10 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             unclosedBlock = false;
     }
 
+    bool useSnippetTextEdits = canUseSnippetTextEdits(client->capabilities);
+
     std::vector<lsp::TextEdit> edits;
+    std::optional<lsp::SnippetTextEdit> endEdit;
     bool moveCursorUp = false;
 
     // TODO: handle `until` for repeat: `until` can be inserted if `hasEnd` in a repeat block is false
@@ -206,21 +234,29 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             }
         }
 
-        // TODO: it would be nicer if we had snippet support, and could insert text *after* the cursor
-        // and leave the cursor in the same spot. Right now we can only insert text *at* the cursor,
-        // then have to manually send a command to move the cursor
         // If we have content already on the current line, we cannot "replace" it whilst also
-        // putting the end on the line afterwards, so we fallback to the manual movement method
+        // putting the end on the line afterwards, so we fallback to inserting a newline before it
 
         // If the position marker is at the very end of the file, if we insert one line further then vscode will
         // not be happy and will insert at the position marker.
         // If its in the middle of the file, vscode won't change the marker
         if (params.position.line == document->lineCount() - 1 || !currentLineContent.empty())
         {
-            // Insert an end at the current position, with a newline before it
-            auto insertText = "\n" + indent + "end" + currentLineContent + "\n";
-            edits.emplace_back(lsp::TextEdit{{{params.position.line, 0}, {params.position.line + 1, 0}}, insertText});
-            moveCursorUp = true;
+            lsp::Range range{{params.position.line, 0}, {params.position.line + 1, 0}};
+            if (useSnippetTextEdits)
+            {
+                // Put the final tabstop on the blank line left behind by the edit, so the cursor lands
+                // there directly instead of relying on a client-specific cursor-move command afterwards
+                auto snippetText = "\n$0" + indent + "end" + escapeSnippetText(currentLineContent) + "\n";
+                endEdit = lsp::SnippetTextEdit{range, lsp::StringValue{"snippet", snippetText}};
+            }
+            else
+            {
+                // Insert an end at the current position, with a newline before it
+                auto insertText = "\n" + indent + "end" + currentLineContent + "\n";
+                edits.emplace_back(lsp::TextEdit{range, insertText});
+                moveCursorUp = true;
+            }
         }
         else
         {
@@ -232,7 +268,24 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         }
     }
 
-    if (!edits.empty())
+    if (edits.empty() && !endEdit)
+        return;
+
+    if (useSnippetTextEdits)
+    {
+        std::vector<std::variant<lsp::TextEdit, lsp::SnippetTextEdit>> documentEdits(edits.begin(), edits.end());
+        if (endEdit)
+            documentEdits.emplace_back(*endEdit);
+
+        lsp::VersionedTextDocumentIdentifier versionedDocument;
+        versionedDocument.uri = params.textDocument.uri;
+        versionedDocument.version = document->version();
+
+        lsp::WorkspaceEdit workspaceEdit;
+        workspaceEdit.documentChanges = {lsp::TextDocumentEdit{versionedDocument, documentEdits}};
+        client->applyEdit({"insert end", workspaceEdit});
+    }
+    else
     {
         std::unordered_map<Uri, std::vector<lsp::TextEdit>, UriHash> changes{{params.textDocument.uri, edits}};
         if (moveCursorUp)

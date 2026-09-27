@@ -451,8 +451,34 @@ struct DiagnosticWorkspaceClientCapabilities
 };
 NLOHMANN_DEFINE_OPTIONAL(DiagnosticWorkspaceClientCapabilities, refreshSupport)
 
+/**
+ * Client capabilities specific to `WorkspaceEdit`s.
+ */
+struct WorkspaceEditClientCapabilities
+{
+    /**
+     * The client supports versioned document changes in `WorkspaceEdit`s.
+     */
+    bool documentChanges = false;
+
+    /**
+     * Whether the client supports the `snippet` text edit within a
+     * `WorkspaceEdit`.
+     *
+     * @since 3.18.0
+     */
+    bool snippetEditSupport = false;
+};
+NLOHMANN_DEFINE_OPTIONAL(WorkspaceEditClientCapabilities, documentChanges, snippetEditSupport)
+
 struct ClientWorkspaceCapabilities
 {
+    /**
+     * The client supports versioned document changes in `WorkspaceEdit`s,
+     * and whether it supports `SnippetTextEdit`s within them.
+     */
+    std::optional<WorkspaceEditClientCapabilities> workspaceEdit = std::nullopt;
+
     /**
      * Capabilities specific to the `workspace/didChangeConfiguration`
      * notification.
@@ -486,7 +512,8 @@ struct ClientWorkspaceCapabilities
      */
     std::optional<DiagnosticWorkspaceClientCapabilities> diagnostics = std::nullopt;
 };
-NLOHMANN_DEFINE_OPTIONAL(ClientWorkspaceCapabilities, didChangeConfiguration, didChangeWatchedFiles, configuration, inlayHint, diagnostics)
+NLOHMANN_DEFINE_OPTIONAL(
+    ClientWorkspaceCapabilities, workspaceEdit, didChangeConfiguration, didChangeWatchedFiles, configuration, inlayHint, diagnostics)
 
 struct ClientGeneralCapabilities
 {
