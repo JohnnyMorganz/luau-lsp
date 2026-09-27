@@ -258,6 +258,43 @@ TEST_CASE_FIXTURE(Fixture, "renaming_required_variable_should_also_rename_import
     )");
 }
 
+TEST_CASE_FIXTURE(Fixture, "renaming_required_variable_should_not_rename_type_prefixes_of_shadowing_local")
+{
+    auto source = R"(
+        local Types = require("path/to/types")
+
+        do
+            local Types = require("path/to/other_types")
+            type Foo = Types.Foo
+        end
+
+        type Bar = Types.Foo
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 14};
+    params.newName = "ActualTypes";
+
+    auto result = workspace.rename(params, nullptr);
+    REQUIRE(result);
+    REQUIRE(result->changes.size() == 1);
+
+    auto documentEdits = result->changes.begin()->second;
+    CHECK_EQ(applyEdit(source, documentEdits), R"(
+        local ActualTypes = require("path/to/types")
+
+        do
+            local Types = require("path/to/other_types")
+            type Foo = Types.Foo
+        end
+
+        type Bar = ActualTypes.Foo
+    )");
+}
+
 TEST_CASE_FIXTURE(Fixture, "rename_global_function_name")
 {
     auto source = R"(
