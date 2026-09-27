@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - VSCode extension: `luau-lsp.server.path` now expands a leading `~/` (or `~\`) to the user's home directory, matching the existing behaviour of `luau-lsp.server.baseLuaurc` ([#1635](https://github.com/JohnnyMorganz/luau-lsp/issues/1635))
 - Renaming a local variable (e.g. `local jecs = require(...)`) now correctly renames its uses as a type reference prefix (e.g. `jecs.Entity<Player>`), including when the rename is triggered from that prefix itself, which previously failed with "Unable to find symbol to rename". Matching is now done against the resolved local rather than by name, so shadowed locals with the same name are no longer confused ([#1203](https://github.com/JohnnyMorganz/luau-lsp/issues/1203))
 - String require auto-imports are no longer suggested for files that have been renamed or deleted ([#1045](https://github.com/JohnnyMorganz/luau-lsp/issues/1045))
+- Fixed Signature Help showing the implicit first argument of a `__call` metamethod, which is supplied by the table being called rather than by the caller ([#1597](https://github.com/JohnnyMorganz/luau-lsp/issues/1597))
 
 ### Changed
 

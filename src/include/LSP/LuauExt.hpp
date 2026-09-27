@@ -29,6 +29,7 @@ struct ToStringNamedFunctionOpts
 {
     bool hideTableKind = false;
     bool multiline = false;
+    bool hideSelf = false;
 };
 
 std::string toStringNamedFunction(const Luau::ModulePtr& module, const Luau::FunctionType* ftv, const NameOrExpr nameOrFuncExpr,

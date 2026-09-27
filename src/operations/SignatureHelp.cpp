@@ -102,11 +102,13 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
     if (!it)
         return std::nullopt;
     auto followedId = Luau::follow(*it);
+    const auto metamethod = findCallMetamethod(followedId);
+    const bool hasImplicitSelf = candidate->self || metamethod.has_value();
 
     // Construct a type pack from the current list of arguments for overload matching
     Luau::TypeArena typeArena;
     std::vector<Luau::TypeId> argumentTys;
-    if (candidate->self)
+    if (hasImplicitSelf)
         argumentTys.push_back(followedId);
     for (auto&& arg : candidate->args)
         if (auto ty = module->astTypes.find(arg))
@@ -115,6 +117,7 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
 
     types::ToStringNamedFunctionOpts opts;
     opts.hideTableKind = !config.hover.showTableKinds;
+    opts.hideSelf = hasImplicitSelf;
 
     std::optional<size_t> activeSignature = std::nullopt;
     std::vector<lsp::SignatureInformation> signatures{};
@@ -159,8 +162,8 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
 
         for (; it != Luau::end(ftv->argTypes); it++, idx++)
         {
-            // If the function has self, and the caller has called as a method (i.e., :), then omit the self parameter
-            if (idx == 0 && candidate->self)
+            // Method calls and __call metamethods receive their first argument implicitly.
+            if (idx == 0 && hasImplicitSelf)
                 continue;
 
             // Show parameter documentation
@@ -248,9 +251,15 @@ std::optional<lsp::SignatureHelp> WorkspaceFolder::signatureHelp(
                 addSignature(part, candidateFunctionType, /* isOverloaded = */ true);
 
     // Handle __call metamethod
-    if (const auto metamethod = findCallMetamethod(followedId))
+    if (metamethod)
+    {
         if (auto ftv = Luau::get<Luau::FunctionType>(Luau::follow(*metamethod)))
-            addSignature(*metamethod, ftv);
+        {
+            Luau::FunctionType callable = *ftv;
+            callable.hasSelf = true;
+            addSignature(*metamethod, &callable);
+        }
+    }
 
     lsp::SignatureHelp help = lsp::SignatureHelp{signatures, activeSignature.value_or(0), activeParameter};
     platform->handleSignatureHelp(*textDocument, *sourceModule, position, help);
