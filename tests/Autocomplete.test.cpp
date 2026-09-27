@@ -6,6 +6,12 @@
 #include "LSP/Completion.hpp"
 #include "Platform/InstanceRequireAutoImporter.hpp"
 
+#include <algorithm>
+#include <chrono>
+#include <cstdlib>
+#include <numeric>
+#include <random>
+
 std::optional<lsp::CompletionItem> getItem(const std::vector<lsp::CompletionItem>& items, const std::string& label)
 {
     for (const auto& item : items)
@@ -2721,66 +2727,170 @@ TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_is_not_use
     CHECK(!results.empty());
 }
 
-// Repro attempt for LUAU-LSP-AS: EXCEPTION_ACCESS_VIOLATION_READ in Scope::lookupType /
+// Fuzzing stress test for LUAU-LSP-AS: EXCEPTION_ACCESS_VIOLATION_READ in Scope::lookupType /
 // std::_Hash<T>::_Find_last, reached via WorkspaceFolder::completion -> tryFragmentAutocomplete ->
 // cloneTypesFromFragment -> staleScope->lookupType(x), with luau.new_solver_enabled=true.
 //
-// Unlike the sourcemap-use-after-free family fixed in #1565 (LUAU-LSP-EG/ER/EE/CY/GD/NG/AP/FS/FG/EH),
-// this crash involves a plain user-defined type alias, not a sourcemap-generated instance type, and
-// is not in that fix's issue list. Theory: repeated fragment-autocomplete calls all read (and, via
-// Luau::follow's path compression during cloneIncremental, mutate) the SAME retained "stale" scope
-// from the last full check -- exactly what happens when a user types continuously in a file using the
-// new solver, since fragment autocomplete deliberately never triggers a full recheck. If cloning ever
-// writes into the stale arena instead of only the destination arena, many iterations should corrupt it.
-TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "repeated_fragment_autocomplete_reads_of_local_type_alias_do_not_corrupt_stale_scope")
+// A single-module, single-scenario repro attempt did not reproduce this under ASAN, so instead this
+// hammers a randomized mix of: editing modules in a multi-module require graph (exercising both
+// locally-declared type aliases via Scope::lookupType and imported ones via lookupImportedType across
+// retained/stale scope chains), periodic full rechecks (resetting retained graphs + invalid-dependency
+// flags), and periodic sourcemap reloads (the #1565 use-after-free family, run concurrently with the
+// above instead of in isolation). Deterministic by default (fixed seed, printed on every run) so a
+// crash is reproducible; override with LUAU_LSP_FUZZ_SEED to explore other seeds.
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_fuzz_stress")
 {
     ENABLE_NEW_SOLVER();
     client->capabilities.textDocument = lsp::TextDocumentClientCapabilities{};
     client->capabilities.textDocument->diagnostic = lsp::DiagnosticClientCapabilities{};
 
-    auto oldSource = R"(
-        export type Foo = { x: number, y: number, name: string }
-        local function makeFoo(): Foo
-            return { x = 1, y = 2, name = "a" }
-        end
-        local f = makeFoo()
-    )";
+    constexpr int kModuleCount = 6;
+    auto budget = std::chrono::seconds(90);
+    if (const char* envBudget = std::getenv("LUAU_LSP_FUZZ_SECONDS"))
+        budget = std::chrono::seconds(std::strtol(envBudget, nullptr, 10));
 
-    auto uri = newDocument("foo.luau", oldSource);
-    auto moduleName = workspace.fileResolver.getModuleName(uri);
+    uint32_t seed = 424242u;
+    if (const char* envSeed = std::getenv("LUAU_LSP_FUZZ_SEED"))
+        seed = static_cast<uint32_t>(std::strtoul(envSeed, nullptr, 10));
+    std::cerr << "[fuzz] seed = " << seed << ", budget = " << budget.count() << "s\n";
+    std::mt19937 rng(seed);
 
-    // Full check with retained type graphs, so `Foo`'s TypeFun lives in the retained scope that
-    // every subsequent fragment autocomplete call will read from via staleScope->lookupType("Foo").
-    workspace.checkStrict(moduleName, /* cancellationToken= */ nullptr, /* forAutocomplete= */ false);
-    REQUIRE(workspace.frontend.allModuleDependenciesValid(moduleName, /* forAutocomplete= */ false));
-
-    for (int i = 0; i < 200; i++)
+    struct ModuleInfo
     {
-        auto [newSource, marker] = sourceWithMarker(R"(
-            export type Foo = { x: number, y: number, name: string }
-            local function makeFoo(): Foo
-                return { x = 1, y = 2, name = "a" }
-            end
-            local f = makeFoo()
-            local g: Foo = f
-            local h = g.|
-        )");
+        Uri uri;
+        Luau::ModuleName moduleName;
+        std::vector<int> deps; // indices of modules this one requires
+        int generation = 0;
+    };
 
-        updateDocument(uri, newSource);
-
-        // Never let a full recheck happen: every completion must go through fragment autocomplete
-        // and reuse the same stale retained scope from the very first full check above.
-        REQUIRE(workspace.frontend.allModuleDependenciesValid(moduleName, /* forAutocomplete= */ false));
-        REQUIRE(workspace.frontend.isDirty(moduleName, /* forAutocomplete= */ false));
-
-        lsp::CompletionParams params;
-        params.textDocument = lsp::TextDocumentIdentifier{uri};
-        params.position = marker;
-
-        auto results = workspace.completion(params, /* cancellationToken= */ nullptr);
-
-        REQUIRE(workspace.frontend.isDirty(moduleName, /* forAutocomplete= */ false));
+    std::vector<ModuleInfo> modules;
+    for (int i = 0; i < kModuleCount; i++)
+    {
+        auto uri = newDocument("fuzz" + std::to_string(i) + ".luau", "return {}");
+        modules.push_back({uri, workspace.fileResolver.getModuleName(uri), {}, 0});
     }
+
+    // Build a DAG: each module (after the first) requires a random non-empty subset of earlier modules
+    for (int i = 1; i < kModuleCount; i++)
+    {
+        std::vector<int> pool(i);
+        std::iota(pool.begin(), pool.end(), 0);
+        std::shuffle(pool.begin(), pool.end(), rng);
+        std::uniform_int_distribution<int> depCountDist(1, i);
+        int n = depCountDist(rng);
+        modules[i].deps.assign(pool.begin(), pool.begin() + n);
+        std::sort(modules[i].deps.begin(), modules[i].deps.end());
+    }
+
+    auto buildSource = [&](int i, bool withMarker) -> std::string
+    {
+        auto& m = modules[i];
+        std::string src = "--!strict\n";
+        for (int dep : m.deps)
+            src += "local dep" + std::to_string(dep) + " = require(\"fuzz" + std::to_string(dep) + ".luau\")\n";
+
+        src += "export type T" + std::to_string(i) + " = { fieldA: number, fieldB: string, gen" + std::to_string(m.generation) + ": boolean }\n";
+        src += "local function make" + std::to_string(i) + "(): T" + std::to_string(i) + "\n";
+        src += "    return { fieldA = 1, fieldB = \"x\", gen" + std::to_string(m.generation) + " = true }\n";
+        src += "end\n";
+        src += "local v" + std::to_string(i) + " = make" + std::to_string(i) + "()\n";
+
+        for (int dep : m.deps)
+            src += "local via" + std::to_string(dep) + ": dep" + std::to_string(dep) + ".T" + std::to_string(dep) + "? = nil\n";
+
+        if (withMarker)
+            src += "local zzz: T|\n";
+        else
+            src += "local zzz: T" + std::to_string(i) + "? = nil\n";
+
+        return src;
+    };
+
+    // Give every module an initial full, retained-type-graph check so there's a real "stale" scope
+    // to reuse from the very first fragment-autocomplete call
+    for (int i = 0; i < kModuleCount; i++)
+    {
+        updateDocument(modules[i].uri, buildSource(i, /* withMarker= */ false));
+        workspace.checkStrict(modules[i].moduleName, /* cancellationToken= */ nullptr, /* forAutocomplete= */ false);
+    }
+
+    auto reloadSourcemap = [&](int variant)
+    {
+        if (variant % 2 == 0)
+        {
+            loadSourcemap(R"(
+                {
+                    "name": "game",
+                    "className": "DataModel",
+                    "children": [
+                        { "name": "Workspace", "className": "Workspace" }
+                    ]
+                }
+            )");
+        }
+        else
+        {
+            loadSourcemap(R"(
+                {
+                    "name": "game",
+                    "className": "DataModel",
+                    "children": [
+                        { "name": "Workspace", "className": "Workspace" },
+                        { "name": "ExtraFolder", "className": "Folder" }
+                    ]
+                }
+            )");
+        }
+    };
+
+    std::uniform_int_distribution<int> moduleDist(0, kModuleCount - 1);
+    std::uniform_int_distribution<int> actionDist(0, 99);
+
+    auto deadline = std::chrono::steady_clock::now() + budget;
+    int iterations = 0;
+    int completions = 0;
+
+    while (std::chrono::steady_clock::now() < deadline)
+    {
+        iterations++;
+        int action = actionDist(rng);
+
+        if (action < 70)
+        {
+            // Edit a random module (bump its generation to force a structurally different type) and
+            // request completion at a type-annotation position, exercising Scope::lookupType via
+            // fragment autocomplete's retained/stale scope
+            int i = moduleDist(rng);
+            modules[i].generation++;
+
+            auto [newSource, marker] = sourceWithMarker(buildSource(i, /* withMarker= */ true));
+            updateDocument(modules[i].uri, newSource);
+
+            lsp::CompletionParams params;
+            params.textDocument = lsp::TextDocumentIdentifier{modules[i].uri};
+            params.position = marker;
+
+            workspace.completion(params, /* cancellationToken= */ nullptr);
+            completions++;
+        }
+        else if (action < 90)
+        {
+            // Periodically fully recheck a random module, simulating background diagnostics and
+            // resetting its retained scope + invalid-dependency flags
+            int i = moduleDist(rng);
+            updateDocument(modules[i].uri, buildSource(i, /* withMarker= */ false));
+            workspace.checkStrict(modules[i].moduleName, /* cancellationToken= */ nullptr, /* forAutocomplete= */ false);
+        }
+        else
+        {
+            // Periodically reload the sourcemap, stressing the #1565 invalidation path concurrently
+            // with the require-graph fuzzing above
+            reloadSourcemap(iterations);
+        }
+    }
+
+    std::cerr << "[fuzz] iterations = " << iterations << ", completions = " << completions << "\n";
+    CHECK(iterations > 0);
 }
 
 TEST_SUITE_END();
