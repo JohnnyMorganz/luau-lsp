@@ -175,6 +175,58 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_property_includes_the_original_
     CHECK_EQ(lsp::Range{{6, 20}, {6, 24}}, result->at(1).range);
 }
 
+TEST_CASE_FIXTURE(Fixture, "find_references_of_a_local_includes_its_use_as_a_type_reference_prefix")
+{
+    // Regression test for https://github.com/JohnnyMorganz/luau-lsp/issues/1203
+    auto source = R"(
+        local jecs = require("path/to/jecs")
+
+        type Entity = jecs.Entity<Player>
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 14};
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{1, 14}, {1, 18}}, result->at(0).range);
+    CHECK_EQ(lsp::Range{{3, 22}, {3, 26}}, result->at(1).range);
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_the_type_reference_prefix_itself_resolves_the_local")
+{
+    // Regression test for https://github.com/JohnnyMorganz/luau-lsp/issues/1203
+    // Triggering "Find All References" (or rename) with the cursor directly on the `jecs` prefix
+    // token previously found nothing, since it was only matched against imported module aliases by name.
+    auto source = R"(
+        local jecs = require("path/to/jecs")
+
+        type Entity = jecs.Entity<Player>
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 22};
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    REQUIRE_EQ(2, result->size());
+
+    sortResults(result);
+
+    CHECK_EQ(lsp::Range{{1, 14}, {1, 18}}, result->at(0).range);
+    CHECK_EQ(lsp::Range{{3, 22}, {3, 26}}, result->at(1).range);
+}
+
 TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_function")
 {
     auto source = R"(
