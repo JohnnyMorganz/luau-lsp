@@ -1,4 +1,5 @@
 /build
+/build-asan
 .vscode/settings.json
 /.vs
 out/

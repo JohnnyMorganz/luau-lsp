@@ -2721,4 +2721,66 @@ TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_is_not_use
     CHECK(!results.empty());
 }
 
+// Repro attempt for LUAU-LSP-AS: EXCEPTION_ACCESS_VIOLATION_READ in Scope::lookupType /
+// std::_Hash<T>::_Find_last, reached via WorkspaceFolder::completion -> tryFragmentAutocomplete ->
+// cloneTypesFromFragment -> staleScope->lookupType(x), with luau.new_solver_enabled=true.
+//
+// Unlike the sourcemap-use-after-free family fixed in #1565 (LUAU-LSP-EG/ER/EE/CY/GD/NG/AP/FS/FG/EH),
+// this crash involves a plain user-defined type alias, not a sourcemap-generated instance type, and
+// is not in that fix's issue list. Theory: repeated fragment-autocomplete calls all read (and, via
+// Luau::follow's path compression during cloneIncremental, mutate) the SAME retained "stale" scope
+// from the last full check -- exactly what happens when a user types continuously in a file using the
+// new solver, since fragment autocomplete deliberately never triggers a full recheck. If cloning ever
+// writes into the stale arena instead of only the destination arena, many iterations should corrupt it.
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "repeated_fragment_autocomplete_reads_of_local_type_alias_do_not_corrupt_stale_scope")
+{
+    ENABLE_NEW_SOLVER();
+    client->capabilities.textDocument = lsp::TextDocumentClientCapabilities{};
+    client->capabilities.textDocument->diagnostic = lsp::DiagnosticClientCapabilities{};
+
+    auto oldSource = R"(
+        export type Foo = { x: number, y: number, name: string }
+        local function makeFoo(): Foo
+            return { x = 1, y = 2, name = "a" }
+        end
+        local f = makeFoo()
+    )";
+
+    auto uri = newDocument("foo.luau", oldSource);
+    auto moduleName = workspace.fileResolver.getModuleName(uri);
+
+    // Full check with retained type graphs, so `Foo`'s TypeFun lives in the retained scope that
+    // every subsequent fragment autocomplete call will read from via staleScope->lookupType("Foo").
+    workspace.checkStrict(moduleName, /* cancellationToken= */ nullptr, /* forAutocomplete= */ false);
+    REQUIRE(workspace.frontend.allModuleDependenciesValid(moduleName, /* forAutocomplete= */ false));
+
+    for (int i = 0; i < 200; i++)
+    {
+        auto [newSource, marker] = sourceWithMarker(R"(
+            export type Foo = { x: number, y: number, name: string }
+            local function makeFoo(): Foo
+                return { x = 1, y = 2, name = "a" }
+            end
+            local f = makeFoo()
+            local g: Foo = f
+            local h = g.|
+        )");
+
+        updateDocument(uri, newSource);
+
+        // Never let a full recheck happen: every completion must go through fragment autocomplete
+        // and reuse the same stale retained scope from the very first full check above.
+        REQUIRE(workspace.frontend.allModuleDependenciesValid(moduleName, /* forAutocomplete= */ false));
+        REQUIRE(workspace.frontend.isDirty(moduleName, /* forAutocomplete= */ false));
+
+        lsp::CompletionParams params;
+        params.textDocument = lsp::TextDocumentIdentifier{uri};
+        params.position = marker;
+
+        auto results = workspace.completion(params, /* cancellationToken= */ nullptr);
+
+        REQUIRE(workspace.frontend.isDirty(moduleName, /* forAutocomplete= */ false));
+    }
+}
+
 TEST_SUITE_END();
