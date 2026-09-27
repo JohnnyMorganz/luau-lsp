@@ -3,8 +3,6 @@
 #include "Protocol/Lifecycle.hpp"
 #include "TestClient.h"
 
-#include <algorithm>
-
 TEST_SUITE_BEGIN("LanguageServer");
 
 LUAU_FASTFLAG(DebugLuauTimeTracing)
@@ -87,17 +85,9 @@ TEST_CASE("language_server_dynamically_registers_diagnostics_capability_when_cli
     server.onRequest(0, "initialize", params);
     server.onNotification("initialized", std::make_optional(lsp::InitializedParams{}));
 
-    auto it = std::find_if(client.requestQueue.begin(), client.requestQueue.end(),
-        [](const auto& request)
-        {
-            return request.first == "client/registerCapability";
-        });
-    REQUIRE(it != client.requestQueue.end());
-    REQUIRE(it->second);
-    lsp::RegistrationParams registrationParams = it->second.value();
-    REQUIRE_EQ(registrationParams.registrations.size(), 1);
-    CHECK_EQ(registrationParams.registrations[0].method, "textDocument/diagnostic");
-    lsp::DiagnosticOptions registerOptions = registrationParams.registrations[0].registerOptions;
+    auto registration = client.findRegistration("textDocument/diagnostic");
+    REQUIRE(registration);
+    lsp::DiagnosticOptions registerOptions = registration->registerOptions;
     CHECK_FALSE(registerOptions.workspaceDiagnostics);
 
     server.shutdown();
@@ -113,15 +103,7 @@ TEST_CASE("language_server_does_not_dynamically_register_diagnostics_capability_
     server.onRequest(0, "initialize", params);
     server.onNotification("initialized", std::make_optional(lsp::InitializedParams{}));
 
-    auto it = std::find_if(client.requestQueue.begin(), client.requestQueue.end(),
-        [](const auto& request)
-        {
-            if (request.first != "client/registerCapability" || !request.second)
-                return false;
-            lsp::RegistrationParams registrationParams = request.second.value();
-            return !registrationParams.registrations.empty() && registrationParams.registrations[0].method == "textDocument/diagnostic";
-        });
-    CHECK(it == client.requestQueue.end());
+    CHECK_FALSE(client.findRegistration("textDocument/diagnostic"));
 
     server.shutdown();
 }
@@ -157,23 +139,11 @@ TEST_CASE("language_server_updates_diagnostics_capability_registration_when_work
     client.configStore.insert_or_assign(Uri(), newConfig);
     client.configChangedCallback(Uri(), newConfig, &oldConfig);
 
-    auto unregisterIt = std::find_if(client.requestQueue.begin(), client.requestQueue.end(),
-        [](const auto& request)
-        {
-            return request.first == "client/unregisterCapability";
-        });
-    REQUIRE(unregisterIt != client.requestQueue.end());
+    CHECK(client.hasUnregistration("textDocument/diagnostic"));
 
-    auto registerIt = std::find_if(client.requestQueue.begin(), client.requestQueue.end(),
-        [](const auto& request)
-        {
-            return request.first == "client/registerCapability";
-        });
-    REQUIRE(registerIt != client.requestQueue.end());
-    REQUIRE(registerIt->second);
-    lsp::RegistrationParams registrationParams = registerIt->second.value();
-    REQUIRE_EQ(registrationParams.registrations.size(), 1);
-    lsp::DiagnosticOptions registerOptions = registrationParams.registrations[0].registerOptions;
+    auto registration = client.findRegistration("textDocument/diagnostic");
+    REQUIRE(registration);
+    lsp::DiagnosticOptions registerOptions = registration->registerOptions;
     CHECK(registerOptions.workspaceDiagnostics);
 
     server.shutdown();

@@ -857,14 +857,17 @@ void LanguageServer::updateDiagnosticCapabilityRegistration()
     // already scopes the actual `workspace/diagnostic` computation per-workspace based on that
     // workspace's own configuration (see `WorkspaceFolder::workspaceDiagnostics`), so this only
     // controls whether the client is told a workspace-wide diagnostic pull is worth running at all.
+    // NOTE: this is a single, server-wide capability, so a multi-root workspace with mixed
+    // `diagnostics.workspace` settings across folders will still under-clear diagnostics for the
+    // folders where it's disabled, same as before this fix - properly supporting that would need a
+    // separate registration per folder (scoped via `registerOptions.documentSelector`), which isn't
+    // implemented here.
     bool workspaceDiagnosticsEnabled = client->getConfiguration(nullWorkspace->rootUri).diagnostics.workspace;
     for (const auto& workspace : workspaceFolders)
     {
-        if (client->getConfiguration(workspace->rootUri).diagnostics.workspace)
-        {
-            workspaceDiagnosticsEnabled = true;
+        if (workspaceDiagnosticsEnabled)
             break;
-        }
+        workspaceDiagnosticsEnabled = client->getConfiguration(workspace->rootUri).diagnostics.workspace;
     }
 
     if (registeredDiagnosticsWorkspaceCapability && *registeredDiagnosticsWorkspaceCapability == workspaceDiagnosticsEnabled)
