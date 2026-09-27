@@ -295,6 +295,34 @@ TEST_CASE_FIXTURE(Fixture, "renaming_required_variable_should_not_rename_type_pr
     )");
 }
 
+TEST_CASE_FIXTURE(Fixture, "renaming_local_from_within_generic_type_reference_prefix_should_rename_declaration")
+{
+    // Regression test for https://github.com/JohnnyMorganz/luau-lsp/issues/1203
+    auto source = R"(
+        local jecs = require("path/to/jecs")
+
+        type Entity = jecs.Entity<Player>
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{3, 22}; // cursor on "jecs" prefix inside the type reference
+    params.newName = "ecs";
+
+    auto result = workspace.rename(params, nullptr);
+    REQUIRE(result);
+    REQUIRE(result->changes.size() == 1);
+
+    auto documentEdits = result->changes.begin()->second;
+    CHECK_EQ(applyEdit(source, documentEdits), R"(
+        local ecs = require("path/to/jecs")
+
+        type Entity = ecs.Entity<Player>
+    )");
+}
+
 TEST_CASE_FIXTURE(Fixture, "rename_global_function_name")
 {
     auto source = R"(
