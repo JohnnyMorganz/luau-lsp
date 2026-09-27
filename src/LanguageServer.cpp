@@ -138,12 +138,9 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities(bool diagnosticsDy
     // Inlay Hint Provider
     capabilities.inlayHintProvider = true;
     // Diagnostics Provider
-    // If the client supports dynamic registration for diagnostics, don't statically commit to
-    // `workspaceDiagnostics` here - we don't yet know the resolved `diagnostics.workspace` setting,
-    // since workspace configuration is only fetched asynchronously, after initialization. Instead,
-    // register the real capability dynamically once configuration is known/changes - see
-    // `updateDiagnosticCapabilityRegistration` - so pull-diagnostics clients correctly clear
-    // diagnostics when a document closes and workspace diagnostics is disabled (#1019).
+    // `diagnostics.workspace` isn't known yet here (config is fetched asynchronously after
+    // initialize), so if the client can register dynamically, defer to
+    // `updateDiagnosticCapabilityRegistration` instead of statically committing to `workspaceDiagnostics: true` (#1019).
     if (!diagnosticsDynamicRegistrationSupported)
         capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
     // Workspace Symbols Provider
@@ -784,7 +781,6 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         if (!oldConfig || oldConfig->inlayHints != config.inlayHints)
             client->refreshInlayHints();
 
-        // Keep the dynamically registered diagnostics capability in sync with the real setting
         if (!oldConfig || oldConfig->diagnostics.workspace != config.diagnostics.workspace)
             updateDiagnosticCapabilityRegistration();
     };
@@ -840,10 +836,7 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
             folder->hasConfiguration = true;
     }
 
-    // Register the diagnostics capability using whatever configuration is known right now - either
-    // the default/global configuration (if the client doesn't support `workspace/configuration`, in
-    // which case `configChangedCallback` above will never fire), or a reasonable initial guess that
-    // `configChangedCallback` will correct once each workspace's real configuration arrives.
+    // Also covers clients without `workspace/configuration` support, where configChangedCallback above never fires
     updateDiagnosticCapabilityRegistration();
 }
 
@@ -853,15 +846,8 @@ void LanguageServer::updateDiagnosticCapabilityRegistration()
             client->capabilities.textDocument->diagnostic->dynamicRegistration))
         return;
 
-    // Workspace diagnostics is considered enabled if any workspace currently wants it. The server
-    // already scopes the actual `workspace/diagnostic` computation per-workspace based on that
-    // workspace's own configuration (see `WorkspaceFolder::workspaceDiagnostics`), so this only
-    // controls whether the client is told a workspace-wide diagnostic pull is worth running at all.
-    // NOTE: this is a single, server-wide capability, so a multi-root workspace with mixed
-    // `diagnostics.workspace` settings across folders will still under-clear diagnostics for the
-    // folders where it's disabled, same as before this fix - properly supporting that would need a
-    // separate registration per folder (scoped via `registerOptions.documentSelector`), which isn't
-    // implemented here.
+    // Enabled if any workspace wants it - a single, server-wide capability, so a multi-root workspace
+    // with mixed `diagnostics.workspace` settings per folder isn't fully supported here.
     bool workspaceDiagnosticsEnabled = client->getConfiguration(nullWorkspace->rootUri).diagnostics.workspace;
     for (const auto& workspace : workspaceFolders)
     {

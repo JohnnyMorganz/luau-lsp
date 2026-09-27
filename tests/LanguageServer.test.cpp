@@ -61,16 +61,9 @@ TEST_CASE("language_server_lazily_initializes_workspace_folders")
     server.shutdown();
 }
 
-// Reproduction/fix for https://github.com/JohnnyMorganz/luau-lsp/issues/1019
-//
-// The server used to always advertise `diagnosticProvider.workspaceDiagnostics: true` statically,
-// regardless of the (dynamic, resource-scoped) `diagnostics.workspace` setting. Pull-diagnostics
-// clients use that capability to decide whether closing a document can be cleared immediately, or
-// whether to defer to a workspace diagnostic pull - so misdeclaring it as `true` when workspace
-// diagnostics is actually disabled left closed documents' diagnostics stale forever. If the client
-// supports dynamic registration for diagnostics, the server now registers the real capability once
-// configuration is known (and keeps it in sync as configuration changes), instead of statically
-// declaring it at initialize.
+// #1019: a pull-diagnostics client uses `diagnosticProvider.workspaceDiagnostics` to decide whether
+// to clear a closed document's diagnostics immediately or defer to a workspace pull, so this must
+// reflect the real `diagnostics.workspace` setting rather than always being statically `true`.
 TEST_CASE("language_server_dynamically_registers_diagnostics_capability_when_client_supports_it")
 {
     TestClient client;

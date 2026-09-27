@@ -72,13 +72,8 @@ private:
     void clearCancellationToken(const json_rpc::JsonRpcMessage& msg);
     std::optional<json_rpc::JsonRpcMessage> popMessage();
 
-    /// Dynamically (re-)registers the `textDocument/diagnostic` capability so its
-    /// `workspaceDiagnostics` flag reflects whether any workspace currently has
-    /// `diagnostics.workspace` enabled. Only takes effect if the client supports dynamic
-    /// registration for diagnostics (see `onInitialize`, which otherwise falls back to a static
-    /// registration). Without this, a pull-diagnostics client is told workspace diagnostics are
-    /// always available, so it defers clearing a closed document's diagnostics to a workspace
-    /// diagnostic pull that never runs when the setting is actually disabled - see #1019.
+    /// Re-registers `textDocument/diagnostic` so `workspaceDiagnostics` matches the real
+    /// `diagnostics.workspace` setting; no-op if the client doesn't support dynamic registration (#1019).
     void updateDiagnosticCapabilityRegistration();
 
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
