@@ -119,12 +119,19 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         return;
 
     auto unclosedBlock = false;
+    auto unclosedRepeat = false;
     for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
     {
         if (auto* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->body->hasEnd)
+        {
             unclosedBlock = true;
+            unclosedRepeat = false;
+        }
         else if (auto* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->body->hasEnd)
+        {
             unclosedBlock = true;
+            unclosedRepeat = false;
+        }
         else if (auto* statIf = (*it)->as<Luau::AstStatIf>())
         {
             bool hasEnd = statIf->thenbody->hasEnd;
@@ -135,24 +142,39 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             }
 
             if (!hasEnd)
+            {
                 unclosedBlock = true;
+                unclosedRepeat = false;
+            }
         }
         else if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->body->hasEnd)
+        {
             unclosedBlock = true;
+            unclosedRepeat = false;
+        }
         else if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->body->hasEnd)
+        {
             unclosedBlock = true;
+            unclosedRepeat = false;
+        }
         if (auto* exprBlock = (*it)->as<Luau::AstStatBlock>(); exprBlock && !exprBlock->hasEnd)
+        {
             unclosedBlock = true;
+            unclosedRepeat = false;
+        }
 
-        // FIX: if the unclosedBlock came from a repeat, then don't autocomplete, as it will be wrong!
+        // `hasEnd` on a repeat's body actually tracks whether `until` has been parsed, since a
+        // repeat block is closed by `until <condition>` rather than a bare `end`. Insert `until`
+        // instead of `end` in that case.
         if (auto* statRepeat = (*it)->as<Luau::AstStatRepeat>(); statRepeat && !statRepeat->body->hasEnd)
+        {
             unclosedBlock = false;
+            unclosedRepeat = true;
+        }
     }
 
     std::vector<lsp::TextEdit> edits;
     bool moveCursorUp = false;
-
-    // TODO: handle `until` for repeat: `until` can be inserted if `hasEnd` in a repeat block is false
 
     if (parentNode)
     {
@@ -178,8 +200,11 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         }
     }
 
-    if (unclosedBlock)
+    if (unclosedBlock || unclosedRepeat)
     {
+        // A repeat block is closed with `until <condition>` rather than a bare `end`
+        std::string closingKeyword = unclosedRepeat ? "until " : "end";
+
         // Take into account the current line content when inserting end
         // in case we are e.g. inside of a function call
         auto currentLineContent = document->getLine(params.position.line);
@@ -217,8 +242,8 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         // If its in the middle of the file, vscode won't change the marker
         if (params.position.line == document->lineCount() - 1 || !currentLineContent.empty())
         {
-            // Insert an end at the current position, with a newline before it
-            auto insertText = "\n" + indent + "end" + currentLineContent + "\n";
+            // Insert an end/until at the current position, with a newline before it
+            auto insertText = "\n" + indent + closingKeyword + currentLineContent + "\n";
             edits.emplace_back(lsp::TextEdit{{{params.position.line, 0}, {params.position.line + 1, 0}}, insertText});
             moveCursorUp = true;
         }
@@ -226,9 +251,9 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         {
             LUAU_ASSERT(currentLineContent.empty());
 
-            // Insert the end onto the next line
+            // Insert the end/until onto the next line
             lsp::Position position{params.position.line + 1, 0};
-            edits.emplace_back(lsp::TextEdit{{position, position}, indent + "end\n"});
+            edits.emplace_back(lsp::TextEdit{{position, position}, indent + closingKeyword + "\n"});
         }
     }
 
