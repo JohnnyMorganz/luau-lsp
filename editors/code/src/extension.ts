@@ -405,7 +405,9 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
   const serverConfiguration =
     vscode.workspace.getConfiguration("luau-lsp.server");
 
-  const serverBinConfig = serverConfiguration.get("path", "").trim();
+  const serverBinConfig = utils.resolvePath(
+    serverConfiguration.get("path", "").trim(),
+  );
   const serverBinUri =
     vscode.workspace.workspaceFolders &&
     vscode.workspace.workspaceFolders.length > 0
