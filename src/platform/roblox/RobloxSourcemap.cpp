@@ -496,33 +496,57 @@ static std::optional<ScriptContext> scriptContextFromFilePathSuffix(const Source
 void RobloxPlatform::writePathsToMap(SourceNode* node, const std::string& base, ScriptContext parentNameContext)
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::writePathsToMap", "LSP");
-    node->virtualPath = base;
-    virtualPathsToSourceNodes[base] = node;
 
-    if (auto realPath = getRealPathFromSourceNode(node))
+    // Explicit-stack pre-order traversal: a deeply nested sourcemap (e.g. from `rojo sourcemap
+    // --include-non-scripts` mirroring an unpacked model's instance tree) can be too deep to walk
+    // recursively without overflowing the stack. See #1521. Sibling processing order doesn't
+    // matter here (each node's own bookkeeping is independent of its siblings'), only that a
+    // node is fully handled before its children are pushed, which this preserves.
+    struct Frame
     {
-        realPathsToSourceNodes.insert_or_assign(*realPath, node);
-    }
+        SourceNode* node;
+        std::string base;
+        ScriptContext parentNameContext;
+    };
 
-    if (node->className == "LocalScript")
-        node->scriptContext = ScriptContext::Client; // client by class invariant, never overridden
-    else if (node->className == "Script")
-        node->scriptContext = scriptContextFromFilePathSuffix(node).value_or(ScriptContext::Server);
-    else
-        node->scriptContext = parentNameContext;
+    std::vector<Frame> stack;
+    stack.push_back(Frame{node, base, parentNameContext});
 
-    ScriptContext childNameContext;
-    if (node->name == "ServerScriptService" || node->name == "ServerStorage")
-        childNameContext = ScriptContext::Server;
-    else if (node->name == "StarterPlayer" || node->name == "StarterGui" || node->name == "StarterPack" || node->name == "ReplicatedFirst")
-        childNameContext = ScriptContext::Client;
-    else
-        childNameContext = parentNameContext;
-
-    for (auto& child : node->children)
+    while (!stack.empty())
     {
-        child->parent = node;
-        writePathsToMap(child, base + "/" + child->name, childNameContext);
+        Frame frame = std::move(stack.back());
+        stack.pop_back();
+
+        SourceNode* current = frame.node;
+        current->virtualPath = frame.base;
+        virtualPathsToSourceNodes[frame.base] = current;
+
+        if (auto realPath = getRealPathFromSourceNode(current))
+        {
+            realPathsToSourceNodes.insert_or_assign(*realPath, current);
+        }
+
+        if (current->className == "LocalScript")
+            current->scriptContext = ScriptContext::Client; // client by class invariant, never overridden
+        else if (current->className == "Script")
+            current->scriptContext = scriptContextFromFilePathSuffix(current).value_or(ScriptContext::Server);
+        else
+            current->scriptContext = frame.parentNameContext;
+
+        ScriptContext childNameContext;
+        if (current->name == "ServerScriptService" || current->name == "ServerStorage")
+            childNameContext = ScriptContext::Server;
+        else if (current->name == "StarterPlayer" || current->name == "StarterGui" || current->name == "StarterPack" ||
+                 current->name == "ReplicatedFirst")
+            childNameContext = ScriptContext::Client;
+        else
+            childNameContext = frame.parentNameContext;
+
+        for (auto& child : current->children)
+        {
+            child->parent = current;
+            stack.push_back(Frame{child, frame.base + "/" + child->name, childNameContext});
+        }
     }
 }
 

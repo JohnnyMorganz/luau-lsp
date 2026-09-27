@@ -1595,6 +1595,84 @@ TEST_CASE("source_node_contains_file_paths_returns_false_when_no_file_paths_in_t
     CHECK_FALSE(child->containsFilePaths());
 }
 
+// Regression test for #1521: a sourcemap generated with `rojo sourcemap --include-non-scripts`
+// preserves non-script instance subtrees (e.g. unpacked map geometry) that would otherwise be
+// pruned, which can make the tree far deeper than a typical script hierarchy. SourceNode::fromJson
+// and RobloxPlatform::writePathsToMap used to recurse once per nesting level and could overflow
+// the stack; they now use an explicit heap-allocated stack instead, so depth is no longer bounded
+// by the native call stack.
+TEST_CASE_FIXTURE(Fixture, "deeply_nested_sourcemap_does_not_overflow_stack")
+{
+    constexpr int Depth = 5000;
+
+    std::string sourcemap = R"({"name":"Game","className":"DataModel","children":[)";
+    for (int i = 0; i < Depth; ++i)
+        sourcemap += R"({"name":"F)" + std::to_string(i) + R"(","className":"Folder","children":[)";
+    sourcemap += R"({"name":"Leaf","className":"Folder"})";
+    for (int i = 0; i < Depth; ++i)
+        sourcemap += "]}";
+    sourcemap += "]}";
+
+    // Load twice: the second load exercises RobloxPlatform::clearSourcemapTypes ->
+    // SourceNode::clearCachedTypes walking the (now deep) tree built by the first load, which is
+    // also an explicit-stack rewrite.
+    loadSourcemap(sourcemap);
+    loadSourcemap(sourcemap);
+
+    auto root = getRootSourceNode();
+    CHECK_EQ(root->className, "DataModel");
+
+    // Walk the whole chain to make sure it was actually built (and parent pointers wired by
+    // writePathsToMap) rather than silently truncated.
+    const SourceNode* node = root;
+    for (int i = 0; i < Depth; ++i)
+    {
+        auto child = node->findChild("F" + std::to_string(i));
+        REQUIRE(child);
+        CHECK_EQ((*child)->parent, node);
+        node = *child;
+    }
+
+    auto leaf = node->findChild("Leaf");
+    REQUIRE(leaf);
+    CHECK_EQ((*leaf)->parent, node);
+    CHECK_EQ((*leaf)->virtualPath, node->virtualPath + "/Leaf");
+}
+
+// Regression test for #1521, covering SourceNode::toJson/containsFilePaths, which have the same
+// recursive-per-nesting-level shape as fromJson but operate on an in-memory tree built directly
+// via the allocator rather than parsed from JSON.
+TEST_CASE("deeply_nested_source_node_to_json_does_not_overflow_stack")
+{
+    constexpr int Depth = 5000;
+
+    Luau::TypedAllocator<SourceNode> allocator;
+
+    SourceNode* node = allocator.allocate(SourceNode("Leaf", "ModuleScript", {"src/Leaf.luau"}, {}));
+    for (int i = 0; i < Depth; ++i)
+        node = allocator.allocate(SourceNode("F" + std::to_string(i), "Folder", {}, {node}));
+
+    auto root = allocator.allocate(SourceNode("game", "DataModel", {}, {node}));
+
+    CHECK(root->containsFilePaths());
+
+    auto jsonOutput = root->toJson();
+
+    // Descend from the root (F{Depth-1} is outermost, Leaf is innermost) to make sure the whole
+    // chain survived serialization rather than being truncated or pruned.
+    const ordered_json* current = &jsonOutput;
+    for (int i = Depth - 1; i >= 0; --i)
+    {
+        REQUIRE(current->contains("children"));
+        REQUIRE_EQ((*current)["children"].size(), 1);
+        current = &(*current)["children"][0];
+        CHECK_EQ((*current)["name"], "F" + std::to_string(i));
+    }
+    REQUIRE(current->contains("children"));
+    REQUIRE_EQ((*current)["children"].size(), 1);
+    CHECK_EQ((*current)["children"][0]["name"], "Leaf");
+}
+
 TEST_CASE_FIXTURE(Fixture, "plugin_node_from_json_parses_file_paths")
 {
     auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());

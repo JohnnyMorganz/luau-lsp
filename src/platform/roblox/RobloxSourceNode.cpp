@@ -94,11 +94,40 @@ std::optional<const SourceNode*> SourceNode::findDescendant(const std::string& c
 
 bool SourceNode::containsFilePaths() const
 {
-    return !filePaths.empty() || std::any_of(children.begin(), children.end(),
-                                     [](const auto* child)
-                                     {
-                                         return child->containsFilePaths();
-                                     });
+    // Explicit-stack post-order traversal to avoid stack overflow on deeply nested sourcemaps
+    // (see #1521). Each frame accumulates whether any child visited so far had file paths, so the
+    // aggregate for a node is available as soon as its last child has been popped.
+    struct Frame
+    {
+        const SourceNode* node;
+        size_t nextChildIndex = 0;
+        bool anyChildHasFilePaths = false;
+    };
+
+    std::vector<Frame> stack;
+    stack.push_back(Frame{this});
+
+    bool result = false;
+
+    while (!stack.empty())
+    {
+        const SourceNode* node = stack.back().node;
+
+        if (stack.back().nextChildIndex < node->children.size())
+        {
+            const SourceNode* child = node->children[stack.back().nextChildIndex];
+            stack.back().nextChildIndex++;
+            stack.push_back(Frame{child});
+            continue;
+        }
+
+        result = !node->filePaths.empty() || stack.back().anyChildHasFilePaths;
+        stack.pop_back();
+        if (!stack.empty())
+            stack.back().anyChildHasFilePaths = stack.back().anyChildHasFilePaths || result;
+    }
+
+    return result;
 }
 
 std::optional<const SourceNode*> SourceNode::findAncestor(const std::string& ancestorName) const
@@ -160,68 +189,145 @@ const SourceNode* SourceNode::walkPath(const std::string& path) const
 
 void SourceNode::clearCachedTypes() const
 {
-    tys.clear();
-    for (const auto& child : children)
-        child->clearCachedTypes();
+    // Explicit-stack traversal: a deeply nested sourcemap (e.g. from `rojo sourcemap
+    // --include-non-scripts` mirroring an unpacked model's instance tree) can be too deep to
+    // walk recursively without overflowing the stack. See #1521.
+    std::vector<const SourceNode*> stack{this};
+    while (!stack.empty())
+    {
+        const SourceNode* node = stack.back();
+        stack.pop_back();
+
+        node->tys.clear();
+        for (const auto& child : node->children)
+            stack.push_back(child);
+    }
 }
 
 SourceNode* SourceNode::fromJson(const json& j, Luau::TypedAllocator<SourceNode>& allocator)
 {
-    auto name = j.at("name").get<std::string>();
-    auto className = j.at("className").get<std::string>();
-
-    std::vector<std::string> filePaths;
-    if (j.contains("filePaths"))
-        j.at("filePaths").get_to(filePaths);
-
-    std::vector<SourceNode*> children;
-    if (j.contains("children"))
+    // Explicit-stack post-order build: a deeply nested sourcemap (e.g. from `rojo sourcemap
+    // --include-non-scripts` mirroring an unpacked model's instance tree) can be too deep to
+    // parse recursively without overflowing the stack. See #1521. Each frame tracks the json
+    // node it corresponds to, how many of its "children" have been visited so far, and the
+    // SourceNode children already built for it; a node is only constructed once every entry in
+    // its "children" array has been turned into a SourceNode.
+    struct Frame
     {
-        for (auto& child : j.at("children"))
-            children.emplace_back(SourceNode::fromJson(child, allocator));
+        const json* value;
+        size_t nextChildIndex = 0;
+        std::vector<SourceNode*> children;
+    };
+
+    std::vector<Frame> stack;
+    stack.push_back(Frame{&j});
+
+    SourceNode* result = nullptr;
+
+    while (!stack.empty())
+    {
+        const json& node = *stack.back().value;
+        const json* childrenArray = node.contains("children") ? &node.at("children") : nullptr;
+
+        if (childrenArray && stack.back().nextChildIndex < childrenArray->size())
+        {
+            const json& childJson = childrenArray->at(stack.back().nextChildIndex);
+            stack.back().nextChildIndex++;
+            stack.push_back(Frame{&childJson});
+            continue;
+        }
+
+        auto name = node.at("name").get<std::string>();
+        auto className = node.at("className").get<std::string>();
+
+        std::vector<std::string> filePaths;
+        if (node.contains("filePaths"))
+            node.at("filePaths").get_to(filePaths);
+
+        bool pluginManaged = node.contains("pluginManaged") && node.at("pluginManaged").get<bool>();
+
+        result = allocator.allocate(
+            SourceNode(std::move(name), std::move(className), std::move(filePaths), std::move(stack.back().children), pluginManaged));
+
+        stack.pop_back();
+        if (!stack.empty())
+            stack.back().children.push_back(result);
     }
 
-    bool pluginManaged = j.contains("pluginManaged") && j.at("pluginManaged").get<bool>();
-
-    return allocator.allocate(SourceNode(std::move(name), std::move(className), std::move(filePaths), std::move(children), pluginManaged));
+    return result;
 }
 
 // Only includes nodes with filepaths to avoid writing every Instance in the DataModel to `sourcemap.json`
 ordered_json SourceNode::toJson() const
 {
-    ordered_json node;
-    node["name"] = name;
-    node["className"] = className;
-    if (pluginManaged)
+    // Explicit-stack post-order build, mirroring `fromJson`, to avoid stack overflow on a deeply
+    // nested in-memory tree (see #1521). Whether a node's subtree "contains file paths" is
+    // computed inline as part of this same walk (each frame tracks whether any child visited so
+    // far had file paths, same as `containsFilePaths()`), rather than by calling
+    // `containsFilePaths()` on each candidate child before descending into it - doing so would
+    // make the whole walk quadratic, since that call would re-walk the child's subtree from
+    // scratch at every level. A child is only attached to its parent's "children" array (and, for
+    // consistency, only allowed to influence the parent's own aggregate) once it's known its
+    // subtree has something worth keeping; `this` is always kept regardless, matching the
+    // recursive version never pruning the node `toJson()` was called on.
+    struct Frame
     {
-        // When a plugin-managed node is no longer in the plugin info, it must be pruned.
-        // However, when the sourcemap is re-read (ex: file change, reopened editor, LSP restart)
-        // that would make all nodes NOT plugin-managed, so nothing could ever be removed after that.
-        // Therefore, we need to persist pluginManaged in the json.
-        node["pluginManaged"] = pluginManaged;
-    }
+        const SourceNode* node;
+        size_t nextChildIndex = 0;
+        ordered_json children = ordered_json::array();
+        bool anyChildHasFilePaths = false;
+    };
 
-    if (!filePaths.empty())
-    {
-        node["filePaths"] = filePaths;
-    }
+    std::vector<Frame> stack;
+    stack.push_back(Frame{this});
 
-    if (!children.empty())
+    ordered_json result;
+
+    while (!stack.empty())
     {
-        ordered_json children_array = ordered_json::array();
-        for (const auto* child : children)
+        const SourceNode* node = stack.back().node;
+
+        if (stack.back().nextChildIndex < node->children.size())
         {
-            if (!child->containsFilePaths())
+            const SourceNode* child = node->children[stack.back().nextChildIndex];
+            stack.back().nextChildIndex++;
+            stack.push_back(Frame{child});
+            continue;
+        }
+
+        bool hasFilePaths = !node->filePaths.empty() || stack.back().anyChildHasFilePaths;
+        bool isRoot = stack.size() == 1;
+
+        if (hasFilePaths || isRoot)
+        {
+            ordered_json nodeJson;
+            nodeJson["name"] = node->name;
+            nodeJson["className"] = node->className;
+            if (node->pluginManaged)
             {
-                continue;
+                // When a plugin-managed node is no longer in the plugin info, it must be pruned.
+                // However, when the sourcemap is re-read (ex: file change, reopened editor, LSP restart)
+                // that would make all nodes NOT plugin-managed, so nothing could ever be removed after that.
+                // Therefore, we need to persist pluginManaged in the json.
+                nodeJson["pluginManaged"] = node->pluginManaged;
             }
-            children_array.emplace_back(child->toJson());
+
+            if (!node->filePaths.empty())
+                nodeJson["filePaths"] = node->filePaths;
+
+            if (!stack.back().children.empty())
+                nodeJson["children"] = std::move(stack.back().children);
+
+            result = std::move(nodeJson);
         }
-        if (!children_array.empty())
+
+        stack.pop_back();
+        if (!stack.empty() && hasFilePaths)
         {
-            node["children"] = children_array;
+            stack.back().anyChildHasFilePaths = true;
+            stack.back().children.push_back(std::move(result));
         }
     }
 
-    return node;
+    return result;
 }
