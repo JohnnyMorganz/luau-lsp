@@ -118,20 +118,20 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
     if (parentNode && shouldSuppressKeywordInsertion(parentNode, cursorIsInErrorNode))
         return;
 
-    auto unclosedBlock = false;
-    auto unclosedRepeat = false;
+    enum class ClosingKeyword
+    {
+        None,
+        End,
+        Until,
+    };
+
+    auto closing = ClosingKeyword::None;
     for (auto it = ancestry.rbegin(); it != ancestry.rend(); ++it)
     {
         if (auto* statForIn = (*it)->as<Luau::AstStatForIn>(); statForIn && !statForIn->body->hasEnd)
-        {
-            unclosedBlock = true;
-            unclosedRepeat = false;
-        }
+            closing = ClosingKeyword::End;
         else if (auto* statFor = (*it)->as<Luau::AstStatFor>(); statFor && !statFor->body->hasEnd)
-        {
-            unclosedBlock = true;
-            unclosedRepeat = false;
-        }
+            closing = ClosingKeyword::End;
         else if (auto* statIf = (*it)->as<Luau::AstStatIf>())
         {
             bool hasEnd = statIf->thenbody->hasEnd;
@@ -142,35 +142,19 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
             }
 
             if (!hasEnd)
-            {
-                unclosedBlock = true;
-                unclosedRepeat = false;
-            }
+                closing = ClosingKeyword::End;
         }
         else if (auto* statWhile = (*it)->as<Luau::AstStatWhile>(); statWhile && !statWhile->body->hasEnd)
-        {
-            unclosedBlock = true;
-            unclosedRepeat = false;
-        }
+            closing = ClosingKeyword::End;
         else if (auto* exprFunction = (*it)->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->body->hasEnd)
-        {
-            unclosedBlock = true;
-            unclosedRepeat = false;
-        }
+            closing = ClosingKeyword::End;
         if (auto* exprBlock = (*it)->as<Luau::AstStatBlock>(); exprBlock && !exprBlock->hasEnd)
-        {
-            unclosedBlock = true;
-            unclosedRepeat = false;
-        }
+            closing = ClosingKeyword::End;
 
         // `hasEnd` on a repeat's body actually tracks whether `until` has been parsed, since a
-        // repeat block is closed by `until <condition>` rather than a bare `end`. Insert `until`
-        // instead of `end` in that case.
+        // repeat block is closed by `until <condition>` rather than a bare `end`.
         if (auto* statRepeat = (*it)->as<Luau::AstStatRepeat>(); statRepeat && !statRepeat->body->hasEnd)
-        {
-            unclosedBlock = false;
-            unclosedRepeat = true;
-        }
+            closing = ClosingKeyword::Until;
     }
 
     std::vector<lsp::TextEdit> edits;
@@ -200,10 +184,10 @@ void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
         }
     }
 
-    if (unclosedBlock || unclosedRepeat)
+    if (closing != ClosingKeyword::None)
     {
         // A repeat block is closed with `until <condition>` rather than a bare `end`
-        std::string closingKeyword = unclosedRepeat ? "until " : "end";
+        std::string closingKeyword = closing == ClosingKeyword::Until ? "until " : "end";
 
         // Take into account the current line content when inserting end
         // in case we are e.g. inside of a function call
