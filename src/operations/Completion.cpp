@@ -65,6 +65,80 @@ static Luau::AstNode* getParentNode(const std::vector<Luau::AstNode*> ancestry)
     return nullptr;
 }
 
+// When completing a partially-typed identifier that is one of the expressions in a `return` statement
+// (e.g. `if x then return e|`), Luau's autocomplete engine resolves the position as an *expression*
+// completion rather than a *statement* completion, since the identifier being typed could become an
+// actual return value. This means it never considers that an empty return value list is also valid here,
+// so it never offers to close the surrounding block with `end`/`else`/`elseif`/`until` - even once the
+// full keyword has been typed out. As a result, unrelated bindings/globals sharing the same prefix (e.g.
+// `EncodingService` when typing `end`) are offered instead, with nothing to prioritise the keyword over.
+// We manually reinstate those keyword suggestions here by walking the same ancestry chain that would be
+// used if the identifier were removed and the position were treated as a fresh statement.
+// See https://github.com/JohnnyMorganz/luau-lsp/issues/1503
+static void suggestMissingKeywordsForReturnStatement(std::vector<Luau::AstNode*>& ancestry, Luau::AutocompleteEntryMap& entryMap)
+{
+    size_t returnIndex = ancestry.size();
+    for (size_t i = ancestry.size(); i-- > 0;)
+    {
+        if (ancestry[i]->is<Luau::AstStatReturn>())
+        {
+            returnIndex = i;
+            break;
+        }
+
+        // Only walk back through the expression(s) currently being typed - anything else means we are not
+        // directly completing one of the return statement's own values
+        if (!(ancestry[i]->is<Luau::AstExprGlobal>() || ancestry[i]->is<Luau::AstExprLocal>() || ancestry[i]->is<Luau::AstExprError>()))
+            return;
+    }
+
+    if (returnIndex == ancestry.size())
+        return;
+
+    for (size_t i = returnIndex; i-- > 0;)
+    {
+        Luau::AstNode* node = ancestry[i];
+        if (auto* statForIn = node->as<Luau::AstStatForIn>(); statForIn && !statForIn->body->hasEnd)
+            entryMap.emplace("end", Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::Keyword});
+        else if (auto* statFor = node->as<Luau::AstStatFor>(); statFor && !statFor->body->hasEnd)
+            entryMap.emplace("end", Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::Keyword});
+        else if (auto* statIf = node->as<Luau::AstStatIf>())
+        {
+            bool hasEnd = statIf->thenbody->hasEnd;
+            if (statIf->elsebody)
+            {
+                if (auto* elseBlock = statIf->elsebody->as<Luau::AstStatBlock>())
+                    hasEnd = elseBlock->hasEnd;
+            }
+
+            if (!hasEnd)
+                entryMap.emplace("end", Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::Keyword});
+        }
+        else if (auto* statWhile = node->as<Luau::AstStatWhile>(); statWhile && !statWhile->body->hasEnd)
+            entryMap.emplace("end", Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::Keyword});
+        else if (auto* exprFunction = node->as<Luau::AstExprFunction>(); exprFunction && !exprFunction->body->hasEnd)
+            entryMap.emplace("end", Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::Keyword});
+
+        if (auto* statBlock = node->as<Luau::AstStatBlock>(); statBlock && !statBlock->hasEnd)
+            entryMap.emplace("end", Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::Keyword});
+    }
+
+    if (returnIndex >= 2)
+    {
+        Luau::AstNode* parent = ancestry[returnIndex - 2];
+        if (auto* statIf = parent->as<Luau::AstStatIf>())
+        {
+            if (!statIf->elsebody)
+            {
+                entryMap.emplace("else", Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::Keyword});
+                entryMap.emplace("elseif", Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::Keyword});
+            }
+        }
+        else if (auto* statRepeat = parent->as<Luau::AstStatRepeat>(); statRepeat && !statRepeat->body->hasEnd)
+            entryMap.emplace("until", Luau::AutocompleteEntry{Luau::AutocompleteEntryKind::Keyword});
+    }
+}
+
 void WorkspaceFolder::endAutocompletion(const lsp::CompletionParams& params)
 {
     auto moduleName = fileResolver.getModuleName(params.textDocument.uri);
@@ -787,6 +861,9 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
         result = Luau::autocomplete(frontend, moduleName, position, stringCompletionCB);
     }
+
+    if (config.completion.showKeywords)
+        suggestMissingKeywordsForReturnStatement(result.ancestry, result.entryMap);
 
     std::vector<lsp::CompletionItem> items{};
 

@@ -2124,6 +2124,98 @@ TEST_CASE_FIXTURE(Fixture, "prioritise_properties_when_sorting_autocomplete_in_t
     }
 }
 
+TEST_CASE_FIXTURE(Fixture, "prioritise_end_keyword_while_typing_after_return_statement")
+{
+    // https://github.com/JohnnyMorganz/luau-lsp/issues/1503
+    // Whilst typing `end` character-by-character after a bare `return`, the partially typed identifier
+    // is parsed as one of the return statement's values, so Luau's autocomplete engine resolves this as
+    // an expression completion and does not offer to close the surrounding block - even though doing so
+    // is still valid here (an empty return value list). This meant unrelated bindings/globals sharing the
+    // same prefix (e.g. `EncodingService`) were suggested instead, with `end` completely absent from the
+    // suggestions entirely, rather than just being deprioritised.
+    // Note: once `end` has been typed out in full, the if-statement is actually closed by it and there is
+    // nothing left to suggest - `end` is intentionally absent from the entries at that point.
+    ENABLE_NEW_SOLVER();
+
+    for (const std::string partial : {"e", "en"})
+    {
+        std::string rawSource = R"(
+            local EncodingService = 1
+
+            local function f(thisIsTrue: boolean)
+                if thisIsTrue then return )" +
+                                partial + "|";
+        auto [source, marker] = sourceWithMarker(rawSource);
+
+        auto uri = newDocument("foo" + partial + ".luau", source);
+
+        lsp::CompletionParams params;
+        params.textDocument = lsp::TextDocumentIdentifier{uri};
+        params.position = marker;
+
+        auto result = workspace.completion(params, nullptr);
+
+        INFO("partial = '", partial, "'");
+        auto endItem = getItem(result, "end");
+        REQUIRE(endItem);
+        CHECK_EQ(endItem->sortText, SortText::PrioritisedSuggestion);
+    }
+}
+
+TEST_CASE_FIXTURE(Fixture, "prioritise_else_and_elseif_keywords_while_typing_after_return_statement")
+{
+    // https://github.com/JohnnyMorganz/luau-lsp/issues/1503
+    ENABLE_NEW_SOLVER();
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local elapsedTime = 1
+
+        local function f(thisIsTrue: boolean)
+            if thisIsTrue then return els|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    for (const auto property : {"else", "elseif"})
+    {
+        auto entry = getItem(result, property);
+        REQUIRE(entry);
+        CHECK_EQ(entry->sortText, SortText::PrioritisedSuggestion);
+    }
+}
+
+TEST_CASE_FIXTURE(Fixture, "prioritise_until_keyword_while_typing_after_return_statement")
+{
+    // https://github.com/JohnnyMorganz/luau-lsp/issues/1503
+    ENABLE_NEW_SOLVER();
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local untilCondition = 1
+
+        local function f(thisIsTrue: boolean)
+            repeat
+                return unti|
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.completion(params, nullptr);
+
+    auto entry = getItem(result, "until");
+    REQUIRE(entry);
+    CHECK_EQ(entry->sortText, SortText::PrioritisedSuggestion);
+}
+
 TEST_CASE_FIXTURE(Fixture, "prioritise_relevant_keywords_when_inside_of_if")
 {
     ENABLE_NEW_SOLVER();

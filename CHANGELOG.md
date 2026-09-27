@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed Roblox string-require auto-imports producing `require("@alias/Module/init")` for modules backed by an `init.luau` file when a `.luaurc` alias is used. The directory is now required instead, e.g. `require("@alias/Module")` ([#1590](https://github.com/JohnnyMorganz/luau-lsp/issues/1590))
 - VSCode extension: `luau-lsp.server.path` now expands a leading `~/` (or `~\`) to the user's home directory, matching the existing behaviour of `luau-lsp.server.baseLuaurc` ([#1635](https://github.com/JohnnyMorganz/luau-lsp/issues/1635))
 - String require auto-imports are no longer suggested for files that have been renamed or deleted ([#1045](https://github.com/JohnnyMorganz/luau-lsp/issues/1045))
+- Fixed `end`/`else`/`elseif`/`until` not being suggested (or prioritised) while typing them after a bare `return` statement, e.g. `if x then return e|`, since the partially-typed keyword was parsed as one of the return statement's values instead ([#1503](https://github.com/JohnnyMorganz/luau-lsp/issues/1503))
 
 ### Changed
 
