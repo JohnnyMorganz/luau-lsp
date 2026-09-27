@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "LSP/ConfigLuau.hpp"
 #include "LSP/Diagnostics.hpp"
 #include "Platform/LSPPlatform.hpp"
 #include "Platform/RobloxPlatform.hpp"
@@ -531,6 +532,31 @@ void WorkspaceFolder::registerTypes(const std::vector<std::string>& disabledGlob
     Luau::registerBuiltinGlobals(frontend, frontend.globals);
     if (!FFlag::LuauSolverV2)
         Luau::registerBuiltinGlobals(frontend, frontend.globalsForAutocomplete);
+
+    client->sendTrace("workspace initialization: registering .config.luau environment");
+    frontend.registerBuiltinDefinition(
+        Luau::LanguageServer::ConfigLuau::kDefinitionName,
+        [this](Luau::Frontend& frontend, Luau::GlobalTypes& globals, Luau::ScopePtr scope)
+        {
+            const std::string& definitions = Luau::LanguageServer::ConfigLuau::getDefinitions();
+            auto result = frontend.loadDefinitionFile(
+                globals, scope, definitions, "@LuauConfig", /* captureComments */ true);
+            if (result.success)
+            {
+                TextDocument textDocument(
+                    Uri::parse("internal://environments/LuauConfig"), "luau", 0, definitions);
+                definitionsFileState.emplace(
+                    "@LuauConfig", DefinitionsFileState{std::move(textDocument), std::move(result.sourceModule), std::move(result.module)});
+            }
+            else
+            {
+                client->sendLogMessage(lsp::MessageType::Warning, "Failed to register .config.luau type definitions");
+            }
+        });
+    frontend.addEnvironment(Luau::LanguageServer::ConfigLuau::kEnvironmentName);
+    frontend.applyBuiltinDefinitionToEnvironment(
+        Luau::LanguageServer::ConfigLuau::kEnvironmentName, Luau::LanguageServer::ConfigLuau::kDefinitionName);
+    client->sendTrace("workspace initialization: registering .config.luau environment COMPLETED");
 
     auto& tagRegisterGlobals = FFlag::LuauSolverV2 ? frontend.globals : frontend.globalsForAutocomplete;
     Luau::attachTag(Luau::getGlobalBinding(tagRegisterGlobals, "require"), "Require");
