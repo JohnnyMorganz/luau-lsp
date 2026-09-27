@@ -86,7 +86,7 @@ WorkspaceFolderPtr LanguageServer::findWorkspace(const lsp::DocumentUri& file, b
     return nullWorkspace;
 }
 
-lsp::ServerCapabilities LanguageServer::getServerCapabilities()
+lsp::ServerCapabilities LanguageServer::getServerCapabilities(bool diagnosticsDynamicRegistrationSupported)
 {
     lsp::ServerCapabilities capabilities;
     // Text Document Sync
@@ -138,7 +138,14 @@ lsp::ServerCapabilities LanguageServer::getServerCapabilities()
     // Inlay Hint Provider
     capabilities.inlayHintProvider = true;
     // Diagnostics Provider
-    capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
+    // If the client supports dynamic registration for diagnostics, don't statically commit to
+    // `workspaceDiagnostics` here - we don't yet know the resolved `diagnostics.workspace` setting,
+    // since workspace configuration is only fetched asynchronously, after initialization. Instead,
+    // register the real capability dynamically once configuration is known/changes - see
+    // `updateDiagnosticCapabilityRegistration` - so pull-diagnostics clients correctly clear
+    // diagnostics when a document closes and workspace diagnostics is disabled (#1019).
+    if (!diagnosticsDynamicRegistrationSupported)
+        capabilities.diagnosticProvider = {"luau", /* interFileDependencies: */ true, /* workspaceDiagnostics: */ true};
     // Workspace Symbols Provider
     capabilities.workspaceSymbolProvider = true;
     // Call Hierarchy Provider
@@ -730,8 +737,10 @@ lsp::InitializeResult LanguageServer::onInitialize(const lsp::InitializeParams& 
     }
 
     isInitialized = true;
+    bool diagnosticsDynamicRegistrationSupported = client->capabilities.textDocument && client->capabilities.textDocument->diagnostic &&
+                                                   client->capabilities.textDocument->diagnostic->dynamicRegistration;
     lsp::InitializeResult result;
-    result.capabilities = getServerCapabilities();
+    result.capabilities = getServerCapabilities(diagnosticsDynamicRegistrationSupported);
     result.serverInfo = lsp::InitializeResult::ServerInfo{LSP_NAME, LSP_VERSION};
 
     // Position Encoding
@@ -774,6 +783,10 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         // Refresh inlay hint if changed
         if (!oldConfig || oldConfig->inlayHints != config.inlayHints)
             client->refreshInlayHints();
+
+        // Keep the dynamically registered diagnostics capability in sync with the real setting
+        if (!oldConfig || oldConfig->diagnostics.workspace != config.diagnostics.workspace)
+            updateDiagnosticCapabilityRegistration();
     };
 
     // Request configuration if the client supports it
@@ -826,6 +839,45 @@ void LanguageServer::onInitialized([[maybe_unused]] const lsp::InitializedParams
         for (auto& folder : workspaceFolders)
             folder->hasConfiguration = true;
     }
+
+    // Register the diagnostics capability using whatever configuration is known right now - either
+    // the default/global configuration (if the client doesn't support `workspace/configuration`, in
+    // which case `configChangedCallback` above will never fire), or a reasonable initial guess that
+    // `configChangedCallback` will correct once each workspace's real configuration arrives.
+    updateDiagnosticCapabilityRegistration();
+}
+
+void LanguageServer::updateDiagnosticCapabilityRegistration()
+{
+    if (!(client->capabilities.textDocument && client->capabilities.textDocument->diagnostic &&
+            client->capabilities.textDocument->diagnostic->dynamicRegistration))
+        return;
+
+    // Workspace diagnostics is considered enabled if any workspace currently wants it. The server
+    // already scopes the actual `workspace/diagnostic` computation per-workspace based on that
+    // workspace's own configuration (see `WorkspaceFolder::workspaceDiagnostics`), so this only
+    // controls whether the client is told a workspace-wide diagnostic pull is worth running at all.
+    bool workspaceDiagnosticsEnabled = client->getConfiguration(nullWorkspace->rootUri).diagnostics.workspace;
+    for (const auto& workspace : workspaceFolders)
+    {
+        if (client->getConfiguration(workspace->rootUri).diagnostics.workspace)
+        {
+            workspaceDiagnosticsEnabled = true;
+            break;
+        }
+    }
+
+    if (registeredDiagnosticsWorkspaceCapability && *registeredDiagnosticsWorkspaceCapability == workspaceDiagnosticsEnabled)
+        return;
+
+    if (registeredDiagnosticsWorkspaceCapability)
+        client->unregisterCapability("textDocumentDiagnosticsCapability", "textDocument/diagnostic");
+
+    client->sendTrace(
+        "registering textDocument/diagnostic capability with workspaceDiagnostics=" + std::string(workspaceDiagnosticsEnabled ? "true" : "false"));
+    client->registerCapability("textDocumentDiagnosticsCapability", "textDocument/diagnostic",
+        lsp::DiagnosticOptions{"luau", /* interFileDependencies: */ true, workspaceDiagnosticsEnabled});
+    registeredDiagnosticsWorkspaceCapability = workspaceDiagnosticsEnabled;
 }
 
 void LanguageServer::onDidOpenTextDocument(const lsp::DidOpenTextDocumentParams& params)

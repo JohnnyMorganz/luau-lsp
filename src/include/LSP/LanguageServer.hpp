@@ -49,7 +49,7 @@ private:
 public:
     explicit LanguageServer(LSPClient* aClient, std::optional<Luau::Config> aDefaultConfig);
 
-    static lsp::ServerCapabilities getServerCapabilities();
+    static lsp::ServerCapabilities getServerCapabilities(bool diagnosticsDynamicRegistrationSupported);
 
     /// Finds the workspace which the file belongs to.
     /// If no workspace is found, the file is attached to the null workspace
@@ -72,6 +72,15 @@ private:
     void clearCancellationToken(const json_rpc::JsonRpcMessage& msg);
     std::optional<json_rpc::JsonRpcMessage> popMessage();
 
+    /// Dynamically (re-)registers the `textDocument/diagnostic` capability so its
+    /// `workspaceDiagnostics` flag reflects whether any workspace currently has
+    /// `diagnostics.workspace` enabled. Only takes effect if the client supports dynamic
+    /// registration for diagnostics (see `onInitialize`, which otherwise falls back to a static
+    /// registration). Without this, a pull-diagnostics client is told workspace diagnostics are
+    /// always available, so it defers clearing a closed document's diagnostics to a workspace
+    /// diagnostic pull that never runs when the setting is actually disabled - see #1019.
+    void updateDiagnosticCapabilityRegistration();
+
     lsp::InitializeResult onInitialize(const lsp::InitializeParams& params);
     void onInitialized([[maybe_unused]] const lsp::InitializedParams& params);
 
@@ -93,6 +102,7 @@ private:
 private:
     bool isInitialized = false;
     bool shutdownRequested = false;
+    std::optional<bool> registeredDiagnosticsWorkspaceCapability;
 
     std::mutex messagesMutex;
     std::condition_variable messagesCv;

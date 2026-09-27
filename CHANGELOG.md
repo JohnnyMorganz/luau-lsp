@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Fixed string-require autocomplete stripping everything after the last `.` from directory names, so accepting a folder like `Folder.suffix` inserted `./Folder` instead of `./Folder.suffix` ([#1614](https://github.com/JohnnyMorganz/luau-lsp/issues/1614))
 - Fixed Roblox string-require auto-imports producing `require("@alias/Module/init")` for modules backed by an `init.luau` file when a `.luaurc` alias is used. The directory is now required instead, e.g. `require("@alias/Module")` ([#1590](https://github.com/JohnnyMorganz/luau-lsp/issues/1590))
 - VSCode extension: `luau-lsp.server.path` now expands a leading `~/` (or `~\`) to the user's home directory, matching the existing behaviour of `luau-lsp.server.baseLuaurc` ([#1635](https://github.com/JohnnyMorganz/luau-lsp/issues/1635))
+- Fixed diagnostics for a closed file remaining visible forever when using pull diagnostics and `luau-lsp.diagnostics.workspace` is disabled (the default). The server now dynamically registers the `textDocument/diagnostic` capability (for clients that support dynamic registration) so it accurately reflects whether workspace diagnostics is enabled, instead of always statically advertising it as available ([#1019](https://github.com/JohnnyMorganz/luau-lsp/issues/1019))
 
 ### Changed
 
