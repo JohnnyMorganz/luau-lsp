@@ -603,6 +603,18 @@ const startLanguageServer = async (context: vscode.ExtensionContext) => {
 export async function activate(context: vscode.ExtensionContext) {
   console.log("Luau LSP activated");
 
+  // If this extension was disabled and then re-enabled while Luau files were still
+  // open, those documents can be left with a stale bracket pair colorization cache
+  // that was computed without our grammar (e.g. brackets inside comments incorrectly
+  // colorized as code). Re-applying the language mode forces VS Code to fully
+  // retokenize the documents against the now-available grammar.
+  // https://github.com/JohnnyMorganz/luau-lsp/issues/1637
+  for (const document of vscode.workspace.textDocuments) {
+    if (document.languageId === "luau") {
+      await vscode.languages.setTextDocumentLanguage(document, "luau");
+    }
+  }
+
   await roblox.onActivate(platformContext, context);
 
   context.subscriptions.push(

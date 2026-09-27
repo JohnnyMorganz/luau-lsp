@@ -11,6 +11,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Hover on a local declared with `const` now reads `const x: T` instead of `local x: T`, at the declaration and at every use
 - Fixed string-require autocomplete stripping everything after the last `.` from directory names, so accepting a folder like `Folder.suffix` inserted `./Folder` instead of `./Folder.suffix` ([#1614](https://github.com/JohnnyMorganz/luau-lsp/issues/1614))
 - Fixed Roblox string-require auto-imports producing `require("@alias/Module/init")` for modules backed by an `init.luau` file when a `.luaurc` alias is used. The directory is now required instead, e.g. `require("@alias/Module")` ([#1590](https://github.com/JohnnyMorganz/luau-lsp/issues/1590))
+- Fixed brackets (`()`, `[]`, `{}`) inside comments incorrectly retaining bracket-pair colorization after disabling and re-enabling the VS Code extension without a window reload, by forcing already-open Luau documents to be retokenized on activation ([#1637](https://github.com/JohnnyMorganz/luau-lsp/issues/1637))
 
 ### Changed
 
