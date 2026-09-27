@@ -2,7 +2,7 @@
 #include "LuauFileUtils.hpp"
 #include "Analyze/AnalyzeCli.hpp"
 #include "LSP/Workspace.hpp"
-#include "Luau/Set.h"
+#include "Luau/DenseHash.h"
 #include "Platform/RobloxPlatform.hpp"
 #include "argparse/argparse.hpp"
 
@@ -35,7 +35,7 @@ RequireGraph computeRequireGraphFromRoot(const Luau::Frontend& frontend, const L
     RequireGraph result;
 
     // Breadth-first search from current node for its requires
-    Luau::Set<Luau::ModuleName> seenSet;
+    Luau::DenseHashSet<Luau::ModuleName> seenSet;
     std::queue<Luau::ModuleName> queue;
 
     queue.push(root);

@@ -6,9 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `"luau-lsp.completion.autocompleteEnd"` now also inserts `until` when pressing Enter inside an unclosed `repeat` block ([#1599](https://github.com/JohnnyMorganz/luau-lsp/issues/1599))
+
 ### Fixed
 
+- Hover on a local declared with `const` now reads `const x: T` instead of `local x: T`, at the declaration and at every use
+- Fixed string-require autocomplete stripping everything after the last `.` from directory names, so accepting a folder like `Folder.suffix` inserted `./Folder` instead of `./Folder.suffix` ([#1614](https://github.com/JohnnyMorganz/luau-lsp/issues/1614))
+- Fixed Roblox string-require auto-imports producing `require("@alias/Module/init")` for modules backed by an `init.luau` file when a `.luaurc` alias is used. The directory is now required instead, e.g. `require("@alias/Module")` ([#1590](https://github.com/JohnnyMorganz/luau-lsp/issues/1590))
+- VSCode extension: `luau-lsp.server.path` now expands a leading `~/` (or `~\`) to the user's home directory, matching the existing behaviour of `luau-lsp.server.baseLuaurc` ([#1635](https://github.com/JohnnyMorganz/luau-lsp/issues/1635))
+- Renaming a local variable (e.g. `local jecs = require(...)`) now correctly renames its uses as a type reference prefix (e.g. `jecs.Entity<Player>`), including when the rename is triggered from that prefix itself, which previously failed with "Unable to find symbol to rename". Matching is now done against the resolved local rather than by name, so shadowed locals with the same name are no longer confused ([#1203](https://github.com/JohnnyMorganz/luau-lsp/issues/1203))
+- String require auto-imports are no longer suggested for files that have been renamed or deleted ([#1045](https://github.com/JohnnyMorganz/luau-lsp/issues/1045))
 - Fixed Signature Help showing the implicit first argument of a `__call` metamethod, which is supplied by the table being called rather than by the caller ([#1597](https://github.com/JohnnyMorganz/luau-lsp/issues/1597))
+
+### Changed
+
+- Sync to upstream Luau 0.740
 
 ## [1.70.0] - 2026-09-20
 

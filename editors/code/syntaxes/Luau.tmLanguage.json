@@ -873,6 +873,10 @@
           "end": "\\}",
           "patterns": [
             {
+              "match": "\\b(read|write)\\b(?=\\s*\\[)",
+              "name": "storage.modifier.access.luau"
+            },
+            {
               "begin": "\\[",
               "end": "\\]",
               "patterns": [

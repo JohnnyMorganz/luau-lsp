@@ -126,7 +126,7 @@ std::vector<Luau::ModuleName> WorkspaceFolder::findReverseDependencies(const Lua
 
         dependents.push_back(next);
 
-        const Luau::Set<Luau::ModuleName>& localDependents = sourceNode.dependents;
+        const Luau::DenseHashSet<Luau::ModuleName>& localDependents = sourceNode.dependents;
         queue.insert(queue.end(), localDependents.begin(), localDependents.end());
     }
 
@@ -718,6 +718,18 @@ lsp::ReferenceResult WorkspaceFolder::references(const lsp::ReferenceParams& par
     {
         if (auto prefix = reference->prefix)
         {
+            // If the cursor is specifically over the prefix (e.g. `jecs` in `jecs.Entity<Player>`) and it
+            // resolves to a known local, treat it the same as any other reference to that local.
+            if (reference->prefixLocal && reference->prefixLocation && reference->prefixLocation->containsClosed(position))
+            {
+                auto references = findSymbolReferences(*sourceModule, Luau::Symbol(reference->prefixLocal));
+                result.reserve(references.size());
+                for (auto& location : references)
+                    result.emplace_back(lsp::Location{
+                        params.textDocument.uri, {textDocument->convertPosition(location.begin), textDocument->convertPosition(location.end)}});
+                return result;
+            }
+
             if (auto importedModuleName = module->getModuleScope()->importedModules.find(prefix.value().value);
                 importedModuleName != module->getModuleScope()->importedModules.end())
             {

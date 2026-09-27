@@ -256,6 +256,10 @@ static std::optional<std::pair<std::string, const char*>> computeSourcemapRequir
     {
         if (auto realPath = platform->getRealPathFromSourceNode(targetNode))
         {
+            // An init.luau file represents its containing directory, so alias the directory instead
+            if (isInitLuauFile(*realPath))
+                realPath = realPath->parent().value_or(*realPath);
+
             if (auto aliasPath = Luau::LanguageServer::AutoImports::computeBestAliasedPath(*realPath, availableAliases))
                 return {*aliasPath, SortText::AutoImportsAbsolute};
         }

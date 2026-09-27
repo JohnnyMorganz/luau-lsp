@@ -13,6 +13,11 @@ std::string FileRequireNode::getLabel() const
 std::string FileRequireNode::getPathComponent() const
 {
     auto name = getLabel();
+
+    // Directories are required by their full name, only strip the extension from files
+    if (isDirectory)
+        return name;
+
     if (auto pos = name.find_last_of('.'); pos != std::string::npos)
         name.erase(pos);
     return name;

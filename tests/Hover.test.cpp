@@ -21,6 +21,48 @@ TEST_CASE_FIXTURE(Fixture, "show_string_length_on_hover")
     CHECK_EQ(result->contents.value, codeBlock("luau", "string (16 bytes)"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "hover_shows_const_for_a_const_local")
+{
+    auto source = R"(
+        const x = 5
+        local y = x
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+
+    // The declaration
+    params.position = lsp::Position{1, 14};
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "const x: number"));
+
+    // A use of the binding
+    params.position = lsp::Position{2, 18};
+    result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "const x: number"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "hover_shows_local_for_a_non_const_local")
+{
+    auto source = R"(
+        local x = 5
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 14};
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "local x: number"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "show_string_utf8_characters_on_hover")
 {
     auto source = R"(
