@@ -1435,6 +1435,27 @@ TEST_CASE_FIXTURE(Fixture, "string_require_does_not_include_modules_that_are_alr
     CHECK_FALSE(getItem(items, "React"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "string_require_stops_suggesting_a_module_once_its_file_is_deleted")
+{
+    auto library = newDocument("library.luau", "");
+
+    FindImportsVisitor visitor;
+    auto user = newDocument("user.luau", "");
+    auto ctx = createContext(this, user, &visitor);
+
+    std::vector<lsp::CompletionItem> items;
+    suggestStringRequires(ctx, items);
+    REQUIRE(getItem(items, "library"));
+
+    // Simulate the file being renamed / deleted on disk
+    lsp::FileEvent event{library, lsp::FileChangeType::Deleted};
+    workspace.onDidChangeWatchedFiles({event});
+
+    items.clear();
+    suggestStringRequires(ctx, items);
+    CHECK_FALSE(getItem(items, "library"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "string_require_uses_aliases")
 {
     AliasMap aliases{};

@@ -166,4 +166,21 @@ TEST_CASE_FIXTURE(Fixture, "ignored_files_are_marked_as_dirty_when_changed_exter
     CHECK(workspace.frontend.isDirty(moduleName));
 }
 
+TEST_CASE_FIXTURE(Fixture, "deleted_files_are_erased_from_source_nodes_so_they_are_not_suggested_for_auto_import")
+{
+    auto uri = newDocument("module.luau", R"(
+        return {}
+    )");
+
+    auto moduleName = workspace.fileResolver.getModuleName(uri);
+    workspace.frontend.parse(moduleName);
+    REQUIRE(workspace.frontend.sourceNodes.count(moduleName) == 1);
+
+    // Simulate the file being renamed / deleted
+    lsp::FileEvent event{uri, lsp::FileChangeType::Deleted};
+    workspace.onDidChangeWatchedFiles({event});
+
+    CHECK(workspace.frontend.sourceNodes.count(moduleName) == 0);
+}
+
 TEST_SUITE_END();
