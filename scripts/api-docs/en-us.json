@@ -41417,6 +41417,7 @@
     "documentation": "Abstract intermediate class that manages physical geometry properties for PartOperations and MeshParts.",
     "keys": {
       "CollisionFidelity": "@roblox/globaltype/TriangleMeshPart.CollisionFidelity",
+      "CollisionPrecision": "@roblox/globaltype/TriangleMeshPart.CollisionPrecision",
       "FluidFidelity": "@roblox/globaltype/TriangleMeshPart.FluidFidelity",
       "MeshSize": "@roblox/globaltype/TriangleMeshPart.MeshSize"
     },
@@ -41426,6 +41427,11 @@
   "@roblox/globaltype/TriangleMeshPart.CollisionFidelity": {
     "documentation": "Determines the level of detail the part's physics will adhere to its mesh.",
     "learn_more_link": "https://create.roblox.com/docs/reference/engine/classes/TriangleMeshPart#CollisionFidelity",
+    "code_sample": ""
+  },
+  "@roblox/globaltype/TriangleMeshPart.CollisionPrecision": {
+    "documentation": "Quantifies how precise or performant a <code>CollisionFidelity.Tunable</code> collision geometry is, from <code>0</code> to <code>1</code>.",
+    "learn_more_link": "https://create.roblox.com/docs/reference/engine/classes/TriangleMeshPart#CollisionPrecision",
     "code_sample": ""
   },
   "@roblox/globaltype/TriangleMeshPart.FluidFidelity": {
@@ -67156,6 +67162,7 @@
       "FixedSize": "@roblox/globaltype/EditableMesh.FixedSize",
       "AddBone": "@roblox/globaltype/EditableMesh.AddBone",
       "AddColor": "@roblox/globaltype/EditableMesh.AddColor",
+      "AddFace": "@roblox/globaltype/EditableMesh.AddFace",
       "AddNormal": "@roblox/globaltype/EditableMesh.AddNormal",
       "AddTriangle": "@roblox/globaltype/EditableMesh.AddTriangle",
       "AddUV": "@roblox/globaltype/EditableMesh.AddUV",
@@ -67318,6 +67325,33 @@
     "learn_more_link": "https://create.roblox.com/docs/reference/engine/classes/EditableMesh#AddColor",
     "code_sample": ""
   },
+  "@roblox/globaltype/EditableMesh.AddFace/param/0": {
+    "documentation": "Object which allows for the runtime creation and manipulation of meshes."
+  },
+  "@roblox/globaltype/EditableMesh.AddFace/param/1": {
+    "documentation": "Array of the new face's vertex IDs, in order around the face. Provide 3 IDs to create a triangle or 4 IDs to create a quad."
+  },
+  "@roblox/globaltype/EditableMesh.AddFace/return/0": {
+    "documentation": "Face ID of the new face."
+  },
+  "@roblox/globaltype/EditableMesh.AddFace": {
+    "documentation": "Adds a new triangle or quad face to the mesh and returns a face ID.",
+    "params": [
+      {
+        "name": "self",
+        "documentation": "@roblox/globaltype/EditableMesh.AddFace/param/0"
+      },
+      {
+        "name": "vertexIds",
+        "documentation": "@roblox/globaltype/EditableMesh.AddFace/param/1"
+      }
+    ],
+    "returns": [
+      "@roblox/globaltype/EditableMesh.AddFace/return/0"
+    ],
+    "learn_more_link": "https://create.roblox.com/docs/reference/engine/classes/EditableMesh#AddFace",
+    "code_sample": ""
+  },
   "@roblox/globaltype/EditableMesh.AddNormal/param/0": {
     "documentation": "Object which allows for the runtime creation and manipulation of meshes."
   },
@@ -67358,7 +67392,7 @@
     "documentation": "ID of the third vertex of the triangle."
   },
   "@roblox/globaltype/EditableMesh.AddTriangle/return/0": {
-    "documentation": "Face ID of the new face."
+    "documentation": "Stable face ID of the new face."
   },
   "@roblox/globaltype/EditableMesh.AddTriangle": {
     "documentation": "Adds a new triangle to the mesh and returns a face ID.",
@@ -67763,7 +67797,7 @@
     "documentation": "Point position in the mesh's local object space."
   },
   "@roblox/globaltype/EditableMesh.FindClosestPointOnSurface/return/0": {
-    "documentation": "Tuple of the face ID, point on the mesh in local object space, and the barycentric coordinate of the position within the face."
+    "documentation": "Tuple of the face ID, point on the mesh in local object space, the barycentric coordinate of the position within the face, and the 3 vertex IDs that the barycentric coordinate weights."
   },
   "@roblox/globaltype/EditableMesh.FindClosestPointOnSurface": {
     "documentation": "Finds the closest point on the mesh's surface.",
@@ -69074,7 +69108,7 @@
     "documentation": "Direction of the ray."
   },
   "@roblox/globaltype/EditableMesh.RaycastLocal/return/0": {
-    "documentation": "Tuple of the point of intersection, face ID, and barycentric coordinates."
+    "documentation": "Tuple of the face ID, point of intersection, barycentric coordinates, and the 3 vertex IDs that the barycentric coordinates weight."
   },
   "@roblox/globaltype/EditableMesh.RaycastLocal": {
     "documentation": "Casts a ray and returns the intersection point, face ID, and barycentric coordinates.",
@@ -71749,7 +71783,7 @@
     "documentation": "The <code>Translator</code> instance for the specified locale."
   },
   "@roblox/globaltype/LocalizationService.GetTranslatorForPlayer": {
-    "documentation": "Returns a <code>Translator</code> to be used for translations using the locale data loaded.",
+    "documentation": "<strong>Deprecated:</strong> This function has been deprecated by <code>LocalizationService:GetTranslatorForPlayerAsync()</code>, which functions similarly except that it yields until the cloud table has loaded. Please use it in new work instead.<br>Returns a <code>Translator</code> to be used for translations using the locale data loaded.",
     "params": [
       {
         "name": "self",
@@ -91778,6 +91812,7 @@
       "Direction1DState": "@roblox/globaltype/InputAction.Direction1DState",
       "Direction2DState": "@roblox/globaltype/InputAction.Direction2DState",
       "Direction3DState": "@roblox/globaltype/InputAction.Direction3DState",
+      "DisplayName": "@roblox/globaltype/InputAction.DisplayName",
       "Enabled": "@roblox/globaltype/InputAction.Enabled",
       "PreferredBinding": "@roblox/globaltype/InputAction.PreferredBinding",
       "Type": "@roblox/globaltype/InputAction.Type",
@@ -91806,6 +91841,11 @@
   "@roblox/globaltype/InputAction.Direction3DState": {
     "documentation": "Non-scriptable read-only property useful for debugging <code>Direction3D</code> input actions.",
     "learn_more_link": "https://create.roblox.com/docs/reference/engine/classes/InputAction#Direction3DState",
+    "code_sample": ""
+  },
+  "@roblox/globaltype/InputAction.DisplayName": {
+    "documentation": "Localized display name for this action.",
+    "learn_more_link": "https://create.roblox.com/docs/reference/engine/classes/InputAction#DisplayName",
     "code_sample": ""
   },
   "@roblox/globaltype/InputAction.Enabled": {
@@ -106533,6 +106573,16 @@
     "learn_more_link": "https://create.roblox.com/docs/reference/engine/enums/AnimationNodeType#OneShotNode",
     "code_sample": ""
   },
+  "@roblox/enum/AnimationNodeType.StateMachineNode": {
+    "documentation": "A node that selects and transitions between animation states according to a state machine definition.",
+    "keys": {
+      "Name": "@roblox/globaltype/EnumItem.Name",
+      "Value": "@roblox/globaltype/EnumItem.Value",
+      "EnumType": "@roblox/globaltype/EnumItem.EnumType"
+    },
+    "learn_more_link": "https://create.roblox.com/docs/reference/engine/enums/AnimationNodeType#StateMachineNode",
+    "code_sample": ""
+  },
   "@roblox/global/Enum.AnimationNodeType": {
     "documentation": "Specifies the type of an animation graph node, determining how it processes or combines animation data.",
     "keys": {
@@ -106550,7 +106600,8 @@
       "SequenceNode": "@roblox/enum/AnimationNodeType.SequenceNode",
       "SpeedNode": "@roblox/enum/AnimationNodeType.SpeedNode",
       "SubtractNode": "@roblox/enum/AnimationNodeType.SubtractNode",
-      "OneShotNode": "@roblox/enum/AnimationNodeType.OneShotNode"
+      "OneShotNode": "@roblox/enum/AnimationNodeType.OneShotNode",
+      "StateMachineNode": "@roblox/enum/AnimationNodeType.StateMachineNode"
     },
     "learn_more_link": "https://create.roblox.com/docs/reference/engine/enums/AnimationNodeType",
     "code_sample": ""
@@ -113719,7 +113770,7 @@
     "code_sample": ""
   },
   "@roblox/enum/ImageCombineType.Add": {
-    "documentation": "Adds pixels from the source and pixels from the destination together.",
+    "documentation": "Adds pixels from the source and pixels from the destination together. Source RGB values are scaled by the source alpha, while source alpha is added directly to destination alpha.",
     "keys": {
       "Name": "@roblox/globaltype/EnumItem.Name",
       "Value": "@roblox/globaltype/EnumItem.Value",
@@ -113759,7 +113810,7 @@
     "code_sample": ""
   },
   "@roblox/enum/ImageCombineType.Subtract": {
-    "documentation": "Subtracts pixels of the source from pixels of the destination.",
+    "documentation": "Subtracts pixels of the source from pixels of the destination. Source RGB values are scaled by the source alpha, while source alpha is subtracted directly from destination alpha.",
     "keys": {
       "Name": "@roblox/globaltype/EnumItem.Name",
       "Value": "@roblox/globaltype/EnumItem.Value",
