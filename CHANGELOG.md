@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed the language server crashing on Find All References or Rename of a member of a table declared in a definitions file, such as `math.floor`, `task.wait` or `Vector3.new`
+
 ### Changed
 
 - Sync to upstream Luau 0.741
