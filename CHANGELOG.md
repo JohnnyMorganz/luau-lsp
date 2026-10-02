@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed the language server crashing on autocomplete after a file required by the current file is deleted or renamed, or after its unsaved document is closed
+
 ## [1.70.1] - 2026-09-27
 
 ### Added
