@@ -8669,7 +8669,7 @@ export type RBXScriptSignal<T... = ...any> = {
 }
 
 type HttpRequestOptions = {
-    Url: string,
+    Url: string | Secret,
     Method: "GET" | "HEAD" | "POST" | "PUT" | "DELETE" | "CONNECT" | "OPTIONS" | "TRACE" | "PATCH" | nil,
     Headers: { [string]: string | Secret }?,
     Body: string?,
