@@ -7,8 +7,14 @@
 #include "ryml.hpp"
 #endif
 
+#include <functional>
 #include <string>
 
-std::string jsonValueToLuau(const nlohmann::json& val);
-std::string tomlValueToLuau(const toml::value& val);
-std::string yamlValueToLuau(ryml::ConstNodeRef node);
+struct DataFileToLuauOptions
+{
+    std::function<bool(const std::string&)> shouldUseStringSingleton;
+};
+
+std::string jsonValueToLuau(const nlohmann::json& val, const DataFileToLuauOptions& options = {});
+std::string tomlValueToLuau(const toml::value& val, const DataFileToLuauOptions& options = {});
+std::string yamlValueToLuau(ryml::ConstNodeRef node, const DataFileToLuauOptions& options = {});
