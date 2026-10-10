@@ -139,8 +139,6 @@ end
 function Settings.load(self: Settings): ()
 	assert(self._module, "Settings must be initialized before loading")
 
-	-- `loadstring` is no longer part of Luau's built-in definitions, so access it dynamically
-	local loadstring: (string, string?) -> ((() -> any)?, string?) = (getfenv() :: any).loadstring
 	local settingsMethod, parseError = loadstring(self._module.Source, self._module.Name)
 	if settingsMethod == nil then
 		Log.warn("Could not load settings:", parseError)
