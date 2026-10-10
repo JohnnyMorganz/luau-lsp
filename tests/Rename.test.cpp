@@ -41,6 +41,18 @@ TEST_CASE_FIXTURE(Fixture, "fail_if_new_name_is_not_a_valid_identifier")
         "The new name must be a valid identifier composed of characters, digits, and underscores only", JsonRpcException);
 }
 
+TEST_CASE_FIXTURE(Fixture, "fail_if_renaming_a_property_of_a_table_from_builtin_definitions")
+{
+    auto uri = newDocument("foo.luau", "local x = math.floor(1.5)");
+
+    lsp::RenameParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{0, 17}; // 'floor' property
+    params.newName = "round";
+
+    REQUIRE_THROWS_WITH_AS(workspace.rename(params, nullptr), "Unable to find symbol to rename", JsonRpcException);
+}
+
 TEST_CASE_FIXTURE(Fixture, "rename_generic_type_parameter")
 {
     // https://github.com/JohnnyMorganz/luau-lsp/issues/488
