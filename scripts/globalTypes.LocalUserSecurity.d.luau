@@ -45,6 +45,10 @@ declare utf8: {
 
 declare function warn<T...>(...: T...)
 
+-- FIXME: This type is not entirely correct - `loadstring` returns a function or
+-- (nil, string).
+declare function loadstring<A...>(src: string, chunkname: string?): (((A...) -> any)?, string?)
+
 @[deprecated { use = "task.spawn" }]
 declare function spawn(callback: (dt: number, gt: number) -> ())
 
