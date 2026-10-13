@@ -33,6 +33,7 @@ namespace Luau::LanguageServer
 {
 ClientConfiguration defaultTestClientConfiguration();
 Uri newDocument(WorkspaceFolder& workspace, const std::string& name, const std::string& source);
+void updateDocument(WorkspaceFolder& workspace, const Uri& uri, const std::string& newSource);
 } // namespace Luau::LanguageServer
 
 struct Fixture

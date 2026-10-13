@@ -372,6 +372,12 @@
           },
           "scope": "window"
         },
+        "luau-lsp.types.hotReload": {
+          "markdownDescription": "Automatically reload global definition files when they change on disk, instead of prompting to reload the workspace. Only applies when `#luau-lsp.platform.type#` is `standard`",
+          "type": "boolean",
+          "default": false,
+          "scope": "window"
+        },
         "luau-lsp.types.documentationFiles": {
           "markdownDescription": "A list of paths to documentation files which provide documentation support to the definition files provided",
           "type": "array",

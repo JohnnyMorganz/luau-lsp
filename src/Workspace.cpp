@@ -1,6 +1,7 @@
 #include "LSP/Workspace.hpp"
 
 #include <memory>
+#include <new>
 
 #include "LSP/Diagnostics.hpp"
 #include "Platform/LSPPlatform.hpp"
@@ -206,6 +207,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
     std::vector<Luau::ModuleName> deletedModules;
     std::vector<Uri> deletedFiles;
     bool pluginFileChanged = false;
+    bool definitionFileChanged = false;
 
     for (const auto& change : changes)
     {
@@ -221,11 +223,9 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
         }
         else if (change.uri.extension() == ".lua" || change.uri.extension() == ".luau")
         {
-            // Notify if it was a definitions file
             if (isDefinitionFile(change.uri, config))
             {
-                client->sendWindowMessage(
-                    lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
+                definitionFileChanged = true;
                 continue;
             }
 
@@ -248,6 +248,15 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
                 frontend.markDirty(moduleName, &dirtyFiles);
             }
         }
+    }
+
+    if (definitionFileChanged)
+    {
+        if (config.types.hotReload && config.platform.type == LSPPlatformConfig::Standard)
+            reloadDefinitions();
+        else
+            client->sendWindowMessage(
+                lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
     }
 
     if (pluginFileChanged)
@@ -332,6 +341,36 @@ void WorkspaceFolder::reloadPlugins()
     // Any source node could have plugin transformations applied (including non-managed files), so mark all dirty
     for (const auto& [name, _] : frontend.sourceNodes)
         frontend.markDirty(name);
+}
+
+void WorkspaceFolder::reloadDefinitions()
+{
+    client->sendLogMessage(lsp::MessageType::Info, "Detected changes to global definitions files, reloading");
+
+    auto config = client->getConfiguration(rootUri);
+
+    frontend.moduleResolver.clearModules();
+    frontend.moduleResolverForAutocomplete.clearModules();
+
+    for (const auto& [name, sourceNode] : frontend.sourceNodes)
+    {
+        frontend.markDirty(name);
+        sourceNode->setInvalidModuleDependency(true, false);
+        sourceNode->setInvalidModuleDependency(true, true);
+    }
+
+    definitionsFileState.clear();
+    definitionsFileMetadata = std::nullopt;
+    frontend.clearBuiltinEnvironments();
+
+    frontend.globals.~GlobalTypes();
+    new (&frontend.globals) Luau::GlobalTypes(frontend.builtinTypes, frontend.getLuauSolverMode());
+    frontend.globalsForAutocomplete.~GlobalTypes();
+    new (&frontend.globalsForAutocomplete) Luau::GlobalTypes(frontend.builtinTypes, frontend.getLuauSolverMode());
+
+    registerTypes(config.types.disabledGlobals);
+
+    recomputeDiagnostics(config);
 }
 
 // Runs `Frontend::check` on the module and DISCARDS THE TYPE GRAPH.

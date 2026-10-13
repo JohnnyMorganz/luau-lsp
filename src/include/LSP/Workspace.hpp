@@ -105,6 +105,8 @@ public:
     bool isPluginFile(const Uri& uri) const;
     /// Reload all plugins from disk and invalidate cached transformations
     void reloadPlugins();
+    /// Reload global definition files from disk and invalidate type graphs
+    void reloadDefinitions();
 
     lsp::DocumentDiagnosticReport documentDiagnostics(
         const lsp::DocumentDiagnosticParams& params, const LSPCancellationToken& cancellationToken, bool allowUnmanagedFiles = false);
