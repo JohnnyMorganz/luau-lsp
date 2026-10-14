@@ -190,6 +190,56 @@ TEST_CASE_FIXTURE(Fixture, "type_functions_in_definition_files_work")
     REQUIRE(result.errors.empty());
 }
 
+TEST_CASE("hot_reload_on_save_reloads_global_definitions_when_enabled")
+{
+    TestClient client;
+    TempDir tempDir("hot_reload_definitions_on_save");
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri::file(tempDir.path()), std::nullopt);
+
+    auto defPath = tempDir.write_child("extra.d.luau", R"(
+        declare extern type HotReloadType with
+            prop: number
+        end
+    )");
+
+    client.definitionsFiles.emplace("@hotreload", defPath);
+
+    auto config = defaultTestClientConfiguration();
+    config.platform.type = LSPPlatformConfig::Standard;
+    config.types.definitionFiles = {{"@hotreload", defPath}};
+    config.types.hotReload = true;
+    client.globalConfig = config;
+
+    workspace.setupWithConfiguration(config);
+    workspace.isReady = true;
+
+    auto document = newDocument(workspace, "foo.luau", R"(
+        --!strict
+        local x: HotReloadType = nil :: any
+        local _y = x.prop
+    )");
+
+    auto moduleName = workspace.fileResolver.getModuleName(document);
+    REQUIRE(workspace.frontend.check(moduleName).errors.empty());
+
+    tempDir.write_child("extra.d.luau", R"(
+        declare extern type HotReloadType with
+            prop: number
+            newProp: string
+        end
+    )");
+
+    workspace.onDidSaveTextDocument(Uri::file(defPath), lsp::DidSaveTextDocumentParams{{{Uri::file(defPath)}}});
+
+    updateDocument(workspace, document, R"(
+        --!strict
+        local x: HotReloadType = nil :: any
+        local _y = x.newProp
+    )");
+
+    CHECK(workspace.frontend.check(moduleName).errors.empty());
+}
+
 TEST_CASE("hot_reload_reloads_global_definitions_when_enabled")
 {
     TestClient client;

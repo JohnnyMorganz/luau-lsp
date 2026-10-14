@@ -100,6 +100,17 @@ void WorkspaceFolder::onDidSaveTextDocument(const lsp::DocumentUri& uri, const l
     LUAU_ASSERT(isReady);
 
     auto config = client->getConfiguration(rootUri);
+
+    if (isDefinitionFile(uri, config))
+    {
+        if (config.types.hotReload && config.platform.type == LSPPlatformConfig::Standard)
+            reloadDefinitions();
+        else
+            client->sendWindowMessage(
+                lsp::MessageType::Info, "Detected changes to global definitions files. Please reload your workspace for this to take effect");
+        return;
+    }
+
     if (isWorkspaceDiagnosticsEnabled(client, config))
     {
         Luau::DenseHashSet<Luau::ModuleName> dependents{};
@@ -315,9 +326,14 @@ bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<Clie
     for (auto& [_, file] : config.types.definitionFiles)
     {
         if (rootUri.resolvePath(resolvePath(file)) == path)
-        {
             return true;
-        }
+    }
+
+    for (auto& [_, file] : client->definitionsFiles)
+    {
+        auto resolved = resolvePath(file);
+        if (Uri::file(resolved) == path || rootUri.resolvePath(resolved) == path)
+            return true;
     }
 
     return false;
