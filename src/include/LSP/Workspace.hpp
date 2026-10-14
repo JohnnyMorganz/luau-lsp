@@ -136,6 +136,9 @@ private:
     lsp::WorkspaceEdit computeOrganiseRequiresEdit(const lsp::DocumentUri& uri);
     std::vector<Luau::ModuleName> findReverseDependencies(const Luau::ModuleName& moduleName);
     std::vector<Uri> findFilesForWorkspaceDiagnostics(const std::string& rootPath, const ClientConfiguration& config);
+    TextDocumentPtr getTextDocumentFromModuleName(const Luau::ModuleName& moduleName);
+    std::optional<lsp::Location> findTypeDefinitionLocation(
+        const Luau::Scope& scope, const Luau::Name& typeName, const TextDocument* currentDocument);
 
 public:
     std::vector<std::string> getComments(const Luau::ModuleName& moduleName, const Luau::Location& node);

@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "Fixture.h"
+#include "TempDir.h"
 
 #include "LSP/IostreamHelpers.hpp"
 
@@ -761,6 +762,124 @@ TEST_CASE_FIXTURE(Fixture, "go_to_definition_on_original_local_function_definiti
     REQUIRE_EQ(result.size(), 1);
     CHECK_EQ(result[0].uri, document);
     CHECK_EQ(result[0].range, lsp::Range{{1, 23}, {1, 36}});
+}
+
+TEST_CASE("go_to_definition_of_global_extern_type_from_definitions_file")
+{
+    TestClient client;
+    TempDir tempDir("goto_global_type_defs");
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri::file(tempDir.path()), std::nullopt);
+
+    auto defPath = tempDir.write_child("globals.d.luau", R"(
+        declare extern type GlobalWidget with
+            label: string
+        end
+    )");
+
+    client.definitionsFiles.emplace("@globals", defPath);
+
+    auto config = Luau::LanguageServer::defaultTestClientConfiguration();
+    config.platform.type = LSPPlatformConfig::Standard;
+    config.types.definitionFiles = {{"@globals", defPath}};
+    client.globalConfig = config;
+
+    workspace.setupWithConfiguration(config);
+    workspace.isReady = true;
+
+    auto [source, position] = sourceWithMarker(R"(
+        --!strict
+        local x: Global|Widget = nil :: any
+    )");
+    auto document = Luau::LanguageServer::newDocument(workspace, "main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params, nullptr);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, Uri::file(defPath));
+    CHECK_EQ(result[0].range.start, lsp::Position{1, 28});
+    CHECK_EQ(result[0].range.end, lsp::Position{3, 11});
+}
+
+TEST_CASE("go_to_definition_of_global_type_alias_from_definitions_file")
+{
+    TestClient client;
+    TempDir tempDir("goto_global_type_alias_defs");
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri::file(tempDir.path()), std::nullopt);
+
+    auto defPath = tempDir.write_child("globals.d.luau", R"(
+        export type GlobalAlias = {
+            value: number,
+        }
+    )");
+
+    client.definitionsFiles.emplace("@globals", defPath);
+
+    auto config = Luau::LanguageServer::defaultTestClientConfiguration();
+    config.platform.type = LSPPlatformConfig::Standard;
+    config.types.definitionFiles = {{"@globals", defPath}};
+    client.globalConfig = config;
+
+    workspace.setupWithConfiguration(config);
+    workspace.isReady = true;
+
+    auto [source, position] = sourceWithMarker(R"(
+        --!strict
+        local x: Global|Alias = nil :: any
+    )");
+    auto document = Luau::LanguageServer::newDocument(workspace, "main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params, nullptr);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, Uri::file(defPath));
+    CHECK_EQ(result[0].range.start, lsp::Position{1, 8});
+    CHECK_EQ(result[0].range.end, lsp::Position{3, 9});
+}
+
+TEST_CASE("go_to_definition_of_property_on_global_extern_type")
+{
+    TestClient client;
+    TempDir tempDir("goto_global_type_prop_defs");
+    auto workspace = WorkspaceFolder(&client, "$TEST_WORKSPACE", Uri::file(tempDir.path()), std::nullopt);
+
+    auto defPath = tempDir.write_child("globals.d.luau", R"(
+        declare extern type GlobalWidget with
+            label: string
+        end
+    )");
+
+    client.definitionsFiles.emplace("@globals", defPath);
+
+    auto config = Luau::LanguageServer::defaultTestClientConfiguration();
+    config.platform.type = LSPPlatformConfig::Standard;
+    config.types.definitionFiles = {{"@globals", defPath}};
+    client.globalConfig = config;
+
+    workspace.setupWithConfiguration(config);
+    workspace.isReady = true;
+
+    auto [source, position] = sourceWithMarker(R"(
+        --!strict
+        local x: GlobalWidget = nil :: any
+        local y = x.lab|el
+    )");
+    auto document = Luau::LanguageServer::newDocument(workspace, "main.luau", source);
+
+    auto params = lsp::DefinitionParams{};
+    params.textDocument = lsp::TextDocumentIdentifier{document};
+    params.position = position;
+
+    auto result = workspace.gotoDefinition(params, nullptr);
+    REQUIRE_EQ(result.size(), 1);
+    CHECK_EQ(result[0].uri, Uri::file(defPath));
+    CHECK_EQ(result[0].range.start, lsp::Position{2, 12});
+    CHECK_EQ(result[0].range.end, lsp::Position{2, 25});
 }
 
 TEST_SUITE_END();
