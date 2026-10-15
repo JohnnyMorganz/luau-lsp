@@ -118,6 +118,15 @@ TEST_CASE_FIXTURE(Fixture, "isDefinitionsFile")
     CHECK_EQ(workspace.isDefinitionFile(workspace.rootUri.resolvePath("globalTypes.d.luau")), true);
 }
 
+TEST_CASE_FIXTURE(Fixture, "isDefinitionsFile_matches_cli_definitions_paths")
+{
+    auto absolutePath = tempDir.write_child("cli_defs.d.luau", "export type Foo = string");
+    client->definitionsFiles.emplace("@cli", absolutePath);
+
+    CHECK_EQ(workspace.isDefinitionFile(Uri::file(absolutePath)), true);
+    CHECK_EQ(workspace.isDefinitionFile(workspace.rootUri.resolvePath("source.luau")), false);
+}
+
 TEST_CASE_FIXTURE(Fixture, "files_in_alias_directories_are_indexed")
 {
     TempDir library("index_files_resolve_aliases_library");

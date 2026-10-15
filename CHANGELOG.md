@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added `"luau-lsp.types.hotReload"` setting (default `false`) to automatically reload global definition files when they change on disk. Only applies when `"luau-lsp.platform.type"` is `"standard"`
+
 ### Changed
 
 - Sync to upstream Luau 0.742
