@@ -55,6 +55,26 @@ TEST_CASE_FIXTURE(Fixture, "jsonValueToLuau escapes strings")
     CHECK(table->items.size == 4);
 }
 
+TEST_CASE_FIXTURE(Fixture, "jsonValueToLuau can emit string singleton assertions")
+{
+    nlohmann::json json = {
+        {"value", "hello"},
+        {"array", {"nested"}},
+        {"object", {{"key", "value"}}},
+    };
+
+    DataFileToLuauOptions options;
+    options.shouldUseStringSingleton = [](const std::string&)
+    {
+        return true;
+    };
+    auto result = jsonValueToLuau(json, options);
+
+    CHECK(result.find("[\"value\"] = (\"hello\" :: \"hello\")") != std::string::npos);
+    CHECK(result.find("[\"key\"] = (\"value\" :: \"value\")") != std::string::npos);
+    CHECK(result.find("(\"nested\" :: \"nested\")") != std::string::npos);
+}
+
 static Luau::AstExprTable* parseLuauTable(const Luau::AstStatBlock* block)
 {
     REQUIRE(block->body.size == 1);
@@ -130,6 +150,26 @@ TEST_CASE_FIXTURE(Fixture, "tomlValueToLuau escapes strings")
     expectItem(table, "a\"b", "'quoteValue'");
 }
 
+TEST_CASE_FIXTURE(Fixture, "tomlValueToLuau can emit string singleton assertions")
+{
+    toml::value toml = R"(
+        value = "hello"
+        array = ["nested"]
+        object = { key = "value" }
+    )"_toml;
+
+    DataFileToLuauOptions options;
+    options.shouldUseStringSingleton = [](const std::string&)
+    {
+        return true;
+    };
+    auto result = tomlValueToLuau(toml, options);
+
+    CHECK(result.find("[\"value\"] = (\"hello\" :: \"hello\")") != std::string::npos);
+    CHECK(result.find("[\"key\"] = (\"value\" :: \"value\")") != std::string::npos);
+    CHECK(result.find("(\"nested\" :: \"nested\")") != std::string::npos);
+}
+
 TEST_CASE_FIXTURE(Fixture, "yamlValueToLuau returns proper Luau string")
 {
     const char yaml_str[] = R"(
@@ -198,6 +238,29 @@ quoteKey: 'a"b'
 
     expectItem(table, "newLineKey", "'a\\nb'");
     expectItem(table, "quoteKey", "'a\\\"b'");
+}
+
+TEST_CASE_FIXTURE(Fixture, "yamlValueToLuau can emit string singleton assertions")
+{
+    const char yaml_str[] = R"(
+value: hello
+array:
+  - nested
+object:
+  key: value
+)";
+
+    ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(yaml_str));
+    DataFileToLuauOptions options;
+    options.shouldUseStringSingleton = [](const std::string&)
+    {
+        return true;
+    };
+    auto result = yamlValueToLuau(tree.rootref(), options);
+
+    CHECK(result.find("[\"value\"] = (\"hello\" :: \"hello\")") != std::string::npos);
+    CHECK(result.find("[\"key\"] = (\"value\" :: \"value\")") != std::string::npos);
+    CHECK(result.find("(\"nested\" :: \"nested\")") != std::string::npos);
 }
 
 TEST_CASE_FIXTURE(Fixture, "yamlValueToLuau handles keys with empty values")
