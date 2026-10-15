@@ -2768,4 +2768,65 @@ TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_is_not_use
     CHECK(!results.empty());
 }
 
+// Use-after-free regression tests: the frontend erases a module whose file is gone, which destroys
+// the types that the retained type graph of a module requiring it references. Fragment autocomplete
+// reads the stale type graph of a dirty module, so it must be skipped until the module is rechecked
+// (without this, the completions below crash under ASAN)
+static void completeAfterRequiredModuleIsErased(FragmentAutocompleteFixture* fixture, bool reportDeleted)
+{
+    // Enable pull-based diagnostics so the changes do not synchronously recheck
+    fixture->client->capabilities.textDocument = lsp::TextDocumentClientCapabilities{};
+    fixture->client->capabilities.textDocument->diagnostic = lsp::DiagnosticClientCapabilities{};
+
+    auto required = fixture->newDocument("required.luau", R"(
+        return { value = 1 }
+    )");
+
+    auto oldSource = R"(
+        local required = require("required.luau")
+        local x = required
+    )";
+    auto [newSource, marker] = sourceWithMarker(R"(
+        local required = require("required.luau")
+        local x = required.|
+    )");
+
+    auto uri = fixture->newDocument("foo.luau", oldSource);
+    auto& workspace = fixture->workspace;
+    auto moduleName = workspace.fileResolver.getModuleName(uri);
+    bool forAutocomplete = !FFlag::LuauSolverV2;
+
+    // Initial check with retained type graphs: `required` references a type of required.luau
+    workspace.checkStrict(moduleName, /* cancellationToken= */ nullptr, forAutocomplete);
+    REQUIRE(workspace.frontend.allModuleDependenciesValid(moduleName, forAutocomplete));
+
+    if (reportDeleted)
+        // The file watcher reports that required.luau was deleted, which erases its module
+        workspace.onDidChangeWatchedFiles({lsp::FileEvent{required, lsp::FileChangeType::Deleted}});
+    else
+        // required.luau does not exist on disk, so once closed it has no source and is erased when next parsed
+        workspace.closeTextDocument(required);
+
+    REQUIRE(workspace.frontend.isDirty(moduleName, forAutocomplete));
+    CHECK_FALSE(workspace.frontend.allModuleDependenciesValid(moduleName, forAutocomplete));
+
+    fixture->updateDocument(uri, newSource);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    workspace.completion(params, /* cancellationToken= */ nullptr);
+}
+
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_is_not_used_after_a_required_file_is_deleted")
+{
+    completeAfterRequiredModuleIsErased(this, /* reportDeleted= */ true);
+}
+
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_is_not_used_after_a_required_document_without_a_file_is_closed")
+{
+    completeAfterRequiredModuleIsErased(this, /* reportDeleted= */ false);
+}
+
 TEST_SUITE_END();
