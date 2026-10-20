@@ -244,6 +244,55 @@ TEST_CASE("definitions_loaded_through_workspace_via_client")
     CHECK(cr.errors.empty());
 }
 
+TEST_CASE("enum_item_enum_types_are_specialized")
+{
+    TempDir t("analyze_cli_specialized_enum_types");
+    auto filePath = t.write_child("test.luau", R"(
+        --!strict
+        local keyCode: typeof(Enum.KeyCode) = Enum.KeyCode.A.EnumType
+        local userInputType: typeof(Enum.UserInputType) = Enum.UserInputType.Keyboard.EnumType
+        local mismatched: typeof(Enum.UserInputType) = Enum.KeyCode.A.EnumType
+    )");
+
+    CliClient client;
+    initCliClient(client);
+    client.definitionsFiles["@roblox"] = "./scripts/globalTypes.d.luau";
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
+
+    auto cr = workspace.checkSimple(filePath, nullptr);
+    REQUIRE_EQ(cr.errors.size(), 1);
+    CHECK(Luau::get<Luau::TypeMismatch>(cr.errors[0]));
+    CHECK_EQ(cr.errors[0].location.begin.line, 4);
+}
+
+TEST_CASE("enum_item_enum_type_is_read_only")
+{
+    TempDir t("analyze_cli_read_only_enum_type");
+    auto filePath = t.write_child("test.luau", R"(
+        --!strict
+        local item: EnumItem = Enum.KeyCode.A
+        item.EnumType = Enum.KeyCode
+    )");
+
+    CliClient client;
+    initCliClient(client);
+    client.definitionsFiles["@roblox"] = "./scripts/globalTypes.d.luau";
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
+
+    // The old solver does not enforce property access modifiers
+    if (workspace.frontend.getLuauSolverMode() != Luau::SolverMode::New)
+        return;
+
+    auto cr = workspace.checkSimple(filePath, nullptr);
+    REQUIRE_EQ(cr.errors.size(), 1);
+    auto err = Luau::get<Luau::PropertyAccessViolation>(cr.errors[0]);
+    REQUIRE(err);
+    CHECK_EQ(err->key, "EnumType");
+    CHECK_EQ(err->context, Luau::PropertyAccessViolation::CannotWrite);
+}
+
 TEST_CASE("sourcemap_loaded_through_workspace_configuration")
 {
     TempDir t("analyze_cli_sourcemap");

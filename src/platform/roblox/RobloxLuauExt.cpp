@@ -821,7 +821,8 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
                     ctv->name = ctv->name.substr(4);
 
                     // Move the enum over to the imported types if it is not internal, otherwise rename the type
-                    if (endsWith(ctv->name, "_INTERNAL"))
+                    bool isInternal = endsWith(ctv->name, "_INTERNAL");
+                    if (isInternal)
                     {
                         ctv->name.erase(ctv->name.rfind("_INTERNAL"), 9);
                     }
@@ -833,10 +834,19 @@ void RobloxPlatform::mutateRegisteredDefinitions(Luau::GlobalTypes& globals, std
 
                     // Update the documentation symbol
                     Luau::asMutable(ty)->documentationSymbol = "@roblox/enum/" + ctv->name;
-                    for (auto& [name, prop] : ctv->props)
+                    if (isInternal)
                     {
-                        prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
-                        Luau::attachTag(prop, "EnumItem");
+                        // The properties of the internal enum type are its enum items
+                        for (auto& [name, prop] : ctv->props)
+                        {
+                            prop.documentationSymbol = "@roblox/enum/" + ctv->name + "." + name;
+                            Luau::attachTag(prop, "EnumItem");
+                        }
+                    }
+                    else if (auto enumTypeProp = ctv->props.find("EnumType"); enumTypeProp != ctv->props.end())
+                    {
+                        // The enum item type narrows `EnumItem.EnumType`, so keep the documentation of the base property
+                        enumTypeProp->second.documentationSymbol = "@roblox/globaltype/EnumItem.EnumType";
                     }
 
                     // Prefix the name (after it has been placed into enumTypes) with "Enum."

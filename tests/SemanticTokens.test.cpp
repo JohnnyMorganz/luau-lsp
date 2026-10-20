@@ -159,4 +159,21 @@ local x: { string } = {}
     CHECK_EQ(real->tokenType, lsp::SemanticTokenTypes::Type);
 }
 
+TEST_CASE_FIXTURE(Fixture, "enum_type_of_an_enum_item_is_a_property_not_an_enum_member")
+{
+    check(R"(
+local rigType = Enum.HumanoidRigType.R6.EnumType
+)");
+
+    auto tokens = getSemanticTokens(workspace.frontend, getMainModule(), getMainSourceModule());
+
+    auto enumItem = getSemanticToken(tokens, Luau::Position{1, 37});
+    REQUIRE(enumItem);
+    CHECK_EQ(enumItem->tokenType, lsp::SemanticTokenTypes::EnumMember);
+
+    auto enumType = getSemanticToken(tokens, Luau::Position{1, 40});
+    REQUIRE(enumType);
+    CHECK_EQ(enumType->tokenType, lsp::SemanticTokenTypes::Property);
+}
+
 TEST_SUITE_END();

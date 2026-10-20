@@ -473,7 +473,7 @@ end
 declare extern type EnumItem with
     Name: string
     Value: number
-    EnumType: Enum
+    read EnumType: Enum
     function IsA(self, enumName: string): boolean
 end
 
@@ -1110,7 +1110,9 @@ def printEnums(dump: ApiDump):
     out = ""
     for enum, items in enums.items():
         # Declare an atom for the enum
-        out += f"declare extern type Enum{enum} extends EnumItem with end\n"
+        out += f"declare extern type Enum{enum} extends EnumItem with\n"
+        out += f"\tread EnumType: Enum{enum}_INTERNAL\n"
+        out += "end\n"
         out += f"declare extern type Enum{enum}_INTERNAL extends Enum with\n"
         items.sort()
         for item in items:

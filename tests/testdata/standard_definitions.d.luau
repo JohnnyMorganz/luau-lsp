@@ -6,11 +6,13 @@ end
 declare extern type EnumItem with
     Name: string
     Value: number
-    EnumType: Enum
+    read EnumType: Enum
     function IsA(self, enumName: string): boolean
 end
 
-declare extern type EnumHumanoidRigType extends EnumItem with end
+declare extern type EnumHumanoidRigType extends EnumItem with
+    read EnumType: EnumHumanoidRigType_INTERNAL
+end
 declare extern type EnumHumanoidRigType_INTERNAL extends Enum with
     R6: EnumHumanoidRigType
     R15: EnumHumanoidRigType
