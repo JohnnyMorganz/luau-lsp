@@ -830,6 +830,24 @@ TEST_CASE_FIXTURE(Fixture, "function_call_hover_uses_resolved_overload")
     CHECK_EQ(result->contents.value, codeBlock("luau", "function f(string): string"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "hover_property_used_as_computed_table_key_shows_property_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local a = { b = "key" }
+        local t = { [a.|b] = 5 }
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "string"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_base_table_member_of_setmetatable_type")
 {
     auto source = R"(

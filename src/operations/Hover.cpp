@@ -208,17 +208,6 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params,
         auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
         auto parentNode = ancestry.size() >= 2 ? ancestry.at(ancestry.size() - 2) : nullptr;
 
-        // Choose the correct overload (if there is one), and fit any known generic types
-        if (auto call = parentNode ? parentNode->as<Luau::AstExprCall>() : nullptr; call && call->func == expr)
-        {
-            if (auto it = module->astOverloadResolvedTypes.find(call))
-            {
-                auto resolvedType = Luau::follow(*it);
-                if (Luau::get<Luau::FunctionType>(resolvedType))
-                    type = resolvedType;
-            }
-        }
-
         // Special case, we want to check if there is a parent in the ancestry, and if it is an AstTable
         // If so, and we are hovering over a prop, we want to give type info for the assigned expression to the prop
         // rather than just "string"
@@ -248,7 +237,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params,
                 if (auto propInformation = lookupProp(parentType, indexName); !propInformation.empty())
                 {
                     auto [baseTy, prop] = propInformation[0];
-                    if (!type && propInformation.size() == 1 && prop.readTy)
+                    if (propInformation.size() == 1 && prop.readTy)
                         type = prop.readTy;
                     if (auto definitionModuleName = Luau::getDefinitionModuleName(baseTy))
                     {
@@ -265,6 +254,17 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params,
         if (auto local = expr->as<Luau::AstExprLocal>(); !documentationLocation.has_value() && local && local->local)
         {
             documentationLocation = {moduleName, local->local->location};
+        }
+
+        // Attempt to match an overload and show the matched overload signature, rather than all of possible overloads
+        if (auto call = parentNode ? parentNode->as<Luau::AstExprCall>() : nullptr; call && call->func == expr)
+        {
+            if (auto it = module->astOverloadResolvedTypes.find(call))
+            {
+                auto resolvedType = Luau::follow(*it);
+                if (Luau::get<Luau::FunctionType>(resolvedType))
+                    type = resolvedType;
+            }
         }
 
         if (!type)
