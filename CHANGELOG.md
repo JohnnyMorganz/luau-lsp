@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.742
 
+### Fixed
+
+- `EnumItem.EnumType` is now typed as the item's own enum, instead of the base `Enum` type. `EnumType` is also now read-only. For example, `Enum.KeyCode.A.EnumType` is `typeof(Enum.KeyCode)`
+
 ## [1.70.1] - 2026-09-27
 
 ### Added

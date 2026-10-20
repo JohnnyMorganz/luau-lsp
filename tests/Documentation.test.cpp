@@ -647,4 +647,27 @@ end
     CHECK(comments[0] == "Does physics simulation");
 }
 
+TEST_CASE_FIXTURE(Fixture, "enum_items_and_enum_type_have_correct_documentation_symbols")
+{
+    auto enumItemType = workspace.frontend.globals.globalScope->lookupImportedType("Enum", "HumanoidRigType");
+    REQUIRE(enumItemType);
+    auto enumItem = Luau::get<Luau::ExternType>(Luau::follow(enumItemType->type));
+    REQUIRE(enumItem);
+
+    auto enumTypeProp = enumItem->props.find("EnumType");
+    REQUIRE(enumTypeProp != enumItem->props.end());
+    CHECK_EQ(enumTypeProp->second.documentationSymbol, "@roblox/globaltype/EnumItem.EnumType");
+    CHECK_FALSE(Luau::hasTag(enumTypeProp->second.tags, "EnumItem"));
+
+    auto enumType = enumTypeProp->second.readTy;
+    REQUIRE(enumType);
+    auto enumExternType = Luau::get<Luau::ExternType>(Luau::follow(*enumType));
+    REQUIRE(enumExternType);
+
+    auto r6 = enumExternType->props.find("R6");
+    REQUIRE(r6 != enumExternType->props.end());
+    CHECK_EQ(r6->second.documentationSymbol, "@roblox/enum/HumanoidRigType.R6");
+    CHECK(Luau::hasTag(r6->second.tags, "EnumItem"));
+}
+
 TEST_SUITE_END();

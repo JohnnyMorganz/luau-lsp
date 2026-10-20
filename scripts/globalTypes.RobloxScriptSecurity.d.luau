@@ -17,7 +17,7 @@ end
 declare extern type EnumItem with
     Name: string
     Value: number
-    EnumType: Enum
+    read EnumType: Enum
     function IsA(self, enumName: string): boolean
 end
 
@@ -76,7 +76,9 @@ type UniqueId = any
 type VideoSampleArray = any
 type WebViewParams = any
 
-declare extern type EnumAccessModifierType extends EnumItem with end
+declare extern type EnumAccessModifierType extends EnumItem with
+	read EnumType: EnumAccessModifierType_INTERNAL
+end
 declare extern type EnumAccessModifierType_INTERNAL extends Enum with
 	Allow: EnumAccessModifierType
 	Deny: EnumAccessModifierType
@@ -84,7 +86,9 @@ declare extern type EnumAccessModifierType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAccessModifierType?
 	function FromValue(self, Value: number): EnumAccessModifierType?
 end
-declare extern type EnumAccessoryType extends EnumItem with end
+declare extern type EnumAccessoryType extends EnumItem with
+	read EnumType: EnumAccessoryType_INTERNAL
+end
 declare extern type EnumAccessoryType_INTERNAL extends Enum with
 	Back: EnumAccessoryType
 	DressSkirt: EnumAccessoryType
@@ -110,7 +114,9 @@ declare extern type EnumAccessoryType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAccessoryType?
 	function FromValue(self, Value: number): EnumAccessoryType?
 end
-declare extern type EnumActionOnAutoResumeSync extends EnumItem with end
+declare extern type EnumActionOnAutoResumeSync extends EnumItem with
+	read EnumType: EnumActionOnAutoResumeSync_INTERNAL
+end
 declare extern type EnumActionOnAutoResumeSync_INTERNAL extends Enum with
 	DontResume: EnumActionOnAutoResumeSync
 	KeepLocal: EnumActionOnAutoResumeSync
@@ -119,7 +125,9 @@ declare extern type EnumActionOnAutoResumeSync_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumActionOnAutoResumeSync?
 	function FromValue(self, Value: number): EnumActionOnAutoResumeSync?
 end
-declare extern type EnumActionOnStopSync extends EnumItem with end
+declare extern type EnumActionOnStopSync extends EnumItem with
+	read EnumType: EnumActionOnStopSync_INTERNAL
+end
 declare extern type EnumActionOnStopSync_INTERNAL extends Enum with
 	AlwaysAsk: EnumActionOnStopSync
 	DeleteLocalFiles: EnumActionOnStopSync
@@ -128,7 +136,9 @@ declare extern type EnumActionOnStopSync_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumActionOnStopSync?
 	function FromValue(self, Value: number): EnumActionOnStopSync?
 end
-declare extern type EnumActionType extends EnumItem with end
+declare extern type EnumActionType extends EnumItem with
+	read EnumType: EnumActionType_INTERNAL
+end
 declare extern type EnumActionType_INTERNAL extends Enum with
 	Draw: EnumActionType
 	Lose: EnumActionType
@@ -139,7 +149,9 @@ declare extern type EnumActionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumActionType?
 	function FromValue(self, Value: number): EnumActionType?
 end
-declare extern type EnumActivePayerStatus extends EnumItem with end
+declare extern type EnumActivePayerStatus extends EnumItem with
+	read EnumType: EnumActivePayerStatus_INTERNAL
+end
 declare extern type EnumActivePayerStatus_INTERNAL extends Enum with
 	Casual50Percent: EnumActivePayerStatus
 	Intermediate35Percent: EnumActivePayerStatus
@@ -151,7 +163,9 @@ declare extern type EnumActivePayerStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumActivePayerStatus?
 	function FromValue(self, Value: number): EnumActivePayerStatus?
 end
-declare extern type EnumActuatorRelativeTo extends EnumItem with end
+declare extern type EnumActuatorRelativeTo extends EnumItem with
+	read EnumType: EnumActuatorRelativeTo_INTERNAL
+end
 declare extern type EnumActuatorRelativeTo_INTERNAL extends Enum with
 	Attachment0: EnumActuatorRelativeTo
 	Attachment1: EnumActuatorRelativeTo
@@ -160,7 +174,9 @@ declare extern type EnumActuatorRelativeTo_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumActuatorRelativeTo?
 	function FromValue(self, Value: number): EnumActuatorRelativeTo?
 end
-declare extern type EnumActuatorType extends EnumItem with end
+declare extern type EnumActuatorType extends EnumItem with
+	read EnumType: EnumActuatorType_INTERNAL
+end
 declare extern type EnumActuatorType_INTERNAL extends Enum with
 	Motor: EnumActuatorType
 	None: EnumActuatorType
@@ -169,7 +185,9 @@ declare extern type EnumActuatorType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumActuatorType?
 	function FromValue(self, Value: number): EnumActuatorType?
 end
-declare extern type EnumAdAvailabilityResult extends EnumItem with end
+declare extern type EnumAdAvailabilityResult extends EnumItem with
+	read EnumType: EnumAdAvailabilityResult_INTERNAL
+end
 declare extern type EnumAdAvailabilityResult_INTERNAL extends Enum with
 	DeviceIneligible: EnumAdAvailabilityResult
 	ExperienceIneligible: EnumAdAvailabilityResult
@@ -182,7 +200,9 @@ declare extern type EnumAdAvailabilityResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAdAvailabilityResult?
 	function FromValue(self, Value: number): EnumAdAvailabilityResult?
 end
-declare extern type EnumAdEventType extends EnumItem with end
+declare extern type EnumAdEventType extends EnumItem with
+	read EnumType: EnumAdEventType_INTERNAL
+end
 declare extern type EnumAdEventType_INTERNAL extends Enum with
 	RewardedAdGrant: EnumAdEventType
 	RewardedAdLoaded: EnumAdEventType
@@ -194,21 +214,27 @@ declare extern type EnumAdEventType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAdEventType?
 	function FromValue(self, Value: number): EnumAdEventType?
 end
-declare extern type EnumAdFormat extends EnumItem with end
+declare extern type EnumAdFormat extends EnumItem with
+	read EnumType: EnumAdFormat_INTERNAL
+end
 declare extern type EnumAdFormat_INTERNAL extends Enum with
 	RewardedVideo: EnumAdFormat
 	function GetEnumItems(self): { EnumAdFormat }
 	function FromName(self, Name: string): EnumAdFormat?
 	function FromValue(self, Value: number): EnumAdFormat?
 end
-declare extern type EnumAdShape extends EnumItem with end
+declare extern type EnumAdShape extends EnumItem with
+	read EnumType: EnumAdShape_INTERNAL
+end
 declare extern type EnumAdShape_INTERNAL extends Enum with
 	HorizontalRectangle: EnumAdShape
 	function GetEnumItems(self): { EnumAdShape }
 	function FromName(self, Name: string): EnumAdShape?
 	function FromValue(self, Value: number): EnumAdShape?
 end
-declare extern type EnumAdTeleportMethod extends EnumItem with end
+declare extern type EnumAdTeleportMethod extends EnumItem with
+	read EnumType: EnumAdTeleportMethod_INTERNAL
+end
 declare extern type EnumAdTeleportMethod_INTERNAL extends Enum with
 	InGameMenuBackButton: EnumAdTeleportMethod
 	PortalForward: EnumAdTeleportMethod
@@ -218,7 +244,9 @@ declare extern type EnumAdTeleportMethod_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAdTeleportMethod?
 	function FromValue(self, Value: number): EnumAdTeleportMethod?
 end
-declare extern type EnumAdUIEventType extends EnumItem with end
+declare extern type EnumAdUIEventType extends EnumItem with
+	read EnumType: EnumAdUIEventType_INTERNAL
+end
 declare extern type EnumAdUIEventType_INTERNAL extends Enum with
 	AdLabelClicked: EnumAdUIEventType
 	CloseButtonClicked: EnumAdUIEventType
@@ -233,7 +261,9 @@ declare extern type EnumAdUIEventType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAdUIEventType?
 	function FromValue(self, Value: number): EnumAdUIEventType?
 end
-declare extern type EnumAdUIType extends EnumItem with end
+declare extern type EnumAdUIType extends EnumItem with
+	read EnumType: EnumAdUIType_INTERNAL
+end
 declare extern type EnumAdUIType_INTERNAL extends Enum with
 	Image: EnumAdUIType
 	None: EnumAdUIType
@@ -242,7 +272,9 @@ declare extern type EnumAdUIType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAdUIType?
 	function FromValue(self, Value: number): EnumAdUIType?
 end
-declare extern type EnumAdUnitStatus extends EnumItem with end
+declare extern type EnumAdUnitStatus extends EnumItem with
+	read EnumType: EnumAdUnitStatus_INTERNAL
+end
 declare extern type EnumAdUnitStatus_INTERNAL extends Enum with
 	Active: EnumAdUnitStatus
 	Inactive: EnumAdUnitStatus
@@ -250,7 +282,9 @@ declare extern type EnumAdUnitStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAdUnitStatus?
 	function FromValue(self, Value: number): EnumAdUnitStatus?
 end
-declare extern type EnumAdornCullingMode extends EnumItem with end
+declare extern type EnumAdornCullingMode extends EnumItem with
+	read EnumType: EnumAdornCullingMode_INTERNAL
+end
 declare extern type EnumAdornCullingMode_INTERNAL extends Enum with
 	Automatic: EnumAdornCullingMode
 	Never: EnumAdornCullingMode
@@ -258,7 +292,9 @@ declare extern type EnumAdornCullingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAdornCullingMode?
 	function FromValue(self, Value: number): EnumAdornCullingMode?
 end
-declare extern type EnumAdornShading extends EnumItem with end
+declare extern type EnumAdornShading extends EnumItem with
+	read EnumType: EnumAdornShading_INTERNAL
+end
 declare extern type EnumAdornShading_INTERNAL extends Enum with
 	AlwaysOnTop: EnumAdornShading
 	Default: EnumAdornShading
@@ -269,7 +305,9 @@ declare extern type EnumAdornShading_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAdornShading?
 	function FromValue(self, Value: number): EnumAdornShading?
 end
-declare extern type EnumAgeCheckStatus extends EnumItem with end
+declare extern type EnumAgeCheckStatus extends EnumItem with
+	read EnumType: EnumAgeCheckStatus_INTERNAL
+end
 declare extern type EnumAgeCheckStatus_INTERNAL extends Enum with
 	Checked: EnumAgeCheckStatus
 	Unchecked: EnumAgeCheckStatus
@@ -277,7 +315,9 @@ declare extern type EnumAgeCheckStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAgeCheckStatus?
 	function FromValue(self, Value: number): EnumAgeCheckStatus?
 end
-declare extern type EnumAlignType extends EnumItem with end
+declare extern type EnumAlignType extends EnumItem with
+	read EnumType: EnumAlignType_INTERNAL
+end
 declare extern type EnumAlignType_INTERNAL extends Enum with
 	AllAxes: EnumAlignType
 	Parallel: EnumAlignType
@@ -289,7 +329,9 @@ declare extern type EnumAlignType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAlignType?
 	function FromValue(self, Value: number): EnumAlignType?
 end
-declare extern type EnumAlphaMode extends EnumItem with end
+declare extern type EnumAlphaMode extends EnumItem with
+	read EnumType: EnumAlphaMode_INTERNAL
+end
 declare extern type EnumAlphaMode_INTERNAL extends Enum with
 	Opaque: EnumAlphaMode
 	Overlay: EnumAlphaMode
@@ -299,7 +341,9 @@ declare extern type EnumAlphaMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAlphaMode?
 	function FromValue(self, Value: number): EnumAlphaMode?
 end
-declare extern type EnumAnalyticsCustomFieldKeys extends EnumItem with end
+declare extern type EnumAnalyticsCustomFieldKeys extends EnumItem with
+	read EnumType: EnumAnalyticsCustomFieldKeys_INTERNAL
+end
 declare extern type EnumAnalyticsCustomFieldKeys_INTERNAL extends Enum with
 	CustomField01: EnumAnalyticsCustomFieldKeys
 	CustomField02: EnumAnalyticsCustomFieldKeys
@@ -308,7 +352,9 @@ declare extern type EnumAnalyticsCustomFieldKeys_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnalyticsCustomFieldKeys?
 	function FromValue(self, Value: number): EnumAnalyticsCustomFieldKeys?
 end
-declare extern type EnumAnalyticsEconomyAction extends EnumItem with end
+declare extern type EnumAnalyticsEconomyAction extends EnumItem with
+	read EnumType: EnumAnalyticsEconomyAction_INTERNAL
+end
 declare extern type EnumAnalyticsEconomyAction_INTERNAL extends Enum with
 	Acquire: EnumAnalyticsEconomyAction
 	Default: EnumAnalyticsEconomyAction
@@ -317,7 +363,9 @@ declare extern type EnumAnalyticsEconomyAction_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnalyticsEconomyAction?
 	function FromValue(self, Value: number): EnumAnalyticsEconomyAction?
 end
-declare extern type EnumAnalyticsEconomyFlowType extends EnumItem with end
+declare extern type EnumAnalyticsEconomyFlowType extends EnumItem with
+	read EnumType: EnumAnalyticsEconomyFlowType_INTERNAL
+end
 declare extern type EnumAnalyticsEconomyFlowType_INTERNAL extends Enum with
 	Sink: EnumAnalyticsEconomyFlowType
 	Source: EnumAnalyticsEconomyFlowType
@@ -325,7 +373,9 @@ declare extern type EnumAnalyticsEconomyFlowType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnalyticsEconomyFlowType?
 	function FromValue(self, Value: number): EnumAnalyticsEconomyFlowType?
 end
-declare extern type EnumAnalyticsEconomyTransactionType extends EnumItem with end
+declare extern type EnumAnalyticsEconomyTransactionType extends EnumItem with
+	read EnumType: EnumAnalyticsEconomyTransactionType_INTERNAL
+end
 declare extern type EnumAnalyticsEconomyTransactionType_INTERNAL extends Enum with
 	ContextualPurchase: EnumAnalyticsEconomyTransactionType
 	Gameplay: EnumAnalyticsEconomyTransactionType
@@ -337,7 +387,9 @@ declare extern type EnumAnalyticsEconomyTransactionType_INTERNAL extends Enum wi
 	function FromName(self, Name: string): EnumAnalyticsEconomyTransactionType?
 	function FromValue(self, Value: number): EnumAnalyticsEconomyTransactionType?
 end
-declare extern type EnumAnalyticsLogLevel extends EnumItem with end
+declare extern type EnumAnalyticsLogLevel extends EnumItem with
+	read EnumType: EnumAnalyticsLogLevel_INTERNAL
+end
 declare extern type EnumAnalyticsLogLevel_INTERNAL extends Enum with
 	Debug: EnumAnalyticsLogLevel
 	Error: EnumAnalyticsLogLevel
@@ -349,7 +401,9 @@ declare extern type EnumAnalyticsLogLevel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnalyticsLogLevel?
 	function FromValue(self, Value: number): EnumAnalyticsLogLevel?
 end
-declare extern type EnumAnalyticsProgressionStatus extends EnumItem with end
+declare extern type EnumAnalyticsProgressionStatus extends EnumItem with
+	read EnumType: EnumAnalyticsProgressionStatus_INTERNAL
+end
 declare extern type EnumAnalyticsProgressionStatus_INTERNAL extends Enum with
 	Abandon: EnumAnalyticsProgressionStatus
 	Begin: EnumAnalyticsProgressionStatus
@@ -360,7 +414,9 @@ declare extern type EnumAnalyticsProgressionStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnalyticsProgressionStatus?
 	function FromValue(self, Value: number): EnumAnalyticsProgressionStatus?
 end
-declare extern type EnumAnalyticsProgressionType extends EnumItem with end
+declare extern type EnumAnalyticsProgressionType extends EnumItem with
+	read EnumType: EnumAnalyticsProgressionType_INTERNAL
+end
 declare extern type EnumAnalyticsProgressionType_INTERNAL extends Enum with
 	Complete: EnumAnalyticsProgressionType
 	Custom: EnumAnalyticsProgressionType
@@ -370,7 +426,9 @@ declare extern type EnumAnalyticsProgressionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnalyticsProgressionType?
 	function FromValue(self, Value: number): EnumAnalyticsProgressionType?
 end
-declare extern type EnumAnimatedImageScaleType extends EnumItem with end
+declare extern type EnumAnimatedImageScaleType extends EnumItem with
+	read EnumType: EnumAnimatedImageScaleType_INTERNAL
+end
 declare extern type EnumAnimatedImageScaleType_INTERNAL extends Enum with
 	Crop: EnumAnimatedImageScaleType
 	Fit: EnumAnimatedImageScaleType
@@ -380,7 +438,9 @@ declare extern type EnumAnimatedImageScaleType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimatedImageScaleType?
 	function FromValue(self, Value: number): EnumAnimatedImageScaleType?
 end
-declare extern type EnumAnimationClipFromVideoStatus extends EnumItem with end
+declare extern type EnumAnimationClipFromVideoStatus extends EnumItem with
+	read EnumType: EnumAnimationClipFromVideoStatus_INTERNAL
+end
 declare extern type EnumAnimationClipFromVideoStatus_INTERNAL extends Enum with
 	Cancelled: EnumAnimationClipFromVideoStatus
 	ErrorGeneric: EnumAnimationClipFromVideoStatus
@@ -398,7 +458,9 @@ declare extern type EnumAnimationClipFromVideoStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationClipFromVideoStatus?
 	function FromValue(self, Value: number): EnumAnimationClipFromVideoStatus?
 end
-declare extern type EnumAnimationNodeBlend2DInputMode extends EnumItem with end
+declare extern type EnumAnimationNodeBlend2DInputMode extends EnumItem with
+	read EnumType: EnumAnimationNodeBlend2DInputMode_INTERNAL
+end
 declare extern type EnumAnimationNodeBlend2DInputMode_INTERNAL extends Enum with
 	Cartesian: EnumAnimationNodeBlend2DInputMode
 	Polar: EnumAnimationNodeBlend2DInputMode
@@ -406,7 +468,9 @@ declare extern type EnumAnimationNodeBlend2DInputMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationNodeBlend2DInputMode?
 	function FromValue(self, Value: number): EnumAnimationNodeBlend2DInputMode?
 end
-declare extern type EnumAnimationNodeBlendMode extends EnumItem with end
+declare extern type EnumAnimationNodeBlendMode extends EnumItem with
+	read EnumType: EnumAnimationNodeBlendMode_INTERNAL
+end
 declare extern type EnumAnimationNodeBlendMode_INTERNAL extends Enum with
 	Add: EnumAnimationNodeBlendMode
 	Over: EnumAnimationNodeBlendMode
@@ -415,7 +479,9 @@ declare extern type EnumAnimationNodeBlendMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationNodeBlendMode?
 	function FromValue(self, Value: number): EnumAnimationNodeBlendMode?
 end
-declare extern type EnumAnimationNodeInterruptible extends EnumItem with end
+declare extern type EnumAnimationNodeInterruptible extends EnumItem with
+	read EnumType: EnumAnimationNodeInterruptible_INTERNAL
+end
 declare extern type EnumAnimationNodeInterruptible_INTERNAL extends Enum with
 	Always: EnumAnimationNodeInterruptible
 	Finished: EnumAnimationNodeInterruptible
@@ -424,7 +490,9 @@ declare extern type EnumAnimationNodeInterruptible_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationNodeInterruptible?
 	function FromValue(self, Value: number): EnumAnimationNodeInterruptible?
 end
-declare extern type EnumAnimationNodePhaseSync extends EnumItem with end
+declare extern type EnumAnimationNodePhaseSync extends EnumItem with
+	read EnumType: EnumAnimationNodePhaseSync_INTERNAL
+end
 declare extern type EnumAnimationNodePhaseSync_INTERNAL extends Enum with
 	Synced: EnumAnimationNodePhaseSync
 	Unsynced: EnumAnimationNodePhaseSync
@@ -432,7 +500,9 @@ declare extern type EnumAnimationNodePhaseSync_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationNodePhaseSync?
 	function FromValue(self, Value: number): EnumAnimationNodePhaseSync?
 end
-declare extern type EnumAnimationNodePlayMode extends EnumItem with end
+declare extern type EnumAnimationNodePlayMode extends EnumItem with
+	read EnumType: EnumAnimationNodePlayMode_INTERNAL
+end
 declare extern type EnumAnimationNodePlayMode_INTERNAL extends Enum with
 	Loop: EnumAnimationNodePlayMode
 	OnceAndHold: EnumAnimationNodePlayMode
@@ -442,7 +512,9 @@ declare extern type EnumAnimationNodePlayMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationNodePlayMode?
 	function FromValue(self, Value: number): EnumAnimationNodePlayMode?
 end
-declare extern type EnumAnimationNodeTransitionType extends EnumItem with end
+declare extern type EnumAnimationNodeTransitionType extends EnumItem with
+	read EnumType: EnumAnimationNodeTransitionType_INTERNAL
+end
 declare extern type EnumAnimationNodeTransitionType_INTERNAL extends Enum with
 	CrossFade: EnumAnimationNodeTransitionType
 	DeadBlend: EnumAnimationNodeTransitionType
@@ -451,7 +523,9 @@ declare extern type EnumAnimationNodeTransitionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationNodeTransitionType?
 	function FromValue(self, Value: number): EnumAnimationNodeTransitionType?
 end
-declare extern type EnumAnimationNodeTransitionWhen extends EnumItem with end
+declare extern type EnumAnimationNodeTransitionWhen extends EnumItem with
+	read EnumType: EnumAnimationNodeTransitionWhen_INTERNAL
+end
 declare extern type EnumAnimationNodeTransitionWhen_INTERNAL extends Enum with
 	BeforeFinished: EnumAnimationNodeTransitionWhen
 	Finished: EnumAnimationNodeTransitionWhen
@@ -459,7 +533,9 @@ declare extern type EnumAnimationNodeTransitionWhen_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationNodeTransitionWhen?
 	function FromValue(self, Value: number): EnumAnimationNodeTransitionWhen?
 end
-declare extern type EnumAnimationNodeType extends EnumItem with end
+declare extern type EnumAnimationNodeType extends EnumItem with
+	read EnumType: EnumAnimationNodeType_INTERNAL
+end
 declare extern type EnumAnimationNodeType_INTERNAL extends Enum with
 	AddNode: EnumAnimationNodeType
 	Blend1DNode: EnumAnimationNodeType
@@ -481,7 +557,9 @@ declare extern type EnumAnimationNodeType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationNodeType?
 	function FromValue(self, Value: number): EnumAnimationNodeType?
 end
-declare extern type EnumAnimationNodeWaitFor extends EnumItem with end
+declare extern type EnumAnimationNodeWaitFor extends EnumItem with
+	read EnumType: EnumAnimationNodeWaitFor_INTERNAL
+end
 declare extern type EnumAnimationNodeWaitFor_INTERNAL extends Enum with
 	Finished: EnumAnimationNodeWaitFor
 	Trigger: EnumAnimationNodeWaitFor
@@ -489,7 +567,9 @@ declare extern type EnumAnimationNodeWaitFor_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationNodeWaitFor?
 	function FromValue(self, Value: number): EnumAnimationNodeWaitFor?
 end
-declare extern type EnumAnimationPriority extends EnumItem with end
+declare extern type EnumAnimationPriority extends EnumItem with
+	read EnumType: EnumAnimationPriority_INTERNAL
+end
 declare extern type EnumAnimationPriority_INTERNAL extends Enum with
 	Action: EnumAnimationPriority
 	Action2: EnumAnimationPriority
@@ -502,7 +582,9 @@ declare extern type EnumAnimationPriority_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationPriority?
 	function FromValue(self, Value: number): EnumAnimationPriority?
 end
-declare extern type EnumAnimationValueNodeType extends EnumItem with end
+declare extern type EnumAnimationValueNodeType extends EnumItem with
+	read EnumType: EnumAnimationValueNodeType_INTERNAL
+end
 declare extern type EnumAnimationValueNodeType_INTERNAL extends Enum with
 	Expression: EnumAnimationValueNodeType
 	Invalid: EnumAnimationValueNodeType
@@ -510,7 +592,9 @@ declare extern type EnumAnimationValueNodeType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimationValueNodeType?
 	function FromValue(self, Value: number): EnumAnimationValueNodeType?
 end
-declare extern type EnumAnimatorRetargetingMode extends EnumItem with end
+declare extern type EnumAnimatorRetargetingMode extends EnumItem with
+	read EnumType: EnumAnimatorRetargetingMode_INTERNAL
+end
 declare extern type EnumAnimatorRetargetingMode_INTERNAL extends Enum with
 	Default: EnumAnimatorRetargetingMode
 	Disabled: EnumAnimatorRetargetingMode
@@ -519,7 +603,9 @@ declare extern type EnumAnimatorRetargetingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnimatorRetargetingMode?
 	function FromValue(self, Value: number): EnumAnimatorRetargetingMode?
 end
-declare extern type EnumAnnotationChannelContentPreference extends EnumItem with end
+declare extern type EnumAnnotationChannelContentPreference extends EnumItem with
+	read EnumType: EnumAnnotationChannelContentPreference_INTERNAL
+end
 declare extern type EnumAnnotationChannelContentPreference_INTERNAL extends Enum with
 	All: EnumAnnotationChannelContentPreference
 	None: EnumAnnotationChannelContentPreference
@@ -528,7 +614,9 @@ declare extern type EnumAnnotationChannelContentPreference_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumAnnotationChannelContentPreference?
 	function FromValue(self, Value: number): EnumAnnotationChannelContentPreference?
 end
-declare extern type EnumAnnotationEditingMode extends EnumItem with end
+declare extern type EnumAnnotationEditingMode extends EnumItem with
+	read EnumType: EnumAnnotationEditingMode_INTERNAL
+end
 declare extern type EnumAnnotationEditingMode_INTERNAL extends Enum with
 	None: EnumAnnotationEditingMode
 	PlacingNew: EnumAnnotationEditingMode
@@ -537,7 +625,9 @@ declare extern type EnumAnnotationEditingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnnotationEditingMode?
 	function FromValue(self, Value: number): EnumAnnotationEditingMode?
 end
-declare extern type EnumAnnotationPlaceContentPreference extends EnumItem with end
+declare extern type EnumAnnotationPlaceContentPreference extends EnumItem with
+	read EnumType: EnumAnnotationPlaceContentPreference_INTERNAL
+end
 declare extern type EnumAnnotationPlaceContentPreference_INTERNAL extends Enum with
 	All: EnumAnnotationPlaceContentPreference
 	MentionsAndReplies: EnumAnnotationPlaceContentPreference
@@ -547,7 +637,9 @@ declare extern type EnumAnnotationPlaceContentPreference_INTERNAL extends Enum w
 	function FromName(self, Name: string): EnumAnnotationPlaceContentPreference?
 	function FromValue(self, Value: number): EnumAnnotationPlaceContentPreference?
 end
-declare extern type EnumAnnotationRequestStatus extends EnumItem with end
+declare extern type EnumAnnotationRequestStatus extends EnumItem with
+	read EnumType: EnumAnnotationRequestStatus_INTERNAL
+end
 declare extern type EnumAnnotationRequestStatus_INTERNAL extends Enum with
 	ErrorInternalFailure: EnumAnnotationRequestStatus
 	ErrorModerated: EnumAnnotationRequestStatus
@@ -558,7 +650,9 @@ declare extern type EnumAnnotationRequestStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnnotationRequestStatus?
 	function FromValue(self, Value: number): EnumAnnotationRequestStatus?
 end
-declare extern type EnumAnnotationRequestType extends EnumItem with end
+declare extern type EnumAnnotationRequestType extends EnumItem with
+	read EnumType: EnumAnnotationRequestType_INTERNAL
+end
 declare extern type EnumAnnotationRequestType_INTERNAL extends Enum with
 	Create: EnumAnnotationRequestType
 	Delete: EnumAnnotationRequestType
@@ -569,7 +663,9 @@ declare extern type EnumAnnotationRequestType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnnotationRequestType?
 	function FromValue(self, Value: number): EnumAnnotationRequestType?
 end
-declare extern type EnumAntiAliasing extends EnumItem with end
+declare extern type EnumAntiAliasing extends EnumItem with
+	read EnumType: EnumAntiAliasing_INTERNAL
+end
 declare extern type EnumAntiAliasing_INTERNAL extends Enum with
 	Disabled: EnumAntiAliasing
 	Enabled: EnumAntiAliasing
@@ -577,7 +673,9 @@ declare extern type EnumAntiAliasing_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAntiAliasing?
 	function FromValue(self, Value: number): EnumAntiAliasing?
 end
-declare extern type EnumAppLifecycleManagerState extends EnumItem with end
+declare extern type EnumAppLifecycleManagerState extends EnumItem with
+	read EnumType: EnumAppLifecycleManagerState_INTERNAL
+end
 declare extern type EnumAppLifecycleManagerState_INTERNAL extends Enum with
 	Active: EnumAppLifecycleManagerState
 	Detached: EnumAppLifecycleManagerState
@@ -587,7 +685,9 @@ declare extern type EnumAppLifecycleManagerState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAppLifecycleManagerState?
 	function FromValue(self, Value: number): EnumAppLifecycleManagerState?
 end
-declare extern type EnumAppShellActionType extends EnumItem with end
+declare extern type EnumAppShellActionType extends EnumItem with
+	read EnumType: EnumAppShellActionType_INTERNAL
+end
 declare extern type EnumAppShellActionType_INTERNAL extends Enum with
 	AvatarEditorPageLoaded: EnumAppShellActionType
 	GamePageLoaded: EnumAppShellActionType
@@ -605,7 +705,9 @@ declare extern type EnumAppShellActionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAppShellActionType?
 	function FromValue(self, Value: number): EnumAppShellActionType?
 end
-declare extern type EnumAppShellFeature extends EnumItem with end
+declare extern type EnumAppShellFeature extends EnumItem with
+	read EnumType: EnumAppShellFeature_INTERNAL
+end
 declare extern type EnumAppShellFeature_INTERNAL extends Enum with
 	AvatarEditor: EnumAppShellFeature
 	Chat: EnumAppShellFeature
@@ -619,7 +721,9 @@ declare extern type EnumAppShellFeature_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAppShellFeature?
 	function FromValue(self, Value: number): EnumAppShellFeature?
 end
-declare extern type EnumAppUpdateStatus extends EnumItem with end
+declare extern type EnumAppUpdateStatus extends EnumItem with
+	read EnumType: EnumAppUpdateStatus_INTERNAL
+end
 declare extern type EnumAppUpdateStatus_INTERNAL extends Enum with
 	Available: EnumAppUpdateStatus
 	AvailableBetaProgram: EnumAppUpdateStatus
@@ -632,7 +736,9 @@ declare extern type EnumAppUpdateStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAppUpdateStatus?
 	function FromValue(self, Value: number): EnumAppUpdateStatus?
 end
-declare extern type EnumApplyShadowMode extends EnumItem with end
+declare extern type EnumApplyShadowMode extends EnumItem with
+	read EnumType: EnumApplyShadowMode_INTERNAL
+end
 declare extern type EnumApplyShadowMode_INTERNAL extends Enum with
 	Shape: EnumApplyShadowMode
 	Text: EnumApplyShadowMode
@@ -640,7 +746,9 @@ declare extern type EnumApplyShadowMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumApplyShadowMode?
 	function FromValue(self, Value: number): EnumApplyShadowMode?
 end
-declare extern type EnumApplyStrokeMode extends EnumItem with end
+declare extern type EnumApplyStrokeMode extends EnumItem with
+	read EnumType: EnumApplyStrokeMode_INTERNAL
+end
 declare extern type EnumApplyStrokeMode_INTERNAL extends Enum with
 	Border: EnumApplyStrokeMode
 	Contextual: EnumApplyStrokeMode
@@ -648,7 +756,9 @@ declare extern type EnumApplyStrokeMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumApplyStrokeMode?
 	function FromValue(self, Value: number): EnumApplyStrokeMode?
 end
-declare extern type EnumAspectType extends EnumItem with end
+declare extern type EnumAspectType extends EnumItem with
+	read EnumType: EnumAspectType_INTERNAL
+end
 declare extern type EnumAspectType_INTERNAL extends Enum with
 	FitWithinMaxSize: EnumAspectType
 	ScaleWithParentSize: EnumAspectType
@@ -656,7 +766,9 @@ declare extern type EnumAspectType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAspectType?
 	function FromValue(self, Value: number): EnumAspectType?
 end
-declare extern type EnumAssetCreatorType extends EnumItem with end
+declare extern type EnumAssetCreatorType extends EnumItem with
+	read EnumType: EnumAssetCreatorType_INTERNAL
+end
 declare extern type EnumAssetCreatorType_INTERNAL extends Enum with
 	Group: EnumAssetCreatorType
 	User: EnumAssetCreatorType
@@ -664,7 +776,9 @@ declare extern type EnumAssetCreatorType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAssetCreatorType?
 	function FromValue(self, Value: number): EnumAssetCreatorType?
 end
-declare extern type EnumAssetFetchStatus extends EnumItem with end
+declare extern type EnumAssetFetchStatus extends EnumItem with
+	read EnumType: EnumAssetFetchStatus_INTERNAL
+end
 declare extern type EnumAssetFetchStatus_INTERNAL extends Enum with
 	Failure: EnumAssetFetchStatus
 	Loading: EnumAssetFetchStatus
@@ -675,7 +789,9 @@ declare extern type EnumAssetFetchStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAssetFetchStatus?
 	function FromValue(self, Value: number): EnumAssetFetchStatus?
 end
-declare extern type EnumAssetRepresentation extends EnumItem with end
+declare extern type EnumAssetRepresentation extends EnumItem with
+	read EnumType: EnumAssetRepresentation_INTERNAL
+end
 declare extern type EnumAssetRepresentation_INTERNAL extends Enum with
 	FullLength: EnumAssetRepresentation
 	ShortPreview: EnumAssetRepresentation
@@ -683,7 +799,9 @@ declare extern type EnumAssetRepresentation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAssetRepresentation?
 	function FromValue(self, Value: number): EnumAssetRepresentation?
 end
-declare extern type EnumAssetType extends EnumItem with end
+declare extern type EnumAssetType extends EnumItem with
+	read EnumType: EnumAssetType_INTERNAL
+end
 declare extern type EnumAssetType_INTERNAL extends Enum with
 	AnimatedImage: EnumAssetType
 	Animation: EnumAssetType
@@ -754,7 +872,9 @@ declare extern type EnumAssetType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAssetType?
 	function FromValue(self, Value: number): EnumAssetType?
 end
-declare extern type EnumAssetTypeVerification extends EnumItem with end
+declare extern type EnumAssetTypeVerification extends EnumItem with
+	read EnumType: EnumAssetTypeVerification_INTERNAL
+end
 declare extern type EnumAssetTypeVerification_INTERNAL extends Enum with
 	Always: EnumAssetTypeVerification
 	ClientOnly: EnumAssetTypeVerification
@@ -763,7 +883,9 @@ declare extern type EnumAssetTypeVerification_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAssetTypeVerification?
 	function FromValue(self, Value: number): EnumAssetTypeVerification?
 end
-declare extern type EnumAudioApiRollout extends EnumItem with end
+declare extern type EnumAudioApiRollout extends EnumItem with
+	read EnumType: EnumAudioApiRollout_INTERNAL
+end
 declare extern type EnumAudioApiRollout_INTERNAL extends Enum with
 	Automatic: EnumAudioApiRollout
 	Disabled: EnumAudioApiRollout
@@ -772,13 +894,17 @@ declare extern type EnumAudioApiRollout_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAudioApiRollout?
 	function FromValue(self, Value: number): EnumAudioApiRollout?
 end
-declare extern type EnumAudioCaptureMode extends EnumItem with end
+declare extern type EnumAudioCaptureMode extends EnumItem with
+	read EnumType: EnumAudioCaptureMode_INTERNAL
+end
 declare extern type EnumAudioCaptureMode_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumAudioCaptureMode }
 	function FromName(self, Name: string): EnumAudioCaptureMode?
 	function FromValue(self, Value: number): EnumAudioCaptureMode?
 end
-declare extern type EnumAudioChannelLayout extends EnumItem with end
+declare extern type EnumAudioChannelLayout extends EnumItem with
+	read EnumType: EnumAudioChannelLayout_INTERNAL
+end
 declare extern type EnumAudioChannelLayout_INTERNAL extends Enum with
 	Mono: EnumAudioChannelLayout
 	Quad: EnumAudioChannelLayout
@@ -791,7 +917,9 @@ declare extern type EnumAudioChannelLayout_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAudioChannelLayout?
 	function FromValue(self, Value: number): EnumAudioChannelLayout?
 end
-declare extern type EnumAudioFilterType extends EnumItem with end
+declare extern type EnumAudioFilterType extends EnumItem with
+	read EnumType: EnumAudioFilterType_INTERNAL
+end
 declare extern type EnumAudioFilterType_INTERNAL extends Enum with
 	Bandpass: EnumAudioFilterType
 	HighShelf: EnumAudioFilterType
@@ -809,7 +937,9 @@ declare extern type EnumAudioFilterType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAudioFilterType?
 	function FromValue(self, Value: number): EnumAudioFilterType?
 end
-declare extern type EnumAudioPositionType extends EnumItem with end
+declare extern type EnumAudioPositionType extends EnumItem with
+	read EnumType: EnumAudioPositionType_INTERNAL
+end
 declare extern type EnumAudioPositionType_INTERNAL extends Enum with
 	Instance: EnumAudioPositionType
 	Parent: EnumAudioPositionType
@@ -817,7 +947,9 @@ declare extern type EnumAudioPositionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAudioPositionType?
 	function FromValue(self, Value: number): EnumAudioPositionType?
 end
-declare extern type EnumAudioSampleFormat extends EnumItem with end
+declare extern type EnumAudioSampleFormat extends EnumItem with
+	read EnumType: EnumAudioSampleFormat_INTERNAL
+end
 declare extern type EnumAudioSampleFormat_INTERNAL extends Enum with
 	Float32: EnumAudioSampleFormat
 	Int16: EnumAudioSampleFormat
@@ -825,7 +957,9 @@ declare extern type EnumAudioSampleFormat_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAudioSampleFormat?
 	function FromValue(self, Value: number): EnumAudioSampleFormat?
 end
-declare extern type EnumAudioSimulationFidelity extends EnumItem with end
+declare extern type EnumAudioSimulationFidelity extends EnumItem with
+	read EnumType: EnumAudioSimulationFidelity_INTERNAL
+end
 declare extern type EnumAudioSimulationFidelity_INTERNAL extends Enum with
 	Automatic: EnumAudioSimulationFidelity
 	None: EnumAudioSimulationFidelity
@@ -833,7 +967,9 @@ declare extern type EnumAudioSimulationFidelity_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAudioSimulationFidelity?
 	function FromValue(self, Value: number): EnumAudioSimulationFidelity?
 end
-declare extern type EnumAudioSubType extends EnumItem with end
+declare extern type EnumAudioSubType extends EnumItem with
+	read EnumType: EnumAudioSubType_INTERNAL
+end
 declare extern type EnumAudioSubType_INTERNAL extends Enum with
 	Music: EnumAudioSubType
 	SoundEffect: EnumAudioSubType
@@ -841,7 +977,9 @@ declare extern type EnumAudioSubType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAudioSubType?
 	function FromValue(self, Value: number): EnumAudioSubType?
 end
-declare extern type EnumAudioWindowSize extends EnumItem with end
+declare extern type EnumAudioWindowSize extends EnumItem with
+	read EnumType: EnumAudioWindowSize_INTERNAL
+end
 declare extern type EnumAudioWindowSize_INTERNAL extends Enum with
 	Large: EnumAudioWindowSize
 	Medium: EnumAudioWindowSize
@@ -850,7 +988,9 @@ declare extern type EnumAudioWindowSize_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAudioWindowSize?
 	function FromValue(self, Value: number): EnumAudioWindowSize?
 end
-declare extern type EnumAuthorityMode extends EnumItem with end
+declare extern type EnumAuthorityMode extends EnumItem with
+	read EnumType: EnumAuthorityMode_INTERNAL
+end
 declare extern type EnumAuthorityMode_INTERNAL extends Enum with
 	Automatic: EnumAuthorityMode
 	Server: EnumAuthorityMode
@@ -858,7 +998,9 @@ declare extern type EnumAuthorityMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAuthorityMode?
 	function FromValue(self, Value: number): EnumAuthorityMode?
 end
-declare extern type EnumAutoIndentRule extends EnumItem with end
+declare extern type EnumAutoIndentRule extends EnumItem with
+	read EnumType: EnumAutoIndentRule_INTERNAL
+end
 declare extern type EnumAutoIndentRule_INTERNAL extends Enum with
 	Absolute: EnumAutoIndentRule
 	Off: EnumAutoIndentRule
@@ -867,7 +1009,9 @@ declare extern type EnumAutoIndentRule_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAutoIndentRule?
 	function FromValue(self, Value: number): EnumAutoIndentRule?
 end
-declare extern type EnumAutomaticSize extends EnumItem with end
+declare extern type EnumAutomaticSize extends EnumItem with
+	read EnumType: EnumAutomaticSize_INTERNAL
+end
 declare extern type EnumAutomaticSize_INTERNAL extends Enum with
 	None: EnumAutomaticSize
 	X: EnumAutomaticSize
@@ -877,7 +1021,9 @@ declare extern type EnumAutomaticSize_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAutomaticSize?
 	function FromValue(self, Value: number): EnumAutomaticSize?
 end
-declare extern type EnumAvatarAssetType extends EnumItem with end
+declare extern type EnumAvatarAssetType extends EnumItem with
+	read EnumType: EnumAvatarAssetType_INTERNAL
+end
 declare extern type EnumAvatarAssetType_INTERNAL extends Enum with
 	AvatarBackground: EnumAvatarAssetType
 	BackAccessory: EnumAvatarAssetType
@@ -927,7 +1073,9 @@ declare extern type EnumAvatarAssetType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarAssetType?
 	function FromValue(self, Value: number): EnumAvatarAssetType?
 end
-declare extern type EnumAvatarChatServiceFeature extends EnumItem with end
+declare extern type EnumAvatarChatServiceFeature extends EnumItem with
+	read EnumType: EnumAvatarChatServiceFeature_INTERNAL
+end
 declare extern type EnumAvatarChatServiceFeature_INTERNAL extends Enum with
 	None: EnumAvatarChatServiceFeature
 	PlaceAudio: EnumAvatarChatServiceFeature
@@ -944,7 +1092,9 @@ declare extern type EnumAvatarChatServiceFeature_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarChatServiceFeature?
 	function FromValue(self, Value: number): EnumAvatarChatServiceFeature?
 end
-declare extern type EnumAvatarContextMenuOption extends EnumItem with end
+declare extern type EnumAvatarContextMenuOption extends EnumItem with
+	read EnumType: EnumAvatarContextMenuOption_INTERNAL
+end
 declare extern type EnumAvatarContextMenuOption_INTERNAL extends Enum with
 	Chat: EnumAvatarContextMenuOption
 	Emote: EnumAvatarContextMenuOption
@@ -954,7 +1104,9 @@ declare extern type EnumAvatarContextMenuOption_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarContextMenuOption?
 	function FromValue(self, Value: number): EnumAvatarContextMenuOption?
 end
-declare extern type EnumAvatarGenerationError extends EnumItem with end
+declare extern type EnumAvatarGenerationError extends EnumItem with
+	read EnumType: EnumAvatarGenerationError_INTERNAL
+end
 declare extern type EnumAvatarGenerationError_INTERNAL extends Enum with
 	Canceled: EnumAvatarGenerationError
 	DownloadFailed: EnumAvatarGenerationError
@@ -967,7 +1119,9 @@ declare extern type EnumAvatarGenerationError_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarGenerationError?
 	function FromValue(self, Value: number): EnumAvatarGenerationError?
 end
-declare extern type EnumAvatarItemType extends EnumItem with end
+declare extern type EnumAvatarItemType extends EnumItem with
+	read EnumType: EnumAvatarItemType_INTERNAL
+end
 declare extern type EnumAvatarItemType_INTERNAL extends Enum with
 	Asset: EnumAvatarItemType
 	Bundle: EnumAvatarItemType
@@ -975,7 +1129,9 @@ declare extern type EnumAvatarItemType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarItemType?
 	function FromValue(self, Value: number): EnumAvatarItemType?
 end
-declare extern type EnumAvatarPromptResult extends EnumItem with end
+declare extern type EnumAvatarPromptResult extends EnumItem with
+	read EnumType: EnumAvatarPromptResult_INTERNAL
+end
 declare extern type EnumAvatarPromptResult_INTERNAL extends Enum with
 	Failed: EnumAvatarPromptResult
 	PermissionDenied: EnumAvatarPromptResult
@@ -984,7 +1140,9 @@ declare extern type EnumAvatarPromptResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarPromptResult?
 	function FromValue(self, Value: number): EnumAvatarPromptResult?
 end
-declare extern type EnumAvatarSettingsAccessoryLimitMethod extends EnumItem with end
+declare extern type EnumAvatarSettingsAccessoryLimitMethod extends EnumItem with
+	read EnumType: EnumAvatarSettingsAccessoryLimitMethod_INTERNAL
+end
 declare extern type EnumAvatarSettingsAccessoryLimitMethod_INTERNAL extends Enum with
 	PreviewRemove: EnumAvatarSettingsAccessoryLimitMethod
 	PreviewScale: EnumAvatarSettingsAccessoryLimitMethod
@@ -994,7 +1152,9 @@ declare extern type EnumAvatarSettingsAccessoryLimitMethod_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumAvatarSettingsAccessoryLimitMethod?
 	function FromValue(self, Value: number): EnumAvatarSettingsAccessoryLimitMethod?
 end
-declare extern type EnumAvatarSettingsAccessoryMode extends EnumItem with end
+declare extern type EnumAvatarSettingsAccessoryMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsAccessoryMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsAccessoryMode_INTERNAL extends Enum with
 	CustomLimit: EnumAvatarSettingsAccessoryMode
 	PlayerChoice: EnumAvatarSettingsAccessoryMode
@@ -1002,7 +1162,9 @@ declare extern type EnumAvatarSettingsAccessoryMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarSettingsAccessoryMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsAccessoryMode?
 end
-declare extern type EnumAvatarSettingsAnimationClipsMode extends EnumItem with end
+declare extern type EnumAvatarSettingsAnimationClipsMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsAnimationClipsMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsAnimationClipsMode_INTERNAL extends Enum with
 	CustomClips: EnumAvatarSettingsAnimationClipsMode
 	PlayerChoice: EnumAvatarSettingsAnimationClipsMode
@@ -1010,7 +1172,9 @@ declare extern type EnumAvatarSettingsAnimationClipsMode_INTERNAL extends Enum w
 	function FromName(self, Name: string): EnumAvatarSettingsAnimationClipsMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsAnimationClipsMode?
 end
-declare extern type EnumAvatarSettingsAnimationPacksMode extends EnumItem with end
+declare extern type EnumAvatarSettingsAnimationPacksMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsAnimationPacksMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsAnimationPacksMode_INTERNAL extends Enum with
 	PlayerChoice: EnumAvatarSettingsAnimationPacksMode
 	StandardR15: EnumAvatarSettingsAnimationPacksMode
@@ -1019,7 +1183,9 @@ declare extern type EnumAvatarSettingsAnimationPacksMode_INTERNAL extends Enum w
 	function FromName(self, Name: string): EnumAvatarSettingsAnimationPacksMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsAnimationPacksMode?
 end
-declare extern type EnumAvatarSettingsAppearanceMode extends EnumItem with end
+declare extern type EnumAvatarSettingsAppearanceMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsAppearanceMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsAppearanceMode_INTERNAL extends Enum with
 	CustomBody: EnumAvatarSettingsAppearanceMode
 	CustomParts: EnumAvatarSettingsAppearanceMode
@@ -1028,7 +1194,9 @@ declare extern type EnumAvatarSettingsAppearanceMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarSettingsAppearanceMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsAppearanceMode?
 end
-declare extern type EnumAvatarSettingsBuildMode extends EnumItem with end
+declare extern type EnumAvatarSettingsBuildMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsBuildMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsBuildMode_INTERNAL extends Enum with
 	CustomBuild: EnumAvatarSettingsBuildMode
 	PlayerChoice: EnumAvatarSettingsBuildMode
@@ -1036,7 +1204,9 @@ declare extern type EnumAvatarSettingsBuildMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarSettingsBuildMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsBuildMode?
 end
-declare extern type EnumAvatarSettingsCharacterControllerMode extends EnumItem with end
+declare extern type EnumAvatarSettingsCharacterControllerMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsCharacterControllerMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsCharacterControllerMode_INTERNAL extends Enum with
 	LegacyHumanoid: EnumAvatarSettingsCharacterControllerMode
 	LuaCharacterController: EnumAvatarSettingsCharacterControllerMode
@@ -1044,7 +1214,9 @@ declare extern type EnumAvatarSettingsCharacterControllerMode_INTERNAL extends E
 	function FromName(self, Name: string): EnumAvatarSettingsCharacterControllerMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsCharacterControllerMode?
 end
-declare extern type EnumAvatarSettingsClothingMode extends EnumItem with end
+declare extern type EnumAvatarSettingsClothingMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsClothingMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsClothingMode_INTERNAL extends Enum with
 	CustomLimit: EnumAvatarSettingsClothingMode
 	PlayerChoice: EnumAvatarSettingsClothingMode
@@ -1052,7 +1224,9 @@ declare extern type EnumAvatarSettingsClothingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarSettingsClothingMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsClothingMode?
 end
-declare extern type EnumAvatarSettingsCollisionMode extends EnumItem with end
+declare extern type EnumAvatarSettingsCollisionMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsCollisionMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsCollisionMode_INTERNAL extends Enum with
 	Default: EnumAvatarSettingsCollisionMode
 	Legacy: EnumAvatarSettingsCollisionMode
@@ -1061,7 +1235,9 @@ declare extern type EnumAvatarSettingsCollisionMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarSettingsCollisionMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsCollisionMode?
 end
-declare extern type EnumAvatarSettingsCustomAccessoryMode extends EnumItem with end
+declare extern type EnumAvatarSettingsCustomAccessoryMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsCustomAccessoryMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsCustomAccessoryMode_INTERNAL extends Enum with
 	CustomAccessories: EnumAvatarSettingsCustomAccessoryMode
 	PlayerChoice: EnumAvatarSettingsCustomAccessoryMode
@@ -1069,7 +1245,9 @@ declare extern type EnumAvatarSettingsCustomAccessoryMode_INTERNAL extends Enum 
 	function FromName(self, Name: string): EnumAvatarSettingsCustomAccessoryMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsCustomAccessoryMode?
 end
-declare extern type EnumAvatarSettingsCustomBodyType extends EnumItem with end
+declare extern type EnumAvatarSettingsCustomBodyType extends EnumItem with
+	read EnumType: EnumAvatarSettingsCustomBodyType_INTERNAL
+end
 declare extern type EnumAvatarSettingsCustomBodyType_INTERNAL extends Enum with
 	AvatarReference: EnumAvatarSettingsCustomBodyType
 	BundleId: EnumAvatarSettingsCustomBodyType
@@ -1077,7 +1255,9 @@ declare extern type EnumAvatarSettingsCustomBodyType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarSettingsCustomBodyType?
 	function FromValue(self, Value: number): EnumAvatarSettingsCustomBodyType?
 end
-declare extern type EnumAvatarSettingsCustomClothingMode extends EnumItem with end
+declare extern type EnumAvatarSettingsCustomClothingMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsCustomClothingMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsCustomClothingMode_INTERNAL extends Enum with
 	CustomClothing: EnumAvatarSettingsCustomClothingMode
 	PlayerChoice: EnumAvatarSettingsCustomClothingMode
@@ -1085,7 +1265,9 @@ declare extern type EnumAvatarSettingsCustomClothingMode_INTERNAL extends Enum w
 	function FromName(self, Name: string): EnumAvatarSettingsCustomClothingMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsCustomClothingMode?
 end
-declare extern type EnumAvatarSettingsHitAndTouchDetectionMode extends EnumItem with end
+declare extern type EnumAvatarSettingsHitAndTouchDetectionMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsHitAndTouchDetectionMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsHitAndTouchDetectionMode_INTERNAL extends Enum with
 	UseCollider: EnumAvatarSettingsHitAndTouchDetectionMode
 	UseParts: EnumAvatarSettingsHitAndTouchDetectionMode
@@ -1093,7 +1275,9 @@ declare extern type EnumAvatarSettingsHitAndTouchDetectionMode_INTERNAL extends 
 	function FromName(self, Name: string): EnumAvatarSettingsHitAndTouchDetectionMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsHitAndTouchDetectionMode?
 end
-declare extern type EnumAvatarSettingsJumpMode extends EnumItem with end
+declare extern type EnumAvatarSettingsJumpMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsJumpMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsJumpMode_INTERNAL extends Enum with
 	JumpHeight: EnumAvatarSettingsJumpMode
 	JumpPower: EnumAvatarSettingsJumpMode
@@ -1101,7 +1285,9 @@ declare extern type EnumAvatarSettingsJumpMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarSettingsJumpMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsJumpMode?
 end
-declare extern type EnumAvatarSettingsLegacyCollisionMode extends EnumItem with end
+declare extern type EnumAvatarSettingsLegacyCollisionMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsLegacyCollisionMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsLegacyCollisionMode_INTERNAL extends Enum with
 	InnerBoxColliders: EnumAvatarSettingsLegacyCollisionMode
 	R6Colliders: EnumAvatarSettingsLegacyCollisionMode
@@ -1109,7 +1295,9 @@ declare extern type EnumAvatarSettingsLegacyCollisionMode_INTERNAL extends Enum 
 	function FromName(self, Name: string): EnumAvatarSettingsLegacyCollisionMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsLegacyCollisionMode?
 end
-declare extern type EnumAvatarSettingsScaleMode extends EnumItem with end
+declare extern type EnumAvatarSettingsScaleMode extends EnumItem with
+	read EnumType: EnumAvatarSettingsScaleMode_INTERNAL
+end
 declare extern type EnumAvatarSettingsScaleMode_INTERNAL extends Enum with
 	CustomScale: EnumAvatarSettingsScaleMode
 	PlayerChoice: EnumAvatarSettingsScaleMode
@@ -1117,7 +1305,9 @@ declare extern type EnumAvatarSettingsScaleMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarSettingsScaleMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsScaleMode?
 end
-declare extern type EnumAvatarThumbnailCustomizationType extends EnumItem with end
+declare extern type EnumAvatarThumbnailCustomizationType extends EnumItem with
+	read EnumType: EnumAvatarThumbnailCustomizationType_INTERNAL
+end
 declare extern type EnumAvatarThumbnailCustomizationType_INTERNAL extends Enum with
 	Closeup: EnumAvatarThumbnailCustomizationType
 	FullBody: EnumAvatarThumbnailCustomizationType
@@ -1125,7 +1315,9 @@ declare extern type EnumAvatarThumbnailCustomizationType_INTERNAL extends Enum w
 	function FromName(self, Name: string): EnumAvatarThumbnailCustomizationType?
 	function FromValue(self, Value: number): EnumAvatarThumbnailCustomizationType?
 end
-declare extern type EnumAvatarUnificationMode extends EnumItem with end
+declare extern type EnumAvatarUnificationMode extends EnumItem with
+	read EnumType: EnumAvatarUnificationMode_INTERNAL
+end
 declare extern type EnumAvatarUnificationMode_INTERNAL extends Enum with
 	Default: EnumAvatarUnificationMode
 	Disabled: EnumAvatarUnificationMode
@@ -1134,7 +1326,9 @@ declare extern type EnumAvatarUnificationMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAvatarUnificationMode?
 	function FromValue(self, Value: number): EnumAvatarUnificationMode?
 end
-declare extern type EnumAxis extends EnumItem with end
+declare extern type EnumAxis extends EnumItem with
+	read EnumType: EnumAxis_INTERNAL
+end
 declare extern type EnumAxis_INTERNAL extends Enum with
 	X: EnumAxis
 	Y: EnumAxis
@@ -1143,7 +1337,9 @@ declare extern type EnumAxis_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAxis?
 	function FromValue(self, Value: number): EnumAxis?
 end
-declare extern type EnumBasicMeshPartShape extends EnumItem with end
+declare extern type EnumBasicMeshPartShape extends EnumItem with
+	read EnumType: EnumBasicMeshPartShape_INTERNAL
+end
 declare extern type EnumBasicMeshPartShape_INTERNAL extends Enum with
 	Capsule: EnumBasicMeshPartShape
 	Cone: EnumBasicMeshPartShape
@@ -1152,7 +1348,9 @@ declare extern type EnumBasicMeshPartShape_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBasicMeshPartShape?
 	function FromValue(self, Value: number): EnumBasicMeshPartShape?
 end
-declare extern type EnumBenefitType extends EnumItem with end
+declare extern type EnumBenefitType extends EnumItem with
+	read EnumType: EnumBenefitType_INTERNAL
+end
 declare extern type EnumBenefitType_INTERNAL extends Enum with
 	AvatarAsset: EnumBenefitType
 	AvatarBundle: EnumBenefitType
@@ -1161,7 +1359,9 @@ declare extern type EnumBenefitType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBenefitType?
 	function FromValue(self, Value: number): EnumBenefitType?
 end
-declare extern type EnumBinType extends EnumItem with end
+declare extern type EnumBinType extends EnumItem with
+	read EnumType: EnumBinType_INTERNAL
+end
 declare extern type EnumBinType_INTERNAL extends Enum with
 	Clone: EnumBinType
 	GameTool: EnumBinType
@@ -1172,7 +1372,9 @@ declare extern type EnumBinType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBinType?
 	function FromValue(self, Value: number): EnumBinType?
 end
-declare extern type EnumBodyPart extends EnumItem with end
+declare extern type EnumBodyPart extends EnumItem with
+	read EnumType: EnumBodyPart_INTERNAL
+end
 declare extern type EnumBodyPart_INTERNAL extends Enum with
 	Head: EnumBodyPart
 	LeftArm: EnumBodyPart
@@ -1184,7 +1386,9 @@ declare extern type EnumBodyPart_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBodyPart?
 	function FromValue(self, Value: number): EnumBodyPart?
 end
-declare extern type EnumBodyPartR15 extends EnumItem with end
+declare extern type EnumBodyPartR15 extends EnumItem with
+	read EnumType: EnumBodyPartR15_INTERNAL
+end
 declare extern type EnumBodyPartR15_INTERNAL extends Enum with
 	Head: EnumBodyPartR15
 	LeftFoot: EnumBodyPartR15
@@ -1207,7 +1411,9 @@ declare extern type EnumBodyPartR15_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBodyPartR15?
 	function FromValue(self, Value: number): EnumBodyPartR15?
 end
-declare extern type EnumBorderMode extends EnumItem with end
+declare extern type EnumBorderMode extends EnumItem with
+	read EnumType: EnumBorderMode_INTERNAL
+end
 declare extern type EnumBorderMode_INTERNAL extends Enum with
 	Inset: EnumBorderMode
 	Middle: EnumBorderMode
@@ -1216,7 +1422,9 @@ declare extern type EnumBorderMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBorderMode?
 	function FromValue(self, Value: number): EnumBorderMode?
 end
-declare extern type EnumBorderStrokePosition extends EnumItem with end
+declare extern type EnumBorderStrokePosition extends EnumItem with
+	read EnumType: EnumBorderStrokePosition_INTERNAL
+end
 declare extern type EnumBorderStrokePosition_INTERNAL extends Enum with
 	Center: EnumBorderStrokePosition
 	Inner: EnumBorderStrokePosition
@@ -1225,7 +1433,9 @@ declare extern type EnumBorderStrokePosition_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBorderStrokePosition?
 	function FromValue(self, Value: number): EnumBorderStrokePosition?
 end
-declare extern type EnumBranchStatus extends EnumItem with end
+declare extern type EnumBranchStatus extends EnumItem with
+	read EnumType: EnumBranchStatus_INTERNAL
+end
 declare extern type EnumBranchStatus_INTERNAL extends Enum with
 	Archived: EnumBranchStatus
 	Draft: EnumBranchStatus
@@ -1235,7 +1445,9 @@ declare extern type EnumBranchStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBranchStatus?
 	function FromValue(self, Value: number): EnumBranchStatus?
 end
-declare extern type EnumBreakReason extends EnumItem with end
+declare extern type EnumBreakReason extends EnumItem with
+	read EnumType: EnumBreakReason_INTERNAL
+end
 declare extern type EnumBreakReason_INTERNAL extends Enum with
 	Error: EnumBreakReason
 	Other: EnumBreakReason
@@ -1245,7 +1457,9 @@ declare extern type EnumBreakReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBreakReason?
 	function FromValue(self, Value: number): EnumBreakReason?
 end
-declare extern type EnumBreakpointRemoveReason extends EnumItem with end
+declare extern type EnumBreakpointRemoveReason extends EnumItem with
+	read EnumType: EnumBreakpointRemoveReason_INTERNAL
+end
 declare extern type EnumBreakpointRemoveReason_INTERNAL extends Enum with
 	Requested: EnumBreakpointRemoveReason
 	ScriptChanged: EnumBreakpointRemoveReason
@@ -1254,7 +1468,9 @@ declare extern type EnumBreakpointRemoveReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBreakpointRemoveReason?
 	function FromValue(self, Value: number): EnumBreakpointRemoveReason?
 end
-declare extern type EnumBulkMoveMode extends EnumItem with end
+declare extern type EnumBulkMoveMode extends EnumItem with
+	read EnumType: EnumBulkMoveMode_INTERNAL
+end
 declare extern type EnumBulkMoveMode_INTERNAL extends Enum with
 	FireAllEvents: EnumBulkMoveMode
 	FireCFrameChanged: EnumBulkMoveMode
@@ -1262,7 +1478,9 @@ declare extern type EnumBulkMoveMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBulkMoveMode?
 	function FromValue(self, Value: number): EnumBulkMoveMode?
 end
-declare extern type EnumBundleType extends EnumItem with end
+declare extern type EnumBundleType extends EnumItem with
+	read EnumType: EnumBundleType_INTERNAL
+end
 declare extern type EnumBundleType_INTERNAL extends Enum with
 	Animations: EnumBundleType
 	BodyParts: EnumBundleType
@@ -1273,7 +1491,9 @@ declare extern type EnumBundleType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumBundleType?
 	function FromValue(self, Value: number): EnumBundleType?
 end
-declare extern type EnumButton extends EnumItem with end
+declare extern type EnumButton extends EnumItem with
+	read EnumType: EnumButton_INTERNAL
+end
 declare extern type EnumButton_INTERNAL extends Enum with
 	Dismount: EnumButton
 	Jump: EnumButton
@@ -1281,7 +1501,9 @@ declare extern type EnumButton_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumButton?
 	function FromValue(self, Value: number): EnumButton?
 end
-declare extern type EnumButtonStyle extends EnumItem with end
+declare extern type EnumButtonStyle extends EnumItem with
+	read EnumType: EnumButtonStyle_INTERNAL
+end
 declare extern type EnumButtonStyle_INTERNAL extends Enum with
 	Custom: EnumButtonStyle
 	RobloxButton: EnumButtonStyle
@@ -1293,7 +1515,9 @@ declare extern type EnumButtonStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumButtonStyle?
 	function FromValue(self, Value: number): EnumButtonStyle?
 end
-declare extern type EnumCageType extends EnumItem with end
+declare extern type EnumCageType extends EnumItem with
+	read EnumType: EnumCageType_INTERNAL
+end
 declare extern type EnumCageType_INTERNAL extends Enum with
 	Inner: EnumCageType
 	Outer: EnumCageType
@@ -1301,7 +1525,9 @@ declare extern type EnumCageType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCageType?
 	function FromValue(self, Value: number): EnumCageType?
 end
-declare extern type EnumCameraMode extends EnumItem with end
+declare extern type EnumCameraMode extends EnumItem with
+	read EnumType: EnumCameraMode_INTERNAL
+end
 declare extern type EnumCameraMode_INTERNAL extends Enum with
 	Classic: EnumCameraMode
 	LockFirstPerson: EnumCameraMode
@@ -1309,7 +1535,9 @@ declare extern type EnumCameraMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCameraMode?
 	function FromValue(self, Value: number): EnumCameraMode?
 end
-declare extern type EnumCameraNavigationModel extends EnumItem with end
+declare extern type EnumCameraNavigationModel extends EnumItem with
+	read EnumType: EnumCameraNavigationModel_INTERNAL
+end
 declare extern type EnumCameraNavigationModel_INTERNAL extends Enum with
 	IndustryCompatible: EnumCameraNavigationModel
 	Roblox: EnumCameraNavigationModel
@@ -1317,7 +1545,9 @@ declare extern type EnumCameraNavigationModel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCameraNavigationModel?
 	function FromValue(self, Value: number): EnumCameraNavigationModel?
 end
-declare extern type EnumCameraPanMode extends EnumItem with end
+declare extern type EnumCameraPanMode extends EnumItem with
+	read EnumType: EnumCameraPanMode_INTERNAL
+end
 declare extern type EnumCameraPanMode_INTERNAL extends Enum with
 	Classic: EnumCameraPanMode
 	EdgeBump: EnumCameraPanMode
@@ -1325,7 +1555,9 @@ declare extern type EnumCameraPanMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCameraPanMode?
 	function FromValue(self, Value: number): EnumCameraPanMode?
 end
-declare extern type EnumCameraSpeedAdjustBinding extends EnumItem with end
+declare extern type EnumCameraSpeedAdjustBinding extends EnumItem with
+	read EnumType: EnumCameraSpeedAdjustBinding_INTERNAL
+end
 declare extern type EnumCameraSpeedAdjustBinding_INTERNAL extends Enum with
 	AltScroll: EnumCameraSpeedAdjustBinding
 	None: EnumCameraSpeedAdjustBinding
@@ -1334,7 +1566,9 @@ declare extern type EnumCameraSpeedAdjustBinding_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCameraSpeedAdjustBinding?
 	function FromValue(self, Value: number): EnumCameraSpeedAdjustBinding?
 end
-declare extern type EnumCameraType extends EnumItem with end
+declare extern type EnumCameraType extends EnumItem with
+	read EnumType: EnumCameraType_INTERNAL
+end
 declare extern type EnumCameraType_INTERNAL extends Enum with
 	Attach: EnumCameraType
 	Custom: EnumCameraType
@@ -1348,7 +1582,9 @@ declare extern type EnumCameraType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCameraType?
 	function FromValue(self, Value: number): EnumCameraType?
 end
-declare extern type EnumCanCollaborateError extends EnumItem with end
+declare extern type EnumCanCollaborateError extends EnumItem with
+	read EnumType: EnumCanCollaborateError_INTERNAL
+end
 declare extern type EnumCanCollaborateError_INTERNAL extends Enum with
 	AgeVerificationCountryBlocked: EnumCanCollaborateError
 	Invalid: EnumCanCollaborateError
@@ -1367,14 +1603,18 @@ declare extern type EnumCanCollaborateError_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCanCollaborateError?
 	function FromValue(self, Value: number): EnumCanCollaborateError?
 end
-declare extern type EnumCaptureGalleryPermission extends EnumItem with end
+declare extern type EnumCaptureGalleryPermission extends EnumItem with
+	read EnumType: EnumCaptureGalleryPermission_INTERNAL
+end
 declare extern type EnumCaptureGalleryPermission_INTERNAL extends Enum with
 	ReadAndUpload: EnumCaptureGalleryPermission
 	function GetEnumItems(self): { EnumCaptureGalleryPermission }
 	function FromName(self, Name: string): EnumCaptureGalleryPermission?
 	function FromValue(self, Value: number): EnumCaptureGalleryPermission?
 end
-declare extern type EnumCaptureType extends EnumItem with end
+declare extern type EnumCaptureType extends EnumItem with
+	read EnumType: EnumCaptureType_INTERNAL
+end
 declare extern type EnumCaptureType_INTERNAL extends Enum with
 	Screenshot: EnumCaptureType
 	Video: EnumCaptureType
@@ -1382,7 +1622,9 @@ declare extern type EnumCaptureType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCaptureType?
 	function FromValue(self, Value: number): EnumCaptureType?
 end
-declare extern type EnumCatalogCategoryFilter extends EnumItem with end
+declare extern type EnumCatalogCategoryFilter extends EnumItem with
+	read EnumType: EnumCatalogCategoryFilter_INTERNAL
+end
 declare extern type EnumCatalogCategoryFilter_INTERNAL extends Enum with
 	Collectibles: EnumCatalogCategoryFilter
 	CommunityCreations: EnumCatalogCategoryFilter
@@ -1394,7 +1636,9 @@ declare extern type EnumCatalogCategoryFilter_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCatalogCategoryFilter?
 	function FromValue(self, Value: number): EnumCatalogCategoryFilter?
 end
-declare extern type EnumCatalogSortAggregation extends EnumItem with end
+declare extern type EnumCatalogSortAggregation extends EnumItem with
+	read EnumType: EnumCatalogSortAggregation_INTERNAL
+end
 declare extern type EnumCatalogSortAggregation_INTERNAL extends Enum with
 	AllTime: EnumCatalogSortAggregation
 	Past12Hours: EnumCatalogSortAggregation
@@ -1406,7 +1650,9 @@ declare extern type EnumCatalogSortAggregation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCatalogSortAggregation?
 	function FromValue(self, Value: number): EnumCatalogSortAggregation?
 end
-declare extern type EnumCatalogSortType extends EnumItem with end
+declare extern type EnumCatalogSortType extends EnumItem with
+	read EnumType: EnumCatalogSortType_INTERNAL
+end
 declare extern type EnumCatalogSortType_INTERNAL extends Enum with
 	Bestselling: EnumCatalogSortType
 	MostFavorited: EnumCatalogSortType
@@ -1418,7 +1664,9 @@ declare extern type EnumCatalogSortType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCatalogSortType?
 	function FromValue(self, Value: number): EnumCatalogSortType?
 end
-declare extern type EnumCellBlock extends EnumItem with end
+declare extern type EnumCellBlock extends EnumItem with
+	read EnumType: EnumCellBlock_INTERNAL
+end
 declare extern type EnumCellBlock_INTERNAL extends Enum with
 	CornerWedge: EnumCellBlock
 	HorizontalWedge: EnumCellBlock
@@ -1429,7 +1677,9 @@ declare extern type EnumCellBlock_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCellBlock?
 	function FromValue(self, Value: number): EnumCellBlock?
 end
-declare extern type EnumCellMaterial extends EnumItem with end
+declare extern type EnumCellMaterial extends EnumItem with
+	read EnumType: EnumCellMaterial_INTERNAL
+end
 declare extern type EnumCellMaterial_INTERNAL extends Enum with
 	Aluminum: EnumCellMaterial
 	Asphalt: EnumCellMaterial
@@ -1453,7 +1703,9 @@ declare extern type EnumCellMaterial_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCellMaterial?
 	function FromValue(self, Value: number): EnumCellMaterial?
 end
-declare extern type EnumCellOrientation extends EnumItem with end
+declare extern type EnumCellOrientation extends EnumItem with
+	read EnumType: EnumCellOrientation_INTERNAL
+end
 declare extern type EnumCellOrientation_INTERNAL extends Enum with
 	NegX: EnumCellOrientation
 	NegZ: EnumCellOrientation
@@ -1463,7 +1715,9 @@ declare extern type EnumCellOrientation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCellOrientation?
 	function FromValue(self, Value: number): EnumCellOrientation?
 end
-declare extern type EnumCenterDialogType extends EnumItem with end
+declare extern type EnumCenterDialogType extends EnumItem with
+	read EnumType: EnumCenterDialogType_INTERNAL
+end
 declare extern type EnumCenterDialogType_INTERNAL extends Enum with
 	ModalDialog: EnumCenterDialogType
 	PlayerInitiatedDialog: EnumCenterDialogType
@@ -1473,7 +1727,9 @@ declare extern type EnumCenterDialogType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCenterDialogType?
 	function FromValue(self, Value: number): EnumCenterDialogType?
 end
-declare extern type EnumCharacterControlMode extends EnumItem with end
+declare extern type EnumCharacterControlMode extends EnumItem with
+	read EnumType: EnumCharacterControlMode_INTERNAL
+end
 declare extern type EnumCharacterControlMode_INTERNAL extends Enum with
 	Default: EnumCharacterControlMode
 	Legacy: EnumCharacterControlMode
@@ -1483,7 +1739,9 @@ declare extern type EnumCharacterControlMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCharacterControlMode?
 	function FromValue(self, Value: number): EnumCharacterControlMode?
 end
-declare extern type EnumChatCallbackType extends EnumItem with end
+declare extern type EnumChatCallbackType extends EnumItem with
+	read EnumType: EnumChatCallbackType_INTERNAL
+end
 declare extern type EnumChatCallbackType_INTERNAL extends Enum with
 	OnClientFormattingMessage: EnumChatCallbackType
 	OnClientSendingMessage: EnumChatCallbackType
@@ -1493,7 +1751,9 @@ declare extern type EnumChatCallbackType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumChatCallbackType?
 	function FromValue(self, Value: number): EnumChatCallbackType?
 end
-declare extern type EnumChatColor extends EnumItem with end
+declare extern type EnumChatColor extends EnumItem with
+	read EnumType: EnumChatColor_INTERNAL
+end
 declare extern type EnumChatColor_INTERNAL extends Enum with
 	Blue: EnumChatColor
 	Green: EnumChatColor
@@ -1503,7 +1763,9 @@ declare extern type EnumChatColor_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumChatColor?
 	function FromValue(self, Value: number): EnumChatColor?
 end
-declare extern type EnumChatMode extends EnumItem with end
+declare extern type EnumChatMode extends EnumItem with
+	read EnumType: EnumChatMode_INTERNAL
+end
 declare extern type EnumChatMode_INTERNAL extends Enum with
 	Menu: EnumChatMode
 	TextAndMenu: EnumChatMode
@@ -1511,7 +1773,9 @@ declare extern type EnumChatMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumChatMode?
 	function FromValue(self, Value: number): EnumChatMode?
 end
-declare extern type EnumChatPrivacyMode extends EnumItem with end
+declare extern type EnumChatPrivacyMode extends EnumItem with
+	read EnumType: EnumChatPrivacyMode_INTERNAL
+end
 declare extern type EnumChatPrivacyMode_INTERNAL extends Enum with
 	AllUsers: EnumChatPrivacyMode
 	Friends: EnumChatPrivacyMode
@@ -1520,7 +1784,9 @@ declare extern type EnumChatPrivacyMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumChatPrivacyMode?
 	function FromValue(self, Value: number): EnumChatPrivacyMode?
 end
-declare extern type EnumChatRestrictionStatus extends EnumItem with end
+declare extern type EnumChatRestrictionStatus extends EnumItem with
+	read EnumType: EnumChatRestrictionStatus_INTERNAL
+end
 declare extern type EnumChatRestrictionStatus_INTERNAL extends Enum with
 	NotRestricted: EnumChatRestrictionStatus
 	Restricted: EnumChatRestrictionStatus
@@ -1529,7 +1795,9 @@ declare extern type EnumChatRestrictionStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumChatRestrictionStatus?
 	function FromValue(self, Value: number): EnumChatRestrictionStatus?
 end
-declare extern type EnumChatStyle extends EnumItem with end
+declare extern type EnumChatStyle extends EnumItem with
+	read EnumType: EnumChatStyle_INTERNAL
+end
 declare extern type EnumChatStyle_INTERNAL extends Enum with
 	Bubble: EnumChatStyle
 	Classic: EnumChatStyle
@@ -1538,7 +1806,9 @@ declare extern type EnumChatStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumChatStyle?
 	function FromValue(self, Value: number): EnumChatStyle?
 end
-declare extern type EnumChatVersion extends EnumItem with end
+declare extern type EnumChatVersion extends EnumItem with
+	read EnumType: EnumChatVersion_INTERNAL
+end
 declare extern type EnumChatVersion_INTERNAL extends Enum with
 	LegacyChatService: EnumChatVersion
 	TextChatService: EnumChatVersion
@@ -1546,7 +1816,9 @@ declare extern type EnumChatVersion_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumChatVersion?
 	function FromValue(self, Value: number): EnumChatVersion?
 end
-declare extern type EnumClientAnimatorThrottlingMode extends EnumItem with end
+declare extern type EnumClientAnimatorThrottlingMode extends EnumItem with
+	read EnumType: EnumClientAnimatorThrottlingMode_INTERNAL
+end
 declare extern type EnumClientAnimatorThrottlingMode_INTERNAL extends Enum with
 	Default: EnumClientAnimatorThrottlingMode
 	Disabled: EnumClientAnimatorThrottlingMode
@@ -1555,7 +1827,9 @@ declare extern type EnumClientAnimatorThrottlingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumClientAnimatorThrottlingMode?
 	function FromValue(self, Value: number): EnumClientAnimatorThrottlingMode?
 end
-declare extern type EnumCloseReason extends EnumItem with end
+declare extern type EnumCloseReason extends EnumItem with
+	read EnumType: EnumCloseReason_INTERNAL
+end
 declare extern type EnumCloseReason_INTERNAL extends Enum with
 	DeveloperShutdown: EnumCloseReason
 	DeveloperUpdate: EnumCloseReason
@@ -1568,7 +1842,9 @@ declare extern type EnumCloseReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCloseReason?
 	function FromValue(self, Value: number): EnumCloseReason?
 end
-declare extern type EnumCollaboratorStatus extends EnumItem with end
+declare extern type EnumCollaboratorStatus extends EnumItem with
+	read EnumType: EnumCollaboratorStatus_INTERNAL
+end
 declare extern type EnumCollaboratorStatus_INTERNAL extends Enum with
 	Editing3D: EnumCollaboratorStatus
 	None: EnumCollaboratorStatus
@@ -1578,7 +1854,9 @@ declare extern type EnumCollaboratorStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCollaboratorStatus?
 	function FromValue(self, Value: number): EnumCollaboratorStatus?
 end
-declare extern type EnumCollisionFidelity extends EnumItem with end
+declare extern type EnumCollisionFidelity extends EnumItem with
+	read EnumType: EnumCollisionFidelity_INTERNAL
+end
 declare extern type EnumCollisionFidelity_INTERNAL extends Enum with
 	Box: EnumCollisionFidelity
 	Default: EnumCollisionFidelity
@@ -1589,7 +1867,9 @@ declare extern type EnumCollisionFidelity_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCollisionFidelity?
 	function FromValue(self, Value: number): EnumCollisionFidelity?
 end
-declare extern type EnumCommandPermission extends EnumItem with end
+declare extern type EnumCommandPermission extends EnumItem with
+	read EnumType: EnumCommandPermission_INTERNAL
+end
 declare extern type EnumCommandPermission_INTERNAL extends Enum with
 	LocalUser: EnumCommandPermission
 	Plugin: EnumCommandPermission
@@ -1597,7 +1877,9 @@ declare extern type EnumCommandPermission_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCommandPermission?
 	function FromValue(self, Value: number): EnumCommandPermission?
 end
-declare extern type EnumCompileTarget extends EnumItem with end
+declare extern type EnumCompileTarget extends EnumItem with
+	read EnumType: EnumCompileTarget_INTERNAL
+end
 declare extern type EnumCompileTarget_INTERNAL extends Enum with
 	Client: EnumCompileTarget
 	CoreScript: EnumCompileTarget
@@ -1607,7 +1889,9 @@ declare extern type EnumCompileTarget_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCompileTarget?
 	function FromValue(self, Value: number): EnumCompileTarget?
 end
-declare extern type EnumCompletionAcceptanceBehavior extends EnumItem with end
+declare extern type EnumCompletionAcceptanceBehavior extends EnumItem with
+	read EnumType: EnumCompletionAcceptanceBehavior_INTERNAL
+end
 declare extern type EnumCompletionAcceptanceBehavior_INTERNAL extends Enum with
 	Insert: EnumCompletionAcceptanceBehavior
 	InsertOnEnterReplaceOnTab: EnumCompletionAcceptanceBehavior
@@ -1617,7 +1901,9 @@ declare extern type EnumCompletionAcceptanceBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCompletionAcceptanceBehavior?
 	function FromValue(self, Value: number): EnumCompletionAcceptanceBehavior?
 end
-declare extern type EnumCompletionItemKind extends EnumItem with end
+declare extern type EnumCompletionItemKind extends EnumItem with
+	read EnumType: EnumCompletionItemKind_INTERNAL
+end
 declare extern type EnumCompletionItemKind_INTERNAL extends Enum with
 	Class: EnumCompletionItemKind
 	Color: EnumCompletionItemKind
@@ -1648,7 +1934,9 @@ declare extern type EnumCompletionItemKind_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCompletionItemKind?
 	function FromValue(self, Value: number): EnumCompletionItemKind?
 end
-declare extern type EnumCompletionItemTag extends EnumItem with end
+declare extern type EnumCompletionItemTag extends EnumItem with
+	read EnumType: EnumCompletionItemTag_INTERNAL
+end
 declare extern type EnumCompletionItemTag_INTERNAL extends Enum with
 	AddParens: EnumCompletionItemTag
 	ClientServerBoundaryViolation: EnumCompletionItemTag
@@ -1665,7 +1953,9 @@ declare extern type EnumCompletionItemTag_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCompletionItemTag?
 	function FromValue(self, Value: number): EnumCompletionItemTag?
 end
-declare extern type EnumCompletionTriggerKind extends EnumItem with end
+declare extern type EnumCompletionTriggerKind extends EnumItem with
+	read EnumType: EnumCompletionTriggerKind_INTERNAL
+end
 declare extern type EnumCompletionTriggerKind_INTERNAL extends Enum with
 	Invoked: EnumCompletionTriggerKind
 	TriggerCharacter: EnumCompletionTriggerKind
@@ -1674,7 +1964,9 @@ declare extern type EnumCompletionTriggerKind_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCompletionTriggerKind?
 	function FromValue(self, Value: number): EnumCompletionTriggerKind?
 end
-declare extern type EnumCompositeValueCurveType extends EnumItem with end
+declare extern type EnumCompositeValueCurveType extends EnumItem with
+	read EnumType: EnumCompositeValueCurveType_INTERNAL
+end
 declare extern type EnumCompositeValueCurveType_INTERNAL extends Enum with
 	ColorHSV: EnumCompositeValueCurveType
 	ColorRGB: EnumCompositeValueCurveType
@@ -1688,14 +1980,18 @@ declare extern type EnumCompositeValueCurveType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCompositeValueCurveType?
 	function FromValue(self, Value: number): EnumCompositeValueCurveType?
 end
-declare extern type EnumCompressionAlgorithm extends EnumItem with end
+declare extern type EnumCompressionAlgorithm extends EnumItem with
+	read EnumType: EnumCompressionAlgorithm_INTERNAL
+end
 declare extern type EnumCompressionAlgorithm_INTERNAL extends Enum with
 	Zstd: EnumCompressionAlgorithm
 	function GetEnumItems(self): { EnumCompressionAlgorithm }
 	function FromName(self, Name: string): EnumCompressionAlgorithm?
 	function FromValue(self, Value: number): EnumCompressionAlgorithm?
 end
-declare extern type EnumComputerCameraMovementMode extends EnumItem with end
+declare extern type EnumComputerCameraMovementMode extends EnumItem with
+	read EnumType: EnumComputerCameraMovementMode_INTERNAL
+end
 declare extern type EnumComputerCameraMovementMode_INTERNAL extends Enum with
 	CameraToggle: EnumComputerCameraMovementMode
 	Classic: EnumComputerCameraMovementMode
@@ -1706,7 +2002,9 @@ declare extern type EnumComputerCameraMovementMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumComputerCameraMovementMode?
 	function FromValue(self, Value: number): EnumComputerCameraMovementMode?
 end
-declare extern type EnumComputerMovementMode extends EnumItem with end
+declare extern type EnumComputerMovementMode extends EnumItem with
+	read EnumType: EnumComputerMovementMode_INTERNAL
+end
 declare extern type EnumComputerMovementMode_INTERNAL extends Enum with
 	ClickToMove: EnumComputerMovementMode
 	Default: EnumComputerMovementMode
@@ -1715,7 +2013,9 @@ declare extern type EnumComputerMovementMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumComputerMovementMode?
 	function FromValue(self, Value: number): EnumComputerMovementMode?
 end
-declare extern type EnumConfigSnapshotErrorState extends EnumItem with end
+declare extern type EnumConfigSnapshotErrorState extends EnumItem with
+	read EnumType: EnumConfigSnapshotErrorState_INTERNAL
+end
 declare extern type EnumConfigSnapshotErrorState_INTERNAL extends Enum with
 	LoadFailed: EnumConfigSnapshotErrorState
 	None: EnumConfigSnapshotErrorState
@@ -1723,7 +2023,9 @@ declare extern type EnumConfigSnapshotErrorState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumConfigSnapshotErrorState?
 	function FromValue(self, Value: number): EnumConfigSnapshotErrorState?
 end
-declare extern type EnumConnectionError extends EnumItem with end
+declare extern type EnumConnectionError extends EnumItem with
+	read EnumType: EnumConnectionError_INTERNAL
+end
 declare extern type EnumConnectionError_INTERNAL extends Enum with
 	AlreadyConnected: EnumConnectionError
 	AndroidAnticheatKick: EnumConnectionError
@@ -1842,7 +2144,9 @@ declare extern type EnumConnectionError_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumConnectionError?
 	function FromValue(self, Value: number): EnumConnectionError?
 end
-declare extern type EnumConnectionState extends EnumItem with end
+declare extern type EnumConnectionState extends EnumItem with
+	read EnumType: EnumConnectionState_INTERNAL
+end
 declare extern type EnumConnectionState_INTERNAL extends Enum with
 	Connected: EnumConnectionState
 	Disconnected: EnumConnectionState
@@ -1850,7 +2154,9 @@ declare extern type EnumConnectionState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumConnectionState?
 	function FromValue(self, Value: number): EnumConnectionState?
 end
-declare extern type EnumContentSourceType extends EnumItem with end
+declare extern type EnumContentSourceType extends EnumItem with
+	read EnumType: EnumContentSourceType_INTERNAL
+end
 declare extern type EnumContentSourceType_INTERNAL extends Enum with
 	None: EnumContentSourceType
 	Object: EnumContentSourceType
@@ -1860,7 +2166,9 @@ declare extern type EnumContentSourceType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumContentSourceType?
 	function FromValue(self, Value: number): EnumContentSourceType?
 end
-declare extern type EnumContextActionPriority extends EnumItem with end
+declare extern type EnumContextActionPriority extends EnumItem with
+	read EnumType: EnumContextActionPriority_INTERNAL
+end
 declare extern type EnumContextActionPriority_INTERNAL extends Enum with
 	High: EnumContextActionPriority
 	Low: EnumContextActionPriority
@@ -1869,7 +2177,9 @@ declare extern type EnumContextActionPriority_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumContextActionPriority?
 	function FromValue(self, Value: number): EnumContextActionPriority?
 end
-declare extern type EnumContextActionResult extends EnumItem with end
+declare extern type EnumContextActionResult extends EnumItem with
+	read EnumType: EnumContextActionResult_INTERNAL
+end
 declare extern type EnumContextActionResult_INTERNAL extends Enum with
 	Pass: EnumContextActionResult
 	Sink: EnumContextActionResult
@@ -1877,7 +2187,9 @@ declare extern type EnumContextActionResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumContextActionResult?
 	function FromValue(self, Value: number): EnumContextActionResult?
 end
-declare extern type EnumControlMode extends EnumItem with end
+declare extern type EnumControlMode extends EnumItem with
+	read EnumType: EnumControlMode_INTERNAL
+end
 declare extern type EnumControlMode_INTERNAL extends Enum with
 	Classic: EnumControlMode
 	MouseLockSwitch: EnumControlMode
@@ -1885,7 +2197,9 @@ declare extern type EnumControlMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumControlMode?
 	function FromValue(self, Value: number): EnumControlMode?
 end
-declare extern type EnumCoreGuiType extends EnumItem with end
+declare extern type EnumCoreGuiType extends EnumItem with
+	read EnumType: EnumCoreGuiType_INTERNAL
+end
 declare extern type EnumCoreGuiType_INTERNAL extends Enum with
 	All: EnumCoreGuiType
 	AvatarSwitcher: EnumCoreGuiType
@@ -1901,7 +2215,9 @@ declare extern type EnumCoreGuiType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCoreGuiType?
 	function FromValue(self, Value: number): EnumCoreGuiType?
 end
-declare extern type EnumCreateAssetResult extends EnumItem with end
+declare extern type EnumCreateAssetResult extends EnumItem with
+	read EnumType: EnumCreateAssetResult_INTERNAL
+end
 declare extern type EnumCreateAssetResult_INTERNAL extends Enum with
 	PermissionDenied: EnumCreateAssetResult
 	Success: EnumCreateAssetResult
@@ -1911,7 +2227,9 @@ declare extern type EnumCreateAssetResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCreateAssetResult?
 	function FromValue(self, Value: number): EnumCreateAssetResult?
 end
-declare extern type EnumCreateContentResult extends EnumItem with end
+declare extern type EnumCreateContentResult extends EnumItem with
+	read EnumType: EnumCreateContentResult_INTERNAL
+end
 declare extern type EnumCreateContentResult_INTERNAL extends Enum with
 	PermissionDenied: EnumCreateContentResult
 	StorageLimitExceeded: EnumCreateContentResult
@@ -1922,7 +2240,9 @@ declare extern type EnumCreateContentResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCreateContentResult?
 	function FromValue(self, Value: number): EnumCreateContentResult?
 end
-declare extern type EnumCreateOutfitFailure extends EnumItem with end
+declare extern type EnumCreateOutfitFailure extends EnumItem with
+	read EnumType: EnumCreateOutfitFailure_INTERNAL
+end
 declare extern type EnumCreateOutfitFailure_INTERNAL extends Enum with
 	InvalidName: EnumCreateOutfitFailure
 	Other: EnumCreateOutfitFailure
@@ -1931,7 +2251,9 @@ declare extern type EnumCreateOutfitFailure_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCreateOutfitFailure?
 	function FromValue(self, Value: number): EnumCreateOutfitFailure?
 end
-declare extern type EnumCreatorType extends EnumItem with end
+declare extern type EnumCreatorType extends EnumItem with
+	read EnumType: EnumCreatorType_INTERNAL
+end
 declare extern type EnumCreatorType_INTERNAL extends Enum with
 	Group: EnumCreatorType
 	User: EnumCreatorType
@@ -1939,7 +2261,9 @@ declare extern type EnumCreatorType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCreatorType?
 	function FromValue(self, Value: number): EnumCreatorType?
 end
-declare extern type EnumCreatorTypeFilter extends EnumItem with end
+declare extern type EnumCreatorTypeFilter extends EnumItem with
+	read EnumType: EnumCreatorTypeFilter_INTERNAL
+end
 declare extern type EnumCreatorTypeFilter_INTERNAL extends Enum with
 	All: EnumCreatorTypeFilter
 	Group: EnumCreatorTypeFilter
@@ -1948,7 +2272,9 @@ declare extern type EnumCreatorTypeFilter_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCreatorTypeFilter?
 	function FromValue(self, Value: number): EnumCreatorTypeFilter?
 end
-declare extern type EnumCurrencyType extends EnumItem with end
+declare extern type EnumCurrencyType extends EnumItem with
+	read EnumType: EnumCurrencyType_INTERNAL
+end
 declare extern type EnumCurrencyType_INTERNAL extends Enum with
 	Default: EnumCurrencyType
 	Robux: EnumCurrencyType
@@ -1957,7 +2283,9 @@ declare extern type EnumCurrencyType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCurrencyType?
 	function FromValue(self, Value: number): EnumCurrencyType?
 end
-declare extern type EnumCustomCameraMode extends EnumItem with end
+declare extern type EnumCustomCameraMode extends EnumItem with
+	read EnumType: EnumCustomCameraMode_INTERNAL
+end
 declare extern type EnumCustomCameraMode_INTERNAL extends Enum with
 	Classic: EnumCustomCameraMode
 	Default: EnumCustomCameraMode
@@ -1966,7 +2294,9 @@ declare extern type EnumCustomCameraMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumCustomCameraMode?
 	function FromValue(self, Value: number): EnumCustomCameraMode?
 end
-declare extern type EnumDataModelChangeType extends EnumItem with end
+declare extern type EnumDataModelChangeType extends EnumItem with
+	read EnumType: EnumDataModelChangeType_INTERNAL
+end
 declare extern type EnumDataModelChangeType_INTERNAL extends Enum with
 	Add: EnumDataModelChangeType
 	AddPackage: EnumDataModelChangeType
@@ -1976,7 +2306,9 @@ declare extern type EnumDataModelChangeType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDataModelChangeType?
 	function FromValue(self, Value: number): EnumDataModelChangeType?
 end
-declare extern type EnumDataModelExtractorFileType extends EnumItem with end
+declare extern type EnumDataModelExtractorFileType extends EnumItem with
+	read EnumType: EnumDataModelExtractorFileType_INTERNAL
+end
 declare extern type EnumDataModelExtractorFileType_INTERNAL extends Enum with
 	FirstSlice: EnumDataModelExtractorFileType
 	NonFirstSlice: EnumDataModelExtractorFileType
@@ -1985,7 +2317,9 @@ declare extern type EnumDataModelExtractorFileType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDataModelExtractorFileType?
 	function FromValue(self, Value: number): EnumDataModelExtractorFileType?
 end
-declare extern type EnumDataStoreRequestType extends EnumItem with end
+declare extern type EnumDataStoreRequestType extends EnumItem with
+	read EnumType: EnumDataStoreRequestType_INTERNAL
+end
 declare extern type EnumDataStoreRequestType_INTERNAL extends Enum with
 	GetAsync: EnumDataStoreRequestType
 	GetSortedAsync: EnumDataStoreRequestType
@@ -2008,7 +2342,9 @@ declare extern type EnumDataStoreRequestType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDataStoreRequestType?
 	function FromValue(self, Value: number): EnumDataStoreRequestType?
 end
-declare extern type EnumDebugBreakModeType extends EnumItem with end
+declare extern type EnumDebugBreakModeType extends EnumItem with
+	read EnumType: EnumDebugBreakModeType_INTERNAL
+end
 declare extern type EnumDebugBreakModeType_INTERNAL extends Enum with
 	Always: EnumDebugBreakModeType
 	Never: EnumDebugBreakModeType
@@ -2017,7 +2353,9 @@ declare extern type EnumDebugBreakModeType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDebugBreakModeType?
 	function FromValue(self, Value: number): EnumDebugBreakModeType?
 end
-declare extern type EnumDebuggerEndReason extends EnumItem with end
+declare extern type EnumDebuggerEndReason extends EnumItem with
+	read EnumType: EnumDebuggerEndReason_INTERNAL
+end
 declare extern type EnumDebuggerEndReason_INTERNAL extends Enum with
 	ClientRequest: EnumDebuggerEndReason
 	ConfigurationFailed: EnumDebuggerEndReason
@@ -2031,7 +2369,9 @@ declare extern type EnumDebuggerEndReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDebuggerEndReason?
 	function FromValue(self, Value: number): EnumDebuggerEndReason?
 end
-declare extern type EnumDebuggerExceptionBreakMode extends EnumItem with end
+declare extern type EnumDebuggerExceptionBreakMode extends EnumItem with
+	read EnumType: EnumDebuggerExceptionBreakMode_INTERNAL
+end
 declare extern type EnumDebuggerExceptionBreakMode_INTERNAL extends Enum with
 	Always: EnumDebuggerExceptionBreakMode
 	Never: EnumDebuggerExceptionBreakMode
@@ -2040,7 +2380,9 @@ declare extern type EnumDebuggerExceptionBreakMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDebuggerExceptionBreakMode?
 	function FromValue(self, Value: number): EnumDebuggerExceptionBreakMode?
 end
-declare extern type EnumDebuggerFrameType extends EnumItem with end
+declare extern type EnumDebuggerFrameType extends EnumItem with
+	read EnumType: EnumDebuggerFrameType_INTERNAL
+end
 declare extern type EnumDebuggerFrameType_INTERNAL extends Enum with
 	C: EnumDebuggerFrameType
 	Lua: EnumDebuggerFrameType
@@ -2048,7 +2390,9 @@ declare extern type EnumDebuggerFrameType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDebuggerFrameType?
 	function FromValue(self, Value: number): EnumDebuggerFrameType?
 end
-declare extern type EnumDebuggerPauseReason extends EnumItem with end
+declare extern type EnumDebuggerPauseReason extends EnumItem with
+	read EnumType: EnumDebuggerPauseReason_INTERNAL
+end
 declare extern type EnumDebuggerPauseReason_INTERNAL extends Enum with
 	Breakpoint: EnumDebuggerPauseReason
 	Entrypoint: EnumDebuggerPauseReason
@@ -2060,7 +2404,9 @@ declare extern type EnumDebuggerPauseReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDebuggerPauseReason?
 	function FromValue(self, Value: number): EnumDebuggerPauseReason?
 end
-declare extern type EnumDebuggerResumeType extends EnumItem with end
+declare extern type EnumDebuggerResumeType extends EnumItem with
+	read EnumType: EnumDebuggerResumeType_INTERNAL
+end
 declare extern type EnumDebuggerResumeType_INTERNAL extends Enum with
 	Resume: EnumDebuggerResumeType
 	StepInto: EnumDebuggerResumeType
@@ -2070,7 +2416,9 @@ declare extern type EnumDebuggerResumeType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDebuggerResumeType?
 	function FromValue(self, Value: number): EnumDebuggerResumeType?
 end
-declare extern type EnumDebuggerStatus extends EnumItem with end
+declare extern type EnumDebuggerStatus extends EnumItem with
+	read EnumType: EnumDebuggerStatus_INTERNAL
+end
 declare extern type EnumDebuggerStatus_INTERNAL extends Enum with
 	ConnectionClosed: EnumDebuggerStatus
 	ConnectionLost: EnumDebuggerStatus
@@ -2085,7 +2433,9 @@ declare extern type EnumDebuggerStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDebuggerStatus?
 	function FromValue(self, Value: number): EnumDebuggerStatus?
 end
-declare extern type EnumDefaultScriptSyncFileType extends EnumItem with end
+declare extern type EnumDefaultScriptSyncFileType extends EnumItem with
+	read EnumType: EnumDefaultScriptSyncFileType_INTERNAL
+end
 declare extern type EnumDefaultScriptSyncFileType_INTERNAL extends Enum with
 	Lua: EnumDefaultScriptSyncFileType
 	Luau: EnumDefaultScriptSyncFileType
@@ -2093,7 +2443,9 @@ declare extern type EnumDefaultScriptSyncFileType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDefaultScriptSyncFileType?
 	function FromValue(self, Value: number): EnumDefaultScriptSyncFileType?
 end
-declare extern type EnumDevCameraOcclusionMode extends EnumItem with end
+declare extern type EnumDevCameraOcclusionMode extends EnumItem with
+	read EnumType: EnumDevCameraOcclusionMode_INTERNAL
+end
 declare extern type EnumDevCameraOcclusionMode_INTERNAL extends Enum with
 	Invisicam: EnumDevCameraOcclusionMode
 	Zoom: EnumDevCameraOcclusionMode
@@ -2101,7 +2453,9 @@ declare extern type EnumDevCameraOcclusionMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDevCameraOcclusionMode?
 	function FromValue(self, Value: number): EnumDevCameraOcclusionMode?
 end
-declare extern type EnumDevComputerCameraMovementMode extends EnumItem with end
+declare extern type EnumDevComputerCameraMovementMode extends EnumItem with
+	read EnumType: EnumDevComputerCameraMovementMode_INTERNAL
+end
 declare extern type EnumDevComputerCameraMovementMode_INTERNAL extends Enum with
 	CameraToggle: EnumDevComputerCameraMovementMode
 	Classic: EnumDevComputerCameraMovementMode
@@ -2112,7 +2466,9 @@ declare extern type EnumDevComputerCameraMovementMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDevComputerCameraMovementMode?
 	function FromValue(self, Value: number): EnumDevComputerCameraMovementMode?
 end
-declare extern type EnumDevComputerMovementMode extends EnumItem with end
+declare extern type EnumDevComputerMovementMode extends EnumItem with
+	read EnumType: EnumDevComputerMovementMode_INTERNAL
+end
 declare extern type EnumDevComputerMovementMode_INTERNAL extends Enum with
 	ClickToMove: EnumDevComputerMovementMode
 	KeyboardMouse: EnumDevComputerMovementMode
@@ -2122,7 +2478,9 @@ declare extern type EnumDevComputerMovementMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDevComputerMovementMode?
 	function FromValue(self, Value: number): EnumDevComputerMovementMode?
 end
-declare extern type EnumDevTouchCameraMovementMode extends EnumItem with end
+declare extern type EnumDevTouchCameraMovementMode extends EnumItem with
+	read EnumType: EnumDevTouchCameraMovementMode_INTERNAL
+end
 declare extern type EnumDevTouchCameraMovementMode_INTERNAL extends Enum with
 	Classic: EnumDevTouchCameraMovementMode
 	Follow: EnumDevTouchCameraMovementMode
@@ -2132,7 +2490,9 @@ declare extern type EnumDevTouchCameraMovementMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDevTouchCameraMovementMode?
 	function FromValue(self, Value: number): EnumDevTouchCameraMovementMode?
 end
-declare extern type EnumDevTouchMovementMode extends EnumItem with end
+declare extern type EnumDevTouchMovementMode extends EnumItem with
+	read EnumType: EnumDevTouchMovementMode_INTERNAL
+end
 declare extern type EnumDevTouchMovementMode_INTERNAL extends Enum with
 	ClickToMove: EnumDevTouchMovementMode
 	DPad: EnumDevTouchMovementMode
@@ -2145,7 +2505,9 @@ declare extern type EnumDevTouchMovementMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDevTouchMovementMode?
 	function FromValue(self, Value: number): EnumDevTouchMovementMode?
 end
-declare extern type EnumDeveloperMemoryTag extends EnumItem with end
+declare extern type EnumDeveloperMemoryTag extends EnumItem with
+	read EnumType: EnumDeveloperMemoryTag_INTERNAL
+end
 declare extern type EnumDeveloperMemoryTag_INTERNAL extends Enum with
 	Animation: EnumDeveloperMemoryTag
 	BaseParts: EnumDeveloperMemoryTag
@@ -2175,7 +2537,9 @@ declare extern type EnumDeveloperMemoryTag_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDeveloperMemoryTag?
 	function FromValue(self, Value: number): EnumDeveloperMemoryTag?
 end
-declare extern type EnumDeviceFeatureType extends EnumItem with end
+declare extern type EnumDeviceFeatureType extends EnumItem with
+	read EnumType: EnumDeviceFeatureType_INTERNAL
+end
 declare extern type EnumDeviceFeatureType_INTERNAL extends Enum with
 	DeviceCapture: EnumDeviceFeatureType
 	InExperienceFAE: EnumDeviceFeatureType
@@ -2183,7 +2547,9 @@ declare extern type EnumDeviceFeatureType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDeviceFeatureType?
 	function FromValue(self, Value: number): EnumDeviceFeatureType?
 end
-declare extern type EnumDeviceForm extends EnumItem with end
+declare extern type EnumDeviceForm extends EnumItem with
+	read EnumType: EnumDeviceForm_INTERNAL
+end
 declare extern type EnumDeviceForm_INTERNAL extends Enum with
 	Console: EnumDeviceForm
 	Desktop: EnumDeviceForm
@@ -2194,7 +2560,9 @@ declare extern type EnumDeviceForm_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDeviceForm?
 	function FromValue(self, Value: number): EnumDeviceForm?
 end
-declare extern type EnumDeviceLevel extends EnumItem with end
+declare extern type EnumDeviceLevel extends EnumItem with
+	read EnumType: EnumDeviceLevel_INTERNAL
+end
 declare extern type EnumDeviceLevel_INTERNAL extends Enum with
 	High: EnumDeviceLevel
 	Low: EnumDeviceLevel
@@ -2203,7 +2571,9 @@ declare extern type EnumDeviceLevel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDeviceLevel?
 	function FromValue(self, Value: number): EnumDeviceLevel?
 end
-declare extern type EnumDeviceSimulatorScalingMode extends EnumItem with end
+declare extern type EnumDeviceSimulatorScalingMode extends EnumItem with
+	read EnumType: EnumDeviceSimulatorScalingMode_INTERNAL
+end
 declare extern type EnumDeviceSimulatorScalingMode_INTERNAL extends Enum with
 	ActualResolution: EnumDeviceSimulatorScalingMode
 	FitToWindow: EnumDeviceSimulatorScalingMode
@@ -2212,7 +2582,9 @@ declare extern type EnumDeviceSimulatorScalingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDeviceSimulatorScalingMode?
 	function FromValue(self, Value: number): EnumDeviceSimulatorScalingMode?
 end
-declare extern type EnumDeviceType extends EnumItem with end
+declare extern type EnumDeviceType extends EnumItem with
+	read EnumType: EnumDeviceType_INTERNAL
+end
 declare extern type EnumDeviceType_INTERNAL extends Enum with
 	Desktop: EnumDeviceType
 	Phone: EnumDeviceType
@@ -2223,7 +2595,9 @@ declare extern type EnumDeviceType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDeviceType?
 	function FromValue(self, Value: number): EnumDeviceType?
 end
-declare extern type EnumDialogBehaviorType extends EnumItem with end
+declare extern type EnumDialogBehaviorType extends EnumItem with
+	read EnumType: EnumDialogBehaviorType_INTERNAL
+end
 declare extern type EnumDialogBehaviorType_INTERNAL extends Enum with
 	MultiplePlayers: EnumDialogBehaviorType
 	SinglePlayer: EnumDialogBehaviorType
@@ -2231,7 +2605,9 @@ declare extern type EnumDialogBehaviorType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDialogBehaviorType?
 	function FromValue(self, Value: number): EnumDialogBehaviorType?
 end
-declare extern type EnumDialogPurpose extends EnumItem with end
+declare extern type EnumDialogPurpose extends EnumItem with
+	read EnumType: EnumDialogPurpose_INTERNAL
+end
 declare extern type EnumDialogPurpose_INTERNAL extends Enum with
 	Help: EnumDialogPurpose
 	Quest: EnumDialogPurpose
@@ -2240,7 +2616,9 @@ declare extern type EnumDialogPurpose_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDialogPurpose?
 	function FromValue(self, Value: number): EnumDialogPurpose?
 end
-declare extern type EnumDialogTone extends EnumItem with end
+declare extern type EnumDialogTone extends EnumItem with
+	read EnumType: EnumDialogTone_INTERNAL
+end
 declare extern type EnumDialogTone_INTERNAL extends Enum with
 	Enemy: EnumDialogTone
 	Friendly: EnumDialogTone
@@ -2249,7 +2627,9 @@ declare extern type EnumDialogTone_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDialogTone?
 	function FromValue(self, Value: number): EnumDialogTone?
 end
-declare extern type EnumDigitsRigDescriptionSide extends EnumItem with end
+declare extern type EnumDigitsRigDescriptionSide extends EnumItem with
+	read EnumType: EnumDigitsRigDescriptionSide_INTERNAL
+end
 declare extern type EnumDigitsRigDescriptionSide_INTERNAL extends Enum with
 	Left: EnumDigitsRigDescriptionSide
 	None: EnumDigitsRigDescriptionSide
@@ -2258,14 +2638,18 @@ declare extern type EnumDigitsRigDescriptionSide_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDigitsRigDescriptionSide?
 	function FromValue(self, Value: number): EnumDigitsRigDescriptionSide?
 end
-declare extern type EnumDiscountType extends EnumItem with end
+declare extern type EnumDiscountType extends EnumItem with
+	read EnumType: EnumDiscountType_INTERNAL
+end
 declare extern type EnumDiscountType_INTERNAL extends Enum with
 	Uncategorized: EnumDiscountType
 	function GetEnumItems(self): { EnumDiscountType }
 	function FromName(self, Name: string): EnumDiscountType?
 	function FromValue(self, Value: number): EnumDiscountType?
 end
-declare extern type EnumDisplayScalingMode extends EnumItem with end
+declare extern type EnumDisplayScalingMode extends EnumItem with
+	read EnumType: EnumDisplayScalingMode_INTERNAL
+end
 declare extern type EnumDisplayScalingMode_INTERNAL extends Enum with
 	Default: EnumDisplayScalingMode
 	Legacy: EnumDisplayScalingMode
@@ -2274,7 +2658,9 @@ declare extern type EnumDisplayScalingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDisplayScalingMode?
 	function FromValue(self, Value: number): EnumDisplayScalingMode?
 end
-declare extern type EnumDisplaySize extends EnumItem with end
+declare extern type EnumDisplaySize extends EnumItem with
+	read EnumType: EnumDisplaySize_INTERNAL
+end
 declare extern type EnumDisplaySize_INTERNAL extends Enum with
 	Large: EnumDisplaySize
 	Medium: EnumDisplaySize
@@ -2283,7 +2669,9 @@ declare extern type EnumDisplaySize_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDisplaySize?
 	function FromValue(self, Value: number): EnumDisplaySize?
 end
-declare extern type EnumDistanceAttenuationMode extends EnumItem with end
+declare extern type EnumDistanceAttenuationMode extends EnumItem with
+	read EnumType: EnumDistanceAttenuationMode_INTERNAL
+end
 declare extern type EnumDistanceAttenuationMode_INTERNAL extends Enum with
 	Custom: EnumDistanceAttenuationMode
 	Inverse: EnumDistanceAttenuationMode
@@ -2294,7 +2682,9 @@ declare extern type EnumDistanceAttenuationMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDistanceAttenuationMode?
 	function FromValue(self, Value: number): EnumDistanceAttenuationMode?
 end
-declare extern type EnumDomainType extends EnumItem with end
+declare extern type EnumDomainType extends EnumItem with
+	read EnumType: EnumDomainType_INTERNAL
+end
 declare extern type EnumDomainType_INTERNAL extends Enum with
 	EXPERIENCE: EnumDomainType
 	OAUTH: EnumDomainType
@@ -2302,7 +2692,9 @@ declare extern type EnumDomainType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDomainType?
 	function FromValue(self, Value: number): EnumDomainType?
 end
-declare extern type EnumDominantAxis extends EnumItem with end
+declare extern type EnumDominantAxis extends EnumItem with
+	read EnumType: EnumDominantAxis_INTERNAL
+end
 declare extern type EnumDominantAxis_INTERNAL extends Enum with
 	Height: EnumDominantAxis
 	Width: EnumDominantAxis
@@ -2310,7 +2702,9 @@ declare extern type EnumDominantAxis_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDominantAxis?
 	function FromValue(self, Value: number): EnumDominantAxis?
 end
-declare extern type EnumDraftStatusCode extends EnumItem with end
+declare extern type EnumDraftStatusCode extends EnumItem with
+	read EnumType: EnumDraftStatusCode_INTERNAL
+end
 declare extern type EnumDraftStatusCode_INTERNAL extends Enum with
 	DraftCommitted: EnumDraftStatusCode
 	DraftOutdated: EnumDraftStatusCode
@@ -2320,7 +2714,9 @@ declare extern type EnumDraftStatusCode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDraftStatusCode?
 	function FromValue(self, Value: number): EnumDraftStatusCode?
 end
-declare extern type EnumDragDetectorDragStyle extends EnumItem with end
+declare extern type EnumDragDetectorDragStyle extends EnumItem with
+	read EnumType: EnumDragDetectorDragStyle_INTERNAL
+end
 declare extern type EnumDragDetectorDragStyle_INTERNAL extends Enum with
 	BestForDevice: EnumDragDetectorDragStyle
 	RotateAxis: EnumDragDetectorDragStyle
@@ -2335,7 +2731,9 @@ declare extern type EnumDragDetectorDragStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDragDetectorDragStyle?
 	function FromValue(self, Value: number): EnumDragDetectorDragStyle?
 end
-declare extern type EnumDragDetectorPermissionPolicy extends EnumItem with end
+declare extern type EnumDragDetectorPermissionPolicy extends EnumItem with
+	read EnumType: EnumDragDetectorPermissionPolicy_INTERNAL
+end
 declare extern type EnumDragDetectorPermissionPolicy_INTERNAL extends Enum with
 	Everybody: EnumDragDetectorPermissionPolicy
 	Nobody: EnumDragDetectorPermissionPolicy
@@ -2344,7 +2742,9 @@ declare extern type EnumDragDetectorPermissionPolicy_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDragDetectorPermissionPolicy?
 	function FromValue(self, Value: number): EnumDragDetectorPermissionPolicy?
 end
-declare extern type EnumDragDetectorResponseStyle extends EnumItem with end
+declare extern type EnumDragDetectorResponseStyle extends EnumItem with
+	read EnumType: EnumDragDetectorResponseStyle_INTERNAL
+end
 declare extern type EnumDragDetectorResponseStyle_INTERNAL extends Enum with
 	Custom: EnumDragDetectorResponseStyle
 	Geometric: EnumDragDetectorResponseStyle
@@ -2353,7 +2753,9 @@ declare extern type EnumDragDetectorResponseStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDragDetectorResponseStyle?
 	function FromValue(self, Value: number): EnumDragDetectorResponseStyle?
 end
-declare extern type EnumDraggerCoordinateSpace extends EnumItem with end
+declare extern type EnumDraggerCoordinateSpace extends EnumItem with
+	read EnumType: EnumDraggerCoordinateSpace_INTERNAL
+end
 declare extern type EnumDraggerCoordinateSpace_INTERNAL extends Enum with
 	Object: EnumDraggerCoordinateSpace
 	World: EnumDraggerCoordinateSpace
@@ -2361,7 +2763,9 @@ declare extern type EnumDraggerCoordinateSpace_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDraggerCoordinateSpace?
 	function FromValue(self, Value: number): EnumDraggerCoordinateSpace?
 end
-declare extern type EnumDraggerMovementMode extends EnumItem with end
+declare extern type EnumDraggerMovementMode extends EnumItem with
+	read EnumType: EnumDraggerMovementMode_INTERNAL
+end
 declare extern type EnumDraggerMovementMode_INTERNAL extends Enum with
 	Geometric: EnumDraggerMovementMode
 	Physical: EnumDraggerMovementMode
@@ -2369,7 +2773,9 @@ declare extern type EnumDraggerMovementMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDraggerMovementMode?
 	function FromValue(self, Value: number): EnumDraggerMovementMode?
 end
-declare extern type EnumDraggingScrollBar extends EnumItem with end
+declare extern type EnumDraggingScrollBar extends EnumItem with
+	read EnumType: EnumDraggingScrollBar_INTERNAL
+end
 declare extern type EnumDraggingScrollBar_INTERNAL extends Enum with
 	Horizontal: EnumDraggingScrollBar
 	None: EnumDraggingScrollBar
@@ -2378,7 +2784,9 @@ declare extern type EnumDraggingScrollBar_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumDraggingScrollBar?
 	function FromValue(self, Value: number): EnumDraggingScrollBar?
 end
-declare extern type EnumEasingDirection extends EnumItem with end
+declare extern type EnumEasingDirection extends EnumItem with
+	read EnumType: EnumEasingDirection_INTERNAL
+end
 declare extern type EnumEasingDirection_INTERNAL extends Enum with
 	In: EnumEasingDirection
 	InOut: EnumEasingDirection
@@ -2387,7 +2795,9 @@ declare extern type EnumEasingDirection_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumEasingDirection?
 	function FromValue(self, Value: number): EnumEasingDirection?
 end
-declare extern type EnumEasingStyle extends EnumItem with end
+declare extern type EnumEasingStyle extends EnumItem with
+	read EnumType: EnumEasingStyle_INTERNAL
+end
 declare extern type EnumEasingStyle_INTERNAL extends Enum with
 	Back: EnumEasingStyle
 	Bounce: EnumEasingStyle
@@ -2404,7 +2814,9 @@ declare extern type EnumEasingStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumEasingStyle?
 	function FromValue(self, Value: number): EnumEasingStyle?
 end
-declare extern type EnumEditableStatus extends EnumItem with end
+declare extern type EnumEditableStatus extends EnumItem with
+	read EnumType: EnumEditableStatus_INTERNAL
+end
 declare extern type EnumEditableStatus_INTERNAL extends Enum with
 	Allowed: EnumEditableStatus
 	Disallowed: EnumEditableStatus
@@ -2413,7 +2825,9 @@ declare extern type EnumEditableStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumEditableStatus?
 	function FromValue(self, Value: number): EnumEditableStatus?
 end
-declare extern type EnumElasticBehavior extends EnumItem with end
+declare extern type EnumElasticBehavior extends EnumItem with
+	read EnumType: EnumElasticBehavior_INTERNAL
+end
 declare extern type EnumElasticBehavior_INTERNAL extends Enum with
 	Always: EnumElasticBehavior
 	Never: EnumElasticBehavior
@@ -2422,7 +2836,9 @@ declare extern type EnumElasticBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumElasticBehavior?
 	function FromValue(self, Value: number): EnumElasticBehavior?
 end
-declare extern type EnumEmitterPositionType extends EnumItem with end
+declare extern type EnumEmitterPositionType extends EnumItem with
+	read EnumType: EnumEmitterPositionType_INTERNAL
+end
 declare extern type EnumEmitterPositionType_INTERNAL extends Enum with
 	Instance: EnumEmitterPositionType
 	Parent: EnumEmitterPositionType
@@ -2430,7 +2846,9 @@ declare extern type EnumEmitterPositionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumEmitterPositionType?
 	function FromValue(self, Value: number): EnumEmitterPositionType?
 end
-declare extern type EnumEngagementLevel extends EnumItem with end
+declare extern type EnumEngagementLevel extends EnumItem with
+	read EnumType: EnumEngagementLevel_INTERNAL
+end
 declare extern type EnumEngagementLevel_INTERNAL extends Enum with
 	High: EnumEngagementLevel
 	Inactive: EnumEngagementLevel
@@ -2441,7 +2859,9 @@ declare extern type EnumEngagementLevel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumEngagementLevel?
 	function FromValue(self, Value: number): EnumEngagementLevel?
 end
-declare extern type EnumEngineFolder extends EnumItem with end
+declare extern type EnumEngineFolder extends EnumItem with
+	read EnumType: EnumEngineFolder_INTERNAL
+end
 declare extern type EnumEngineFolder_INTERNAL extends Enum with
 	Logs: EnumEngineFolder
 	Screenshots: EnumEngineFolder
@@ -2450,7 +2870,9 @@ declare extern type EnumEngineFolder_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumEngineFolder?
 	function FromValue(self, Value: number): EnumEngineFolder?
 end
-declare extern type EnumEnviromentalPhysicsThrottle extends EnumItem with end
+declare extern type EnumEnviromentalPhysicsThrottle extends EnumItem with
+	read EnumType: EnumEnviromentalPhysicsThrottle_INTERNAL
+end
 declare extern type EnumEnviromentalPhysicsThrottle_INTERNAL extends Enum with
 	Always: EnumEnviromentalPhysicsThrottle
 	DefaultAuto: EnumEnviromentalPhysicsThrottle
@@ -2463,7 +2885,9 @@ declare extern type EnumEnviromentalPhysicsThrottle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumEnviromentalPhysicsThrottle?
 	function FromValue(self, Value: number): EnumEnviromentalPhysicsThrottle?
 end
-declare extern type EnumExperienceActivationStatus extends EnumItem with end
+declare extern type EnumExperienceActivationStatus extends EnumItem with
+	read EnumType: EnumExperienceActivationStatus_INTERNAL
+end
 declare extern type EnumExperienceActivationStatus_INTERNAL extends Enum with
 	Active: EnumExperienceActivationStatus
 	Lapsed: EnumExperienceActivationStatus
@@ -2474,7 +2898,9 @@ declare extern type EnumExperienceActivationStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumExperienceActivationStatus?
 	function FromValue(self, Value: number): EnumExperienceActivationStatus?
 end
-declare extern type EnumExperienceAuthScope extends EnumItem with end
+declare extern type EnumExperienceAuthScope extends EnumItem with
+	read EnumType: EnumExperienceAuthScope_INTERNAL
+end
 declare extern type EnumExperienceAuthScope_INTERNAL extends Enum with
 	CreatorAssetsCreate: EnumExperienceAuthScope
 	DefaultScope: EnumExperienceAuthScope
@@ -2482,7 +2908,9 @@ declare extern type EnumExperienceAuthScope_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumExperienceAuthScope?
 	function FromValue(self, Value: number): EnumExperienceAuthScope?
 end
-declare extern type EnumExperienceEventStatus extends EnumItem with end
+declare extern type EnumExperienceEventStatus extends EnumItem with
+	read EnumType: EnumExperienceEventStatus_INTERNAL
+end
 declare extern type EnumExperienceEventStatus_INTERNAL extends Enum with
 	Active: EnumExperienceEventStatus
 	Cancelled: EnumExperienceEventStatus
@@ -2493,7 +2921,9 @@ declare extern type EnumExperienceEventStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumExperienceEventStatus?
 	function FromValue(self, Value: number): EnumExperienceEventStatus?
 end
-declare extern type EnumExperienceStateCaptureSelectionMode extends EnumItem with end
+declare extern type EnumExperienceStateCaptureSelectionMode extends EnumItem with
+	read EnumType: EnumExperienceStateCaptureSelectionMode_INTERNAL
+end
 declare extern type EnumExperienceStateCaptureSelectionMode_INTERNAL extends Enum with
 	Default: EnumExperienceStateCaptureSelectionMode
 	SafetyHighlightMode: EnumExperienceStateCaptureSelectionMode
@@ -2501,7 +2931,9 @@ declare extern type EnumExperienceStateCaptureSelectionMode_INTERNAL extends Enu
 	function FromName(self, Name: string): EnumExperienceStateCaptureSelectionMode?
 	function FromValue(self, Value: number): EnumExperienceStateCaptureSelectionMode?
 end
-declare extern type EnumExperienceStateRecordingLoadMode extends EnumItem with end
+declare extern type EnumExperienceStateRecordingLoadMode extends EnumItem with
+	read EnumType: EnumExperienceStateRecordingLoadMode_INTERNAL
+end
 declare extern type EnumExperienceStateRecordingLoadMode_INTERNAL extends Enum with
 	ContiguousSlice: EnumExperienceStateRecordingLoadMode
 	NewReplay: EnumExperienceStateRecordingLoadMode
@@ -2510,7 +2942,9 @@ declare extern type EnumExperienceStateRecordingLoadMode_INTERNAL extends Enum w
 	function FromName(self, Name: string): EnumExperienceStateRecordingLoadMode?
 	function FromValue(self, Value: number): EnumExperienceStateRecordingLoadMode?
 end
-declare extern type EnumExperienceStateRecordingLoadSourceType extends EnumItem with end
+declare extern type EnumExperienceStateRecordingLoadSourceType extends EnumItem with
+	read EnumType: EnumExperienceStateRecordingLoadSourceType_INTERNAL
+end
 declare extern type EnumExperienceStateRecordingLoadSourceType_INTERNAL extends Enum with
 	File: EnumExperienceStateRecordingLoadSourceType
 	S3Url: EnumExperienceStateRecordingLoadSourceType
@@ -2518,7 +2952,9 @@ declare extern type EnumExperienceStateRecordingLoadSourceType_INTERNAL extends 
 	function FromName(self, Name: string): EnumExperienceStateRecordingLoadSourceType?
 	function FromValue(self, Value: number): EnumExperienceStateRecordingLoadSourceType?
 end
-declare extern type EnumExperienceStateRecordingPlaybackMode extends EnumItem with end
+declare extern type EnumExperienceStateRecordingPlaybackMode extends EnumItem with
+	read EnumType: EnumExperienceStateRecordingPlaybackMode_INTERNAL
+end
 declare extern type EnumExperienceStateRecordingPlaybackMode_INTERNAL extends Enum with
 	Playing: EnumExperienceStateRecordingPlaybackMode
 	Rewinding: EnumExperienceStateRecordingPlaybackMode
@@ -2528,7 +2964,9 @@ declare extern type EnumExperienceStateRecordingPlaybackMode_INTERNAL extends En
 	function FromName(self, Name: string): EnumExperienceStateRecordingPlaybackMode?
 	function FromValue(self, Value: number): EnumExperienceStateRecordingPlaybackMode?
 end
-declare extern type EnumExplosionType extends EnumItem with end
+declare extern type EnumExplosionType extends EnumItem with
+	read EnumType: EnumExplosionType_INTERNAL
+end
 declare extern type EnumExplosionType_INTERNAL extends Enum with
 	Craters: EnumExplosionType
 	NoCraters: EnumExplosionType
@@ -2536,7 +2974,9 @@ declare extern type EnumExplosionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumExplosionType?
 	function FromValue(self, Value: number): EnumExplosionType?
 end
-declare extern type EnumExternalEditorMode extends EnumItem with end
+declare extern type EnumExternalEditorMode extends EnumItem with
+	read EnumType: EnumExternalEditorMode_INTERNAL
+end
 declare extern type EnumExternalEditorMode_INTERNAL extends Enum with
 	SystemDefault: EnumExternalEditorMode
 	UserSelectedEditor: EnumExternalEditorMode
@@ -2544,7 +2984,9 @@ declare extern type EnumExternalEditorMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumExternalEditorMode?
 	function FromValue(self, Value: number): EnumExternalEditorMode?
 end
-declare extern type EnumFACSDataLod extends EnumItem with end
+declare extern type EnumFACSDataLod extends EnumItem with
+	read EnumType: EnumFACSDataLod_INTERNAL
+end
 declare extern type EnumFACSDataLod_INTERNAL extends Enum with
 	LOD0: EnumFACSDataLod
 	LOD1: EnumFACSDataLod
@@ -2553,7 +2995,9 @@ declare extern type EnumFACSDataLod_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFACSDataLod?
 	function FromValue(self, Value: number): EnumFACSDataLod?
 end
-declare extern type EnumFacialAgeEstimationResultType extends EnumItem with end
+declare extern type EnumFacialAgeEstimationResultType extends EnumItem with
+	read EnumType: EnumFacialAgeEstimationResultType_INTERNAL
+end
 declare extern type EnumFacialAgeEstimationResultType_INTERNAL extends Enum with
 	Cancel: EnumFacialAgeEstimationResultType
 	Complete: EnumFacialAgeEstimationResultType
@@ -2562,7 +3006,9 @@ declare extern type EnumFacialAgeEstimationResultType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFacialAgeEstimationResultType?
 	function FromValue(self, Value: number): EnumFacialAgeEstimationResultType?
 end
-declare extern type EnumFacialAnimationStreamingState extends EnumItem with end
+declare extern type EnumFacialAnimationStreamingState extends EnumItem with
+	read EnumType: EnumFacialAnimationStreamingState_INTERNAL
+end
 declare extern type EnumFacialAnimationStreamingState_INTERNAL extends Enum with
 	Audio: EnumFacialAnimationStreamingState
 	None: EnumFacialAnimationStreamingState
@@ -2573,7 +3019,9 @@ declare extern type EnumFacialAnimationStreamingState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFacialAnimationStreamingState?
 	function FromValue(self, Value: number): EnumFacialAnimationStreamingState?
 end
-declare extern type EnumFacsActionUnit extends EnumItem with end
+declare extern type EnumFacsActionUnit extends EnumItem with
+	read EnumType: EnumFacsActionUnit_INTERNAL
+end
 declare extern type EnumFacsActionUnit_INTERNAL extends Enum with
 	ChinRaiser: EnumFacsActionUnit
 	ChinRaiserUpperLip: EnumFacsActionUnit
@@ -2629,7 +3077,9 @@ declare extern type EnumFacsActionUnit_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFacsActionUnit?
 	function FromValue(self, Value: number): EnumFacsActionUnit?
 end
-declare extern type EnumFeatureChannelEncoding extends EnumItem with end
+declare extern type EnumFeatureChannelEncoding extends EnumItem with
+	read EnumType: EnumFeatureChannelEncoding_INTERNAL
+end
 declare extern type EnumFeatureChannelEncoding_INTERNAL extends Enum with
 	Float16: EnumFeatureChannelEncoding
 	Float32: EnumFeatureChannelEncoding
@@ -2637,7 +3087,9 @@ declare extern type EnumFeatureChannelEncoding_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFeatureChannelEncoding?
 	function FromValue(self, Value: number): EnumFeatureChannelEncoding?
 end
-declare extern type EnumFeatureNormalization extends EnumItem with end
+declare extern type EnumFeatureNormalization extends EnumItem with
+	read EnumType: EnumFeatureNormalization_INTERNAL
+end
 declare extern type EnumFeatureNormalization_INTERNAL extends Enum with
 	None: EnumFeatureNormalization
 	StandardScore: EnumFeatureNormalization
@@ -2646,7 +3098,9 @@ declare extern type EnumFeatureNormalization_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFeatureNormalization?
 	function FromValue(self, Value: number): EnumFeatureNormalization?
 end
-declare extern type EnumFeatureRestrictionAbuseVector extends EnumItem with end
+declare extern type EnumFeatureRestrictionAbuseVector extends EnumItem with
+	read EnumType: EnumFeatureRestrictionAbuseVector_INTERNAL
+end
 declare extern type EnumFeatureRestrictionAbuseVector_INTERNAL extends Enum with
 	Communication: EnumFeatureRestrictionAbuseVector
 	ExperienceChat: EnumFeatureRestrictionAbuseVector
@@ -2654,7 +3108,9 @@ declare extern type EnumFeatureRestrictionAbuseVector_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFeatureRestrictionAbuseVector?
 	function FromValue(self, Value: number): EnumFeatureRestrictionAbuseVector?
 end
-declare extern type EnumFeedbackType extends EnumItem with end
+declare extern type EnumFeedbackType extends EnumItem with
+	read EnumType: EnumFeedbackType_INTERNAL
+end
 declare extern type EnumFeedbackType_INTERNAL extends Enum with
 	Feedback: EnumFeedbackType
 	PlayerSupport: EnumFeedbackType
@@ -2662,7 +3118,9 @@ declare extern type EnumFeedbackType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFeedbackType?
 	function FromValue(self, Value: number): EnumFeedbackType?
 end
-declare extern type EnumFieldOfViewMode extends EnumItem with end
+declare extern type EnumFieldOfViewMode extends EnumItem with
+	read EnumType: EnumFieldOfViewMode_INTERNAL
+end
 declare extern type EnumFieldOfViewMode_INTERNAL extends Enum with
 	Diagonal: EnumFieldOfViewMode
 	MaxAxis: EnumFieldOfViewMode
@@ -2671,7 +3129,9 @@ declare extern type EnumFieldOfViewMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFieldOfViewMode?
 	function FromValue(self, Value: number): EnumFieldOfViewMode?
 end
-declare extern type EnumFillDirection extends EnumItem with end
+declare extern type EnumFillDirection extends EnumItem with
+	read EnumType: EnumFillDirection_INTERNAL
+end
 declare extern type EnumFillDirection_INTERNAL extends Enum with
 	Horizontal: EnumFillDirection
 	Vertical: EnumFillDirection
@@ -2679,7 +3139,9 @@ declare extern type EnumFillDirection_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFillDirection?
 	function FromValue(self, Value: number): EnumFillDirection?
 end
-declare extern type EnumFilterErrorType extends EnumItem with end
+declare extern type EnumFilterErrorType extends EnumItem with
+	read EnumType: EnumFilterErrorType_INTERNAL
+end
 declare extern type EnumFilterErrorType_INTERNAL extends Enum with
 	BackslashNotEscapingAnything: EnumFilterErrorType
 	BadBespokeFilter: EnumFilterErrorType
@@ -2704,7 +3166,9 @@ declare extern type EnumFilterErrorType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFilterErrorType?
 	function FromValue(self, Value: number): EnumFilterErrorType?
 end
-declare extern type EnumFilterResult extends EnumItem with end
+declare extern type EnumFilterResult extends EnumItem with
+	read EnumType: EnumFilterResult_INTERNAL
+end
 declare extern type EnumFilterResult_INTERNAL extends Enum with
 	Accepted: EnumFilterResult
 	Rejected: EnumFilterResult
@@ -2712,7 +3176,9 @@ declare extern type EnumFilterResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFilterResult?
 	function FromValue(self, Value: number): EnumFilterResult?
 end
-declare extern type EnumFilterType extends EnumItem with end
+declare extern type EnumFilterType extends EnumItem with
+	read EnumType: EnumFilterType_INTERNAL
+end
 declare extern type EnumFilterType_INTERNAL extends Enum with
 	Exclude: EnumFilterType
 	Include: EnumFilterType
@@ -2720,7 +3186,9 @@ declare extern type EnumFilterType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFilterType?
 	function FromValue(self, Value: number): EnumFilterType?
 end
-declare extern type EnumFinishRecordingOperation extends EnumItem with end
+declare extern type EnumFinishRecordingOperation extends EnumItem with
+	read EnumType: EnumFinishRecordingOperation_INTERNAL
+end
 declare extern type EnumFinishRecordingOperation_INTERNAL extends Enum with
 	Append: EnumFinishRecordingOperation
 	Cancel: EnumFinishRecordingOperation
@@ -2729,7 +3197,9 @@ declare extern type EnumFinishRecordingOperation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFinishRecordingOperation?
 	function FromValue(self, Value: number): EnumFinishRecordingOperation?
 end
-declare extern type EnumFluidFidelity extends EnumItem with end
+declare extern type EnumFluidFidelity extends EnumItem with
+	read EnumType: EnumFluidFidelity_INTERNAL
+end
 declare extern type EnumFluidFidelity_INTERNAL extends Enum with
 	Automatic: EnumFluidFidelity
 	UseCollisionGeometry: EnumFluidFidelity
@@ -2738,7 +3208,9 @@ declare extern type EnumFluidFidelity_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFluidFidelity?
 	function FromValue(self, Value: number): EnumFluidFidelity?
 end
-declare extern type EnumFluidForces extends EnumItem with end
+declare extern type EnumFluidForces extends EnumItem with
+	read EnumType: EnumFluidForces_INTERNAL
+end
 declare extern type EnumFluidForces_INTERNAL extends Enum with
 	Default: EnumFluidForces
 	Experimental: EnumFluidForces
@@ -2746,7 +3218,9 @@ declare extern type EnumFluidForces_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFluidForces?
 	function FromValue(self, Value: number): EnumFluidForces?
 end
-declare extern type EnumFont extends EnumItem with end
+declare extern type EnumFont extends EnumItem with
+	read EnumType: EnumFont_INTERNAL
+end
 declare extern type EnumFont_INTERNAL extends Enum with
 	AmaticSC: EnumFont
 	Antique: EnumFont
@@ -2805,7 +3279,9 @@ declare extern type EnumFont_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFont?
 	function FromValue(self, Value: number): EnumFont?
 end
-declare extern type EnumFontSize extends EnumItem with end
+declare extern type EnumFontSize extends EnumItem with
+	read EnumType: EnumFontSize_INTERNAL
+end
 declare extern type EnumFontSize_INTERNAL extends Enum with
 	Size10: EnumFontSize
 	Size11: EnumFontSize
@@ -2826,7 +3302,9 @@ declare extern type EnumFontSize_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFontSize?
 	function FromValue(self, Value: number): EnumFontSize?
 end
-declare extern type EnumFontStyle extends EnumItem with end
+declare extern type EnumFontStyle extends EnumItem with
+	read EnumType: EnumFontStyle_INTERNAL
+end
 declare extern type EnumFontStyle_INTERNAL extends Enum with
 	Italic: EnumFontStyle
 	Normal: EnumFontStyle
@@ -2834,7 +3312,9 @@ declare extern type EnumFontStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFontStyle?
 	function FromValue(self, Value: number): EnumFontStyle?
 end
-declare extern type EnumFontWeight extends EnumItem with end
+declare extern type EnumFontWeight extends EnumItem with
+	read EnumType: EnumFontWeight_INTERNAL
+end
 declare extern type EnumFontWeight_INTERNAL extends Enum with
 	Bold: EnumFontWeight
 	ExtraBold: EnumFontWeight
@@ -2849,7 +3329,9 @@ declare extern type EnumFontWeight_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFontWeight?
 	function FromValue(self, Value: number): EnumFontWeight?
 end
-declare extern type EnumForceLimitMode extends EnumItem with end
+declare extern type EnumForceLimitMode extends EnumItem with
+	read EnumType: EnumForceLimitMode_INTERNAL
+end
 declare extern type EnumForceLimitMode_INTERNAL extends Enum with
 	Magnitude: EnumForceLimitMode
 	PerAxis: EnumForceLimitMode
@@ -2857,7 +3339,9 @@ declare extern type EnumForceLimitMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumForceLimitMode?
 	function FromValue(self, Value: number): EnumForceLimitMode?
 end
-declare extern type EnumFormFactor extends EnumItem with end
+declare extern type EnumFormFactor extends EnumItem with
+	read EnumType: EnumFormFactor_INTERNAL
+end
 declare extern type EnumFormFactor_INTERNAL extends Enum with
 	Brick: EnumFormFactor
 	Custom: EnumFormFactor
@@ -2867,7 +3351,9 @@ declare extern type EnumFormFactor_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFormFactor?
 	function FromValue(self, Value: number): EnumFormFactor?
 end
-declare extern type EnumFrameStyle extends EnumItem with end
+declare extern type EnumFrameStyle extends EnumItem with
+	read EnumType: EnumFrameStyle_INTERNAL
+end
 declare extern type EnumFrameStyle_INTERNAL extends Enum with
 	ChatBlue: EnumFrameStyle
 	ChatGreen: EnumFrameStyle
@@ -2880,7 +3366,9 @@ declare extern type EnumFrameStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFrameStyle?
 	function FromValue(self, Value: number): EnumFrameStyle?
 end
-declare extern type EnumFramerateManagerMode extends EnumItem with end
+declare extern type EnumFramerateManagerMode extends EnumItem with
+	read EnumType: EnumFramerateManagerMode_INTERNAL
+end
 declare extern type EnumFramerateManagerMode_INTERNAL extends Enum with
 	Automatic: EnumFramerateManagerMode
 	Off: EnumFramerateManagerMode
@@ -2889,7 +3377,9 @@ declare extern type EnumFramerateManagerMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFramerateManagerMode?
 	function FromValue(self, Value: number): EnumFramerateManagerMode?
 end
-declare extern type EnumFriendRequestEvent extends EnumItem with end
+declare extern type EnumFriendRequestEvent extends EnumItem with
+	read EnumType: EnumFriendRequestEvent_INTERNAL
+end
 declare extern type EnumFriendRequestEvent_INTERNAL extends Enum with
 	Accept: EnumFriendRequestEvent
 	Deny: EnumFriendRequestEvent
@@ -2899,7 +3389,9 @@ declare extern type EnumFriendRequestEvent_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFriendRequestEvent?
 	function FromValue(self, Value: number): EnumFriendRequestEvent?
 end
-declare extern type EnumFriendStatus extends EnumItem with end
+declare extern type EnumFriendStatus extends EnumItem with
+	read EnumType: EnumFriendStatus_INTERNAL
+end
 declare extern type EnumFriendStatus_INTERNAL extends Enum with
 	Friend: EnumFriendStatus
 	FriendRequestReceived: EnumFriendStatus
@@ -2910,7 +3402,9 @@ declare extern type EnumFriendStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFriendStatus?
 	function FromValue(self, Value: number): EnumFriendStatus?
 end
-declare extern type EnumFriendsCallingEndReason extends EnumItem with end
+declare extern type EnumFriendsCallingEndReason extends EnumItem with
+	read EnumType: EnumFriendsCallingEndReason_INTERNAL
+end
 declare extern type EnumFriendsCallingEndReason_INTERNAL extends Enum with
 	Canceled: EnumFriendsCallingEndReason
 	Declined: EnumFriendsCallingEndReason
@@ -2923,7 +3417,9 @@ declare extern type EnumFriendsCallingEndReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFriendsCallingEndReason?
 	function FromValue(self, Value: number): EnumFriendsCallingEndReason?
 end
-declare extern type EnumFriendsCallingParticipantErrors extends EnumItem with end
+declare extern type EnumFriendsCallingParticipantErrors extends EnumItem with
+	read EnumType: EnumFriendsCallingParticipantErrors_INTERNAL
+end
 declare extern type EnumFriendsCallingParticipantErrors_INTERNAL extends Enum with
 	ConnectionFailed: EnumFriendsCallingParticipantErrors
 	None: EnumFriendsCallingParticipantErrors
@@ -2934,7 +3430,9 @@ declare extern type EnumFriendsCallingParticipantErrors_INTERNAL extends Enum wi
 	function FromName(self, Name: string): EnumFriendsCallingParticipantErrors?
 	function FromValue(self, Value: number): EnumFriendsCallingParticipantErrors?
 end
-declare extern type EnumFriendsCallingParticipantLeaveReason extends EnumItem with end
+declare extern type EnumFriendsCallingParticipantLeaveReason extends EnumItem with
+	read EnumType: EnumFriendsCallingParticipantLeaveReason_INTERNAL
+end
 declare extern type EnumFriendsCallingParticipantLeaveReason_INTERNAL extends Enum with
 	Declined: EnumFriendsCallingParticipantLeaveReason
 	Failed: EnumFriendsCallingParticipantLeaveReason
@@ -2947,7 +3445,9 @@ declare extern type EnumFriendsCallingParticipantLeaveReason_INTERNAL extends En
 	function FromName(self, Name: string): EnumFriendsCallingParticipantLeaveReason?
 	function FromValue(self, Value: number): EnumFriendsCallingParticipantLeaveReason?
 end
-declare extern type EnumFriendsCallingParticipantStatus extends EnumItem with end
+declare extern type EnumFriendsCallingParticipantStatus extends EnumItem with
+	read EnumType: EnumFriendsCallingParticipantStatus_INTERNAL
+end
 declare extern type EnumFriendsCallingParticipantStatus_INTERNAL extends Enum with
 	Declined: EnumFriendsCallingParticipantStatus
 	Ineligible: EnumFriendsCallingParticipantStatus
@@ -2962,7 +3462,9 @@ declare extern type EnumFriendsCallingParticipantStatus_INTERNAL extends Enum wi
 	function FromName(self, Name: string): EnumFriendsCallingParticipantStatus?
 	function FromValue(self, Value: number): EnumFriendsCallingParticipantStatus?
 end
-declare extern type EnumFriendsCallingPhase extends EnumItem with end
+declare extern type EnumFriendsCallingPhase extends EnumItem with
+	read EnumType: EnumFriendsCallingPhase_INTERNAL
+end
 declare extern type EnumFriendsCallingPhase_INTERNAL extends Enum with
 	Active: EnumFriendsCallingPhase
 	Ended: EnumFriendsCallingPhase
@@ -2972,7 +3474,9 @@ declare extern type EnumFriendsCallingPhase_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFriendsCallingPhase?
 	function FromValue(self, Value: number): EnumFriendsCallingPhase?
 end
-declare extern type EnumFrustumStreamingMode extends EnumItem with end
+declare extern type EnumFrustumStreamingMode extends EnumItem with
+	read EnumType: EnumFrustumStreamingMode_INTERNAL
+end
 declare extern type EnumFrustumStreamingMode_INTERNAL extends Enum with
 	Automatic: EnumFrustumStreamingMode
 	Default: EnumFrustumStreamingMode
@@ -2982,7 +3486,9 @@ declare extern type EnumFrustumStreamingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFrustumStreamingMode?
 	function FromValue(self, Value: number): EnumFrustumStreamingMode?
 end
-declare extern type EnumFunctionalTestResult extends EnumItem with end
+declare extern type EnumFunctionalTestResult extends EnumItem with
+	read EnumType: EnumFunctionalTestResult_INTERNAL
+end
 declare extern type EnumFunctionalTestResult_INTERNAL extends Enum with
 	Error: EnumFunctionalTestResult
 	Passed: EnumFunctionalTestResult
@@ -2991,7 +3497,9 @@ declare extern type EnumFunctionalTestResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFunctionalTestResult?
 	function FromValue(self, Value: number): EnumFunctionalTestResult?
 end
-declare extern type EnumGameAvatarType extends EnumItem with end
+declare extern type EnumGameAvatarType extends EnumItem with
+	read EnumType: EnumGameAvatarType_INTERNAL
+end
 declare extern type EnumGameAvatarType_INTERNAL extends Enum with
 	PlayerChoice: EnumGameAvatarType
 	R15: EnumGameAvatarType
@@ -3000,7 +3508,9 @@ declare extern type EnumGameAvatarType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGameAvatarType?
 	function FromValue(self, Value: number): EnumGameAvatarType?
 end
-declare extern type EnumGamepadType extends EnumItem with end
+declare extern type EnumGamepadType extends EnumItem with
+	read EnumType: EnumGamepadType_INTERNAL
+end
 declare extern type EnumGamepadType_INTERNAL extends Enum with
 	PS4: EnumGamepadType
 	PS5: EnumGamepadType
@@ -3010,7 +3520,9 @@ declare extern type EnumGamepadType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGamepadType?
 	function FromValue(self, Value: number): EnumGamepadType?
 end
-declare extern type EnumGearGenreSetting extends EnumItem with end
+declare extern type EnumGearGenreSetting extends EnumItem with
+	read EnumType: EnumGearGenreSetting_INTERNAL
+end
 declare extern type EnumGearGenreSetting_INTERNAL extends Enum with
 	AllGenres: EnumGearGenreSetting
 	MatchingGenreOnly: EnumGearGenreSetting
@@ -3018,7 +3530,9 @@ declare extern type EnumGearGenreSetting_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGearGenreSetting?
 	function FromValue(self, Value: number): EnumGearGenreSetting?
 end
-declare extern type EnumGearType extends EnumItem with end
+declare extern type EnumGearType extends EnumItem with
+	read EnumType: EnumGearType_INTERNAL
+end
 declare extern type EnumGearType_INTERNAL extends Enum with
 	BuildingTools: EnumGearType
 	Explosives: EnumGearType
@@ -3033,7 +3547,9 @@ declare extern type EnumGearType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGearType?
 	function FromValue(self, Value: number): EnumGearType?
 end
-declare extern type EnumGenerateMomentTextResult extends EnumItem with end
+declare extern type EnumGenerateMomentTextResult extends EnumItem with
+	read EnumType: EnumGenerateMomentTextResult_INTERNAL
+end
 declare extern type EnumGenerateMomentTextResult_INTERNAL extends Enum with
 	Failed: EnumGenerateMomentTextResult
 	Filtered: EnumGenerateMomentTextResult
@@ -3043,7 +3559,9 @@ declare extern type EnumGenerateMomentTextResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGenerateMomentTextResult?
 	function FromValue(self, Value: number): EnumGenerateMomentTextResult?
 end
-declare extern type EnumGenre extends EnumItem with end
+declare extern type EnumGenre extends EnumItem with
+	read EnumType: EnumGenre_INTERNAL
+end
 declare extern type EnumGenre_INTERNAL extends Enum with
 	Adventure: EnumGenre
 	All: EnumGenre
@@ -3063,7 +3581,9 @@ declare extern type EnumGenre_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGenre?
 	function FromValue(self, Value: number): EnumGenre?
 end
-declare extern type EnumGradientTileMode extends EnumItem with end
+declare extern type EnumGradientTileMode extends EnumItem with
+	read EnumType: EnumGradientTileMode_INTERNAL
+end
 declare extern type EnumGradientTileMode_INTERNAL extends Enum with
 	Clamp: EnumGradientTileMode
 	Mirror: EnumGradientTileMode
@@ -3072,7 +3592,9 @@ declare extern type EnumGradientTileMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGradientTileMode?
 	function FromValue(self, Value: number): EnumGradientTileMode?
 end
-declare extern type EnumGradientType extends EnumItem with end
+declare extern type EnumGradientType extends EnumItem with
+	read EnumType: EnumGradientType_INTERNAL
+end
 declare extern type EnumGradientType_INTERNAL extends Enum with
 	Conical: EnumGradientType
 	Elliptical: EnumGradientType
@@ -3082,7 +3604,9 @@ declare extern type EnumGradientType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGradientType?
 	function FromValue(self, Value: number): EnumGradientType?
 end
-declare extern type EnumGraphicsMode extends EnumItem with end
+declare extern type EnumGraphicsMode extends EnumItem with
+	read EnumType: EnumGraphicsMode_INTERNAL
+end
 declare extern type EnumGraphicsMode_INTERNAL extends Enum with
 	Automatic: EnumGraphicsMode
 	Direct3D11: EnumGraphicsMode
@@ -3094,7 +3618,9 @@ declare extern type EnumGraphicsMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGraphicsMode?
 	function FromValue(self, Value: number): EnumGraphicsMode?
 end
-declare extern type EnumGraphicsOptimizationMode extends EnumItem with end
+declare extern type EnumGraphicsOptimizationMode extends EnumItem with
+	read EnumType: EnumGraphicsOptimizationMode_INTERNAL
+end
 declare extern type EnumGraphicsOptimizationMode_INTERNAL extends Enum with
 	Balanced: EnumGraphicsOptimizationMode
 	Performance: EnumGraphicsOptimizationMode
@@ -3103,7 +3629,9 @@ declare extern type EnumGraphicsOptimizationMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGraphicsOptimizationMode?
 	function FromValue(self, Value: number): EnumGraphicsOptimizationMode?
 end
-declare extern type EnumGroupMembershipStatus extends EnumItem with end
+declare extern type EnumGroupMembershipStatus extends EnumItem with
+	read EnumType: EnumGroupMembershipStatus_INTERNAL
+end
 declare extern type EnumGroupMembershipStatus_INTERNAL extends Enum with
 	AlreadyMember: EnumGroupMembershipStatus
 	JoinRequestPending: EnumGroupMembershipStatus
@@ -3113,7 +3641,9 @@ declare extern type EnumGroupMembershipStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGroupMembershipStatus?
 	function FromValue(self, Value: number): EnumGroupMembershipStatus?
 end
-declare extern type EnumGuiState extends EnumItem with end
+declare extern type EnumGuiState extends EnumItem with
+	read EnumType: EnumGuiState_INTERNAL
+end
 declare extern type EnumGuiState_INTERNAL extends Enum with
 	Hover: EnumGuiState
 	Idle: EnumGuiState
@@ -3123,7 +3653,9 @@ declare extern type EnumGuiState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGuiState?
 	function FromValue(self, Value: number): EnumGuiState?
 end
-declare extern type EnumGuiType extends EnumItem with end
+declare extern type EnumGuiType extends EnumItem with
+	read EnumType: EnumGuiType_INTERNAL
+end
 declare extern type EnumGuiType_INTERNAL extends Enum with
 	Core: EnumGuiType
 	CoreBillboards: EnumGuiType
@@ -3134,7 +3666,9 @@ declare extern type EnumGuiType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumGuiType?
 	function FromValue(self, Value: number): EnumGuiType?
 end
-declare extern type EnumHandlesStyle extends EnumItem with end
+declare extern type EnumHandlesStyle extends EnumItem with
+	read EnumType: EnumHandlesStyle_INTERNAL
+end
 declare extern type EnumHandlesStyle_INTERNAL extends Enum with
 	Movement: EnumHandlesStyle
 	Resize: EnumHandlesStyle
@@ -3142,7 +3676,9 @@ declare extern type EnumHandlesStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHandlesStyle?
 	function FromValue(self, Value: number): EnumHandlesStyle?
 end
-declare extern type EnumHapticEffectType extends EnumItem with end
+declare extern type EnumHapticEffectType extends EnumItem with
+	read EnumType: EnumHapticEffectType_INTERNAL
+end
 declare extern type EnumHapticEffectType_INTERNAL extends Enum with
 	Custom: EnumHapticEffectType
 	GameplayCollision: EnumHapticEffectType
@@ -3154,7 +3690,9 @@ declare extern type EnumHapticEffectType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHapticEffectType?
 	function FromValue(self, Value: number): EnumHapticEffectType?
 end
-declare extern type EnumHashAlgorithm extends EnumItem with end
+declare extern type EnumHashAlgorithm extends EnumItem with
+	read EnumType: EnumHashAlgorithm_INTERNAL
+end
 declare extern type EnumHashAlgorithm_INTERNAL extends Enum with
 	Blake2b: EnumHashAlgorithm
 	Blake3: EnumHashAlgorithm
@@ -3165,7 +3703,9 @@ declare extern type EnumHashAlgorithm_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHashAlgorithm?
 	function FromValue(self, Value: number): EnumHashAlgorithm?
 end
-declare extern type EnumHighlightDepthMode extends EnumItem with end
+declare extern type EnumHighlightDepthMode extends EnumItem with
+	read EnumType: EnumHighlightDepthMode_INTERNAL
+end
 declare extern type EnumHighlightDepthMode_INTERNAL extends Enum with
 	AlwaysOnTop: EnumHighlightDepthMode
 	Occluded: EnumHighlightDepthMode
@@ -3173,7 +3713,9 @@ declare extern type EnumHighlightDepthMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHighlightDepthMode?
 	function FromValue(self, Value: number): EnumHighlightDepthMode?
 end
-declare extern type EnumHorizontalAlignment extends EnumItem with end
+declare extern type EnumHorizontalAlignment extends EnumItem with
+	read EnumType: EnumHorizontalAlignment_INTERNAL
+end
 declare extern type EnumHorizontalAlignment_INTERNAL extends Enum with
 	Center: EnumHorizontalAlignment
 	Left: EnumHorizontalAlignment
@@ -3182,7 +3724,9 @@ declare extern type EnumHorizontalAlignment_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHorizontalAlignment?
 	function FromValue(self, Value: number): EnumHorizontalAlignment?
 end
-declare extern type EnumHoverAnimateSpeed extends EnumItem with end
+declare extern type EnumHoverAnimateSpeed extends EnumItem with
+	read EnumType: EnumHoverAnimateSpeed_INTERNAL
+end
 declare extern type EnumHoverAnimateSpeed_INTERNAL extends Enum with
 	Fast: EnumHoverAnimateSpeed
 	Medium: EnumHoverAnimateSpeed
@@ -3193,7 +3737,9 @@ declare extern type EnumHoverAnimateSpeed_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHoverAnimateSpeed?
 	function FromValue(self, Value: number): EnumHoverAnimateSpeed?
 end
-declare extern type EnumHttpCachePolicy extends EnumItem with end
+declare extern type EnumHttpCachePolicy extends EnumItem with
+	read EnumType: EnumHttpCachePolicy_INTERNAL
+end
 declare extern type EnumHttpCachePolicy_INTERNAL extends Enum with
 	DataOnly: EnumHttpCachePolicy
 	Default: EnumHttpCachePolicy
@@ -3204,7 +3750,9 @@ declare extern type EnumHttpCachePolicy_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHttpCachePolicy?
 	function FromValue(self, Value: number): EnumHttpCachePolicy?
 end
-declare extern type EnumHttpCompression extends EnumItem with end
+declare extern type EnumHttpCompression extends EnumItem with
+	read EnumType: EnumHttpCompression_INTERNAL
+end
 declare extern type EnumHttpCompression_INTERNAL extends Enum with
 	Gzip: EnumHttpCompression
 	None: EnumHttpCompression
@@ -3212,7 +3760,9 @@ declare extern type EnumHttpCompression_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHttpCompression?
 	function FromValue(self, Value: number): EnumHttpCompression?
 end
-declare extern type EnumHttpContentType extends EnumItem with end
+declare extern type EnumHttpContentType extends EnumItem with
+	read EnumType: EnumHttpContentType_INTERNAL
+end
 declare extern type EnumHttpContentType_INTERNAL extends Enum with
 	ApplicationJson: EnumHttpContentType
 	ApplicationUrlEncoded: EnumHttpContentType
@@ -3223,7 +3773,9 @@ declare extern type EnumHttpContentType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHttpContentType?
 	function FromValue(self, Value: number): EnumHttpContentType?
 end
-declare extern type EnumHttpError extends EnumItem with end
+declare extern type EnumHttpError extends EnumItem with
+	read EnumType: EnumHttpError_INTERNAL
+end
 declare extern type EnumHttpError_INTERNAL extends Enum with
 	Aborted: EnumHttpError
 	ConnectFail: EnumHttpError
@@ -3248,7 +3800,9 @@ declare extern type EnumHttpError_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHttpError?
 	function FromValue(self, Value: number): EnumHttpError?
 end
-declare extern type EnumHttpRequestType extends EnumItem with end
+declare extern type EnumHttpRequestType extends EnumItem with
+	read EnumType: EnumHttpRequestType_INTERNAL
+end
 declare extern type EnumHttpRequestType_INTERNAL extends Enum with
 	Analytics: EnumHttpRequestType
 	Avatar: EnumHttpRequestType
@@ -3261,7 +3815,9 @@ declare extern type EnumHttpRequestType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHttpRequestType?
 	function FromValue(self, Value: number): EnumHttpRequestType?
 end
-declare extern type EnumHumanoidCollisionType extends EnumItem with end
+declare extern type EnumHumanoidCollisionType extends EnumItem with
+	read EnumType: EnumHumanoidCollisionType_INTERNAL
+end
 declare extern type EnumHumanoidCollisionType_INTERNAL extends Enum with
 	InnerBox: EnumHumanoidCollisionType
 	OuterBox: EnumHumanoidCollisionType
@@ -3269,7 +3825,9 @@ declare extern type EnumHumanoidCollisionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHumanoidCollisionType?
 	function FromValue(self, Value: number): EnumHumanoidCollisionType?
 end
-declare extern type EnumHumanoidDisplayDistanceType extends EnumItem with end
+declare extern type EnumHumanoidDisplayDistanceType extends EnumItem with
+	read EnumType: EnumHumanoidDisplayDistanceType_INTERNAL
+end
 declare extern type EnumHumanoidDisplayDistanceType_INTERNAL extends Enum with
 	None: EnumHumanoidDisplayDistanceType
 	Subject: EnumHumanoidDisplayDistanceType
@@ -3278,7 +3836,9 @@ declare extern type EnumHumanoidDisplayDistanceType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHumanoidDisplayDistanceType?
 	function FromValue(self, Value: number): EnumHumanoidDisplayDistanceType?
 end
-declare extern type EnumHumanoidHealthDisplayType extends EnumItem with end
+declare extern type EnumHumanoidHealthDisplayType extends EnumItem with
+	read EnumType: EnumHumanoidHealthDisplayType_INTERNAL
+end
 declare extern type EnumHumanoidHealthDisplayType_INTERNAL extends Enum with
 	AlwaysOff: EnumHumanoidHealthDisplayType
 	AlwaysOn: EnumHumanoidHealthDisplayType
@@ -3287,7 +3847,9 @@ declare extern type EnumHumanoidHealthDisplayType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHumanoidHealthDisplayType?
 	function FromValue(self, Value: number): EnumHumanoidHealthDisplayType?
 end
-declare extern type EnumHumanoidRigType extends EnumItem with end
+declare extern type EnumHumanoidRigType extends EnumItem with
+	read EnumType: EnumHumanoidRigType_INTERNAL
+end
 declare extern type EnumHumanoidRigType_INTERNAL extends Enum with
 	R15: EnumHumanoidRigType
 	R6: EnumHumanoidRigType
@@ -3295,7 +3857,9 @@ declare extern type EnumHumanoidRigType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHumanoidRigType?
 	function FromValue(self, Value: number): EnumHumanoidRigType?
 end
-declare extern type EnumHumanoidStateType extends EnumItem with end
+declare extern type EnumHumanoidStateType extends EnumItem with
+	read EnumType: EnumHumanoidStateType_INTERNAL
+end
 declare extern type EnumHumanoidStateType_INTERNAL extends Enum with
 	Climbing: EnumHumanoidStateType
 	Dead: EnumHumanoidStateType
@@ -3318,7 +3882,9 @@ declare extern type EnumHumanoidStateType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumHumanoidStateType?
 	function FromValue(self, Value: number): EnumHumanoidStateType?
 end
-declare extern type EnumIKCollisionsMode extends EnumItem with end
+declare extern type EnumIKCollisionsMode extends EnumItem with
+	read EnumType: EnumIKCollisionsMode_INTERNAL
+end
 declare extern type EnumIKCollisionsMode_INTERNAL extends Enum with
 	IncludeContactedMechanisms: EnumIKCollisionsMode
 	NoCollisions: EnumIKCollisionsMode
@@ -3327,7 +3893,9 @@ declare extern type EnumIKCollisionsMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumIKCollisionsMode?
 	function FromValue(self, Value: number): EnumIKCollisionsMode?
 end
-declare extern type EnumIKControlConstraintSupport extends EnumItem with end
+declare extern type EnumIKControlConstraintSupport extends EnumItem with
+	read EnumType: EnumIKControlConstraintSupport_INTERNAL
+end
 declare extern type EnumIKControlConstraintSupport_INTERNAL extends Enum with
 	Default: EnumIKControlConstraintSupport
 	Disabled: EnumIKControlConstraintSupport
@@ -3336,7 +3904,9 @@ declare extern type EnumIKControlConstraintSupport_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumIKControlConstraintSupport?
 	function FromValue(self, Value: number): EnumIKControlConstraintSupport?
 end
-declare extern type EnumIKControlType extends EnumItem with end
+declare extern type EnumIKControlType extends EnumItem with
+	read EnumType: EnumIKControlType_INTERNAL
+end
 declare extern type EnumIKControlType_INTERNAL extends Enum with
 	LookAt: EnumIKControlType
 	Position: EnumIKControlType
@@ -3346,7 +3916,9 @@ declare extern type EnumIKControlType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumIKControlType?
 	function FromValue(self, Value: number): EnumIKControlType?
 end
-declare extern type EnumIXPLoadingStatus extends EnumItem with end
+declare extern type EnumIXPLoadingStatus extends EnumItem with
+	read EnumType: EnumIXPLoadingStatus_INTERNAL
+end
 declare extern type EnumIXPLoadingStatus_INTERNAL extends Enum with
 	ErrorConnection: EnumIXPLoadingStatus
 	ErrorInvalidUser: EnumIXPLoadingStatus
@@ -3359,7 +3931,9 @@ declare extern type EnumIXPLoadingStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumIXPLoadingStatus?
 	function FromValue(self, Value: number): EnumIXPLoadingStatus?
 end
-declare extern type EnumImageAlphaType extends EnumItem with end
+declare extern type EnumImageAlphaType extends EnumItem with
+	read EnumType: EnumImageAlphaType_INTERNAL
+end
 declare extern type EnumImageAlphaType_INTERNAL extends Enum with
 	Default: EnumImageAlphaType
 	LockCanvasAlpha: EnumImageAlphaType
@@ -3368,7 +3942,9 @@ declare extern type EnumImageAlphaType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumImageAlphaType?
 	function FromValue(self, Value: number): EnumImageAlphaType?
 end
-declare extern type EnumImageCombineType extends EnumItem with end
+declare extern type EnumImageCombineType extends EnumItem with
+	read EnumType: EnumImageCombineType_INTERNAL
+end
 declare extern type EnumImageCombineType_INTERNAL extends Enum with
 	Add: EnumImageCombineType
 	AlphaBlend: EnumImageCombineType
@@ -3381,7 +3957,9 @@ declare extern type EnumImageCombineType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumImageCombineType?
 	function FromValue(self, Value: number): EnumImageCombineType?
 end
-declare extern type EnumInOut extends EnumItem with end
+declare extern type EnumInOut extends EnumItem with
+	read EnumType: EnumInOut_INTERNAL
+end
 declare extern type EnumInOut_INTERNAL extends Enum with
 	Center: EnumInOut
 	Edge: EnumInOut
@@ -3390,7 +3968,9 @@ declare extern type EnumInOut_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInOut?
 	function FromValue(self, Value: number): EnumInOut?
 end
-declare extern type EnumInfoType extends EnumItem with end
+declare extern type EnumInfoType extends EnumItem with
+	read EnumType: EnumInfoType_INTERNAL
+end
 declare extern type EnumInfoType_INTERNAL extends Enum with
 	Asset: EnumInfoType
 	Bundle: EnumInfoType
@@ -3401,7 +3981,9 @@ declare extern type EnumInfoType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInfoType?
 	function FromValue(self, Value: number): EnumInfoType?
 end
-declare extern type EnumInitialDockState extends EnumItem with end
+declare extern type EnumInitialDockState extends EnumItem with
+	read EnumType: EnumInitialDockState_INTERNAL
+end
 declare extern type EnumInitialDockState_INTERNAL extends Enum with
 	Bottom: EnumInitialDockState
 	Float: EnumInitialDockState
@@ -3412,7 +3994,9 @@ declare extern type EnumInitialDockState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInitialDockState?
 	function FromValue(self, Value: number): EnumInitialDockState?
 end
-declare extern type EnumInputActionType extends EnumItem with end
+declare extern type EnumInputActionType extends EnumItem with
+	read EnumType: EnumInputActionType_INTERNAL
+end
 declare extern type EnumInputActionType_INTERNAL extends Enum with
 	Bool: EnumInputActionType
 	Direction1D: EnumInputActionType
@@ -3423,7 +4007,9 @@ declare extern type EnumInputActionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInputActionType?
 	function FromValue(self, Value: number): EnumInputActionType?
 end
-declare extern type EnumInputBindingType extends EnumItem with end
+declare extern type EnumInputBindingType extends EnumItem with
+	read EnumType: EnumInputBindingType_INTERNAL
+end
 declare extern type EnumInputBindingType_INTERNAL extends Enum with
 	Automatic: EnumInputBindingType
 	Scriptable: EnumInputBindingType
@@ -3431,7 +4017,9 @@ declare extern type EnumInputBindingType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInputBindingType?
 	function FromValue(self, Value: number): EnumInputBindingType?
 end
-declare extern type EnumInputSink extends EnumItem with end
+declare extern type EnumInputSink extends EnumItem with
+	read EnumType: EnumInputSink_INTERNAL
+end
 declare extern type EnumInputSink_INTERNAL extends Enum with
 	Activate: EnumInputSink
 	All: EnumInputSink
@@ -3440,7 +4028,9 @@ declare extern type EnumInputSink_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInputSink?
 	function FromValue(self, Value: number): EnumInputSink?
 end
-declare extern type EnumInputType extends EnumItem with end
+declare extern type EnumInputType extends EnumItem with
+	read EnumType: EnumInputType_INTERNAL
+end
 declare extern type EnumInputType_INTERNAL extends Enum with
 	Constant: EnumInputType
 	NoInput: EnumInputType
@@ -3449,7 +4039,9 @@ declare extern type EnumInputType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInputType?
 	function FromValue(self, Value: number): EnumInputType?
 end
-declare extern type EnumInstanceFileSyncStatus extends EnumItem with end
+declare extern type EnumInstanceFileSyncStatus extends EnumItem with
+	read EnumType: EnumInstanceFileSyncStatus_INTERNAL
+end
 declare extern type EnumInstanceFileSyncStatus_INTERNAL extends Enum with
 	AncestorErrored: EnumInstanceFileSyncStatus
 	Errored: EnumInstanceFileSyncStatus
@@ -3460,20 +4052,26 @@ declare extern type EnumInstanceFileSyncStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInstanceFileSyncStatus?
 	function FromValue(self, Value: number): EnumInstanceFileSyncStatus?
 end
-declare extern type EnumIntentReplicability extends EnumItem with end
+declare extern type EnumIntentReplicability extends EnumItem with
+	read EnumType: EnumIntentReplicability_INTERNAL
+end
 declare extern type EnumIntentReplicability_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumIntentReplicability }
 	function FromName(self, Name: string): EnumIntentReplicability?
 	function FromValue(self, Value: number): EnumIntentReplicability?
 end
-declare extern type EnumIntermediateMeshGenerationResult extends EnumItem with end
+declare extern type EnumIntermediateMeshGenerationResult extends EnumItem with
+	read EnumType: EnumIntermediateMeshGenerationResult_INTERNAL
+end
 declare extern type EnumIntermediateMeshGenerationResult_INTERNAL extends Enum with
 	HighQualityMesh: EnumIntermediateMeshGenerationResult
 	function GetEnumItems(self): { EnumIntermediateMeshGenerationResult }
 	function FromName(self, Name: string): EnumIntermediateMeshGenerationResult?
 	function FromValue(self, Value: number): EnumIntermediateMeshGenerationResult?
 end
-declare extern type EnumInternalVideoUsage extends EnumItem with end
+declare extern type EnumInternalVideoUsage extends EnumItem with
+	read EnumType: EnumInternalVideoUsage_INTERNAL
+end
 declare extern type EnumInternalVideoUsage_INTERNAL extends Enum with
 	Default: EnumInternalVideoUsage
 	FeatureTileAd: EnumInternalVideoUsage
@@ -3483,7 +4081,9 @@ declare extern type EnumInternalVideoUsage_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInternalVideoUsage?
 	function FromValue(self, Value: number): EnumInternalVideoUsage?
 end
-declare extern type EnumInterpolationThrottlingMode extends EnumItem with end
+declare extern type EnumInterpolationThrottlingMode extends EnumItem with
+	read EnumType: EnumInterpolationThrottlingMode_INTERNAL
+end
 declare extern type EnumInterpolationThrottlingMode_INTERNAL extends Enum with
 	Default: EnumInterpolationThrottlingMode
 	Disabled: EnumInterpolationThrottlingMode
@@ -3492,7 +4092,9 @@ declare extern type EnumInterpolationThrottlingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInterpolationThrottlingMode?
 	function FromValue(self, Value: number): EnumInterpolationThrottlingMode?
 end
-declare extern type EnumInviteState extends EnumItem with end
+declare extern type EnumInviteState extends EnumItem with
+	read EnumType: EnumInviteState_INTERNAL
+end
 declare extern type EnumInviteState_INTERNAL extends Enum with
 	Accepted: EnumInviteState
 	Declined: EnumInviteState
@@ -3502,7 +4104,9 @@ declare extern type EnumInviteState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumInviteState?
 	function FromValue(self, Value: number): EnumInviteState?
 end
-declare extern type EnumItemLineAlignment extends EnumItem with end
+declare extern type EnumItemLineAlignment extends EnumItem with
+	read EnumType: EnumItemLineAlignment_INTERNAL
+end
 declare extern type EnumItemLineAlignment_INTERNAL extends Enum with
 	Automatic: EnumItemLineAlignment
 	Center: EnumItemLineAlignment
@@ -3513,14 +4117,18 @@ declare extern type EnumItemLineAlignment_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumItemLineAlignment?
 	function FromValue(self, Value: number): EnumItemLineAlignment?
 end
-declare extern type EnumJoinSource extends EnumItem with end
+declare extern type EnumJoinSource extends EnumItem with
+	read EnumType: EnumJoinSource_INTERNAL
+end
 declare extern type EnumJoinSource_INTERNAL extends Enum with
 	CreatedItemAttribution: EnumJoinSource
 	function GetEnumItems(self): { EnumJoinSource }
 	function FromName(self, Name: string): EnumJoinSource?
 	function FromValue(self, Value: number): EnumJoinSource?
 end
-declare extern type EnumJointCreationMode extends EnumItem with end
+declare extern type EnumJointCreationMode extends EnumItem with
+	read EnumType: EnumJointCreationMode_INTERNAL
+end
 declare extern type EnumJointCreationMode_INTERNAL extends Enum with
 	All: EnumJointCreationMode
 	None: EnumJointCreationMode
@@ -3529,7 +4137,9 @@ declare extern type EnumJointCreationMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumJointCreationMode?
 	function FromValue(self, Value: number): EnumJointCreationMode?
 end
-declare extern type EnumKeyCode extends EnumItem with end
+declare extern type EnumKeyCode extends EnumItem with
+	read EnumType: EnumKeyCode_INTERNAL
+end
 declare extern type EnumKeyCode_INTERNAL extends Enum with
 	A: EnumKeyCode
 	Ampersand: EnumKeyCode
@@ -3818,7 +4428,9 @@ declare extern type EnumKeyCode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumKeyCode?
 	function FromValue(self, Value: number): EnumKeyCode?
 end
-declare extern type EnumKeyCodeStringFormat extends EnumItem with end
+declare extern type EnumKeyCodeStringFormat extends EnumItem with
+	read EnumType: EnumKeyCodeStringFormat_INTERNAL
+end
 declare extern type EnumKeyCodeStringFormat_INTERNAL extends Enum with
 	Abbreviated: EnumKeyCodeStringFormat
 	Default: EnumKeyCodeStringFormat
@@ -3826,7 +4438,9 @@ declare extern type EnumKeyCodeStringFormat_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumKeyCodeStringFormat?
 	function FromValue(self, Value: number): EnumKeyCodeStringFormat?
 end
-declare extern type EnumKeyInterpolationMode extends EnumItem with end
+declare extern type EnumKeyInterpolationMode extends EnumItem with
+	read EnumType: EnumKeyInterpolationMode_INTERNAL
+end
 declare extern type EnumKeyInterpolationMode_INTERNAL extends Enum with
 	Constant: EnumKeyInterpolationMode
 	Cubic: EnumKeyInterpolationMode
@@ -3835,7 +4449,9 @@ declare extern type EnumKeyInterpolationMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumKeyInterpolationMode?
 	function FromValue(self, Value: number): EnumKeyInterpolationMode?
 end
-declare extern type EnumKeywordFilterType extends EnumItem with end
+declare extern type EnumKeywordFilterType extends EnumItem with
+	read EnumType: EnumKeywordFilterType_INTERNAL
+end
 declare extern type EnumKeywordFilterType_INTERNAL extends Enum with
 	Exclude: EnumKeywordFilterType
 	Include: EnumKeywordFilterType
@@ -3843,14 +4459,18 @@ declare extern type EnumKeywordFilterType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumKeywordFilterType?
 	function FromValue(self, Value: number): EnumKeywordFilterType?
 end
-declare extern type EnumKnownWindow extends EnumItem with end
+declare extern type EnumKnownWindow extends EnumItem with
+	read EnumType: EnumKnownWindow_INTERNAL
+end
 declare extern type EnumKnownWindow_INTERNAL extends Enum with
 	Main: EnumKnownWindow
 	function GetEnumItems(self): { EnumKnownWindow }
 	function FromName(self, Name: string): EnumKnownWindow?
 	function FromValue(self, Value: number): EnumKnownWindow?
 end
-declare extern type EnumLeftRight extends EnumItem with end
+declare extern type EnumLeftRight extends EnumItem with
+	read EnumType: EnumLeftRight_INTERNAL
+end
 declare extern type EnumLeftRight_INTERNAL extends Enum with
 	Center: EnumLeftRight
 	Left: EnumLeftRight
@@ -3859,7 +4479,9 @@ declare extern type EnumLeftRight_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLeftRight?
 	function FromValue(self, Value: number): EnumLeftRight?
 end
-declare extern type EnumLexemeType extends EnumItem with end
+declare extern type EnumLexemeType extends EnumItem with
+	read EnumType: EnumLexemeType_INTERNAL
+end
 declare extern type EnumLexemeType_INTERNAL extends Enum with
 	And: EnumLexemeType
 	Colon: EnumLexemeType
@@ -3884,7 +4506,9 @@ declare extern type EnumLexemeType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLexemeType?
 	function FromValue(self, Value: number): EnumLexemeType?
 end
-declare extern type EnumLightingStyle extends EnumItem with end
+declare extern type EnumLightingStyle extends EnumItem with
+	read EnumType: EnumLightingStyle_INTERNAL
+end
 declare extern type EnumLightingStyle_INTERNAL extends Enum with
 	Realistic: EnumLightingStyle
 	Soft: EnumLightingStyle
@@ -3892,7 +4516,9 @@ declare extern type EnumLightingStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLightingStyle?
 	function FromValue(self, Value: number): EnumLightingStyle?
 end
-declare extern type EnumLimb extends EnumItem with end
+declare extern type EnumLimb extends EnumItem with
+	read EnumType: EnumLimb_INTERNAL
+end
 declare extern type EnumLimb_INTERNAL extends Enum with
 	Head: EnumLimb
 	LeftArm: EnumLimb
@@ -3905,7 +4531,9 @@ declare extern type EnumLimb_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLimb?
 	function FromValue(self, Value: number): EnumLimb?
 end
-declare extern type EnumLineJoinMode extends EnumItem with end
+declare extern type EnumLineJoinMode extends EnumItem with
+	read EnumType: EnumLineJoinMode_INTERNAL
+end
 declare extern type EnumLineJoinMode_INTERNAL extends Enum with
 	Bevel: EnumLineJoinMode
 	Miter: EnumLineJoinMode
@@ -3914,7 +4542,9 @@ declare extern type EnumLineJoinMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLineJoinMode?
 	function FromValue(self, Value: number): EnumLineJoinMode?
 end
-declare extern type EnumListDisplayMode extends EnumItem with end
+declare extern type EnumListDisplayMode extends EnumItem with
+	read EnumType: EnumListDisplayMode_INTERNAL
+end
 declare extern type EnumListDisplayMode_INTERNAL extends Enum with
 	Horizontal: EnumListDisplayMode
 	Vertical: EnumListDisplayMode
@@ -3922,7 +4552,9 @@ declare extern type EnumListDisplayMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumListDisplayMode?
 	function FromValue(self, Value: number): EnumListDisplayMode?
 end
-declare extern type EnumListenerLocation extends EnumItem with end
+declare extern type EnumListenerLocation extends EnumItem with
+	read EnumType: EnumListenerLocation_INTERNAL
+end
 declare extern type EnumListenerLocation_INTERNAL extends Enum with
 	Camera: EnumListenerLocation
 	Character: EnumListenerLocation
@@ -3932,7 +4564,9 @@ declare extern type EnumListenerLocation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumListenerLocation?
 	function FromValue(self, Value: number): EnumListenerLocation?
 end
-declare extern type EnumListenerPositionType extends EnumItem with end
+declare extern type EnumListenerPositionType extends EnumItem with
+	read EnumType: EnumListenerPositionType_INTERNAL
+end
 declare extern type EnumListenerPositionType_INTERNAL extends Enum with
 	Instance: EnumListenerPositionType
 	Parent: EnumListenerPositionType
@@ -3940,7 +4574,9 @@ declare extern type EnumListenerPositionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumListenerPositionType?
 	function FromValue(self, Value: number): EnumListenerPositionType?
 end
-declare extern type EnumListenerType extends EnumItem with end
+declare extern type EnumListenerType extends EnumItem with
+	read EnumType: EnumListenerType_INTERNAL
+end
 declare extern type EnumListenerType_INTERNAL extends Enum with
 	CFrame: EnumListenerType
 	Camera: EnumListenerType
@@ -3950,7 +4586,9 @@ declare extern type EnumListenerType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumListenerType?
 	function FromValue(self, Value: number): EnumListenerType?
 end
-declare extern type EnumLiveEditingAtomicUpdateResponse extends EnumItem with end
+declare extern type EnumLiveEditingAtomicUpdateResponse extends EnumItem with
+	read EnumType: EnumLiveEditingAtomicUpdateResponse_INTERNAL
+end
 declare extern type EnumLiveEditingAtomicUpdateResponse_INTERNAL extends Enum with
 	FailureGuidNotFound: EnumLiveEditingAtomicUpdateResponse
 	FailureHashMismatch: EnumLiveEditingAtomicUpdateResponse
@@ -3960,7 +4598,9 @@ declare extern type EnumLiveEditingAtomicUpdateResponse_INTERNAL extends Enum wi
 	function FromName(self, Name: string): EnumLiveEditingAtomicUpdateResponse?
 	function FromValue(self, Value: number): EnumLiveEditingAtomicUpdateResponse?
 end
-declare extern type EnumLiveEditingBroadcastMessageType extends EnumItem with end
+declare extern type EnumLiveEditingBroadcastMessageType extends EnumItem with
+	read EnumType: EnumLiveEditingBroadcastMessageType_INTERNAL
+end
 declare extern type EnumLiveEditingBroadcastMessageType_INTERNAL extends Enum with
 	Error: EnumLiveEditingBroadcastMessageType
 	Normal: EnumLiveEditingBroadcastMessageType
@@ -3969,7 +4609,9 @@ declare extern type EnumLiveEditingBroadcastMessageType_INTERNAL extends Enum wi
 	function FromName(self, Name: string): EnumLiveEditingBroadcastMessageType?
 	function FromValue(self, Value: number): EnumLiveEditingBroadcastMessageType?
 end
-declare extern type EnumLoadCharacterLayeredClothing extends EnumItem with end
+declare extern type EnumLoadCharacterLayeredClothing extends EnumItem with
+	read EnumType: EnumLoadCharacterLayeredClothing_INTERNAL
+end
 declare extern type EnumLoadCharacterLayeredClothing_INTERNAL extends Enum with
 	Default: EnumLoadCharacterLayeredClothing
 	Disabled: EnumLoadCharacterLayeredClothing
@@ -3978,7 +4620,9 @@ declare extern type EnumLoadCharacterLayeredClothing_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLoadCharacterLayeredClothing?
 	function FromValue(self, Value: number): EnumLoadCharacterLayeredClothing?
 end
-declare extern type EnumLoadDynamicHeads extends EnumItem with end
+declare extern type EnumLoadDynamicHeads extends EnumItem with
+	read EnumType: EnumLoadDynamicHeads_INTERNAL
+end
 declare extern type EnumLoadDynamicHeads_INTERNAL extends Enum with
 	Default: EnumLoadDynamicHeads
 	Disabled: EnumLoadDynamicHeads
@@ -3987,7 +4631,9 @@ declare extern type EnumLoadDynamicHeads_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLoadDynamicHeads?
 	function FromValue(self, Value: number): EnumLoadDynamicHeads?
 end
-declare extern type EnumLocationType extends EnumItem with end
+declare extern type EnumLocationType extends EnumItem with
+	read EnumType: EnumLocationType_INTERNAL
+end
 declare extern type EnumLocationType_INTERNAL extends Enum with
 	Camera: EnumLocationType
 	Character: EnumLocationType
@@ -3996,7 +4642,9 @@ declare extern type EnumLocationType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLocationType?
 	function FromValue(self, Value: number): EnumLocationType?
 end
-declare extern type EnumLuauTypeCheckMode extends EnumItem with end
+declare extern type EnumLuauTypeCheckMode extends EnumItem with
+	read EnumType: EnumLuauTypeCheckMode_INTERNAL
+end
 declare extern type EnumLuauTypeCheckMode_INTERNAL extends Enum with
 	Default: EnumLuauTypeCheckMode
 	NoCheck: EnumLuauTypeCheckMode
@@ -4006,7 +4654,9 @@ declare extern type EnumLuauTypeCheckMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLuauTypeCheckMode?
 	function FromValue(self, Value: number): EnumLuauTypeCheckMode?
 end
-declare extern type EnumMakeupType extends EnumItem with end
+declare extern type EnumMakeupType extends EnumItem with
+	read EnumType: EnumMakeupType_INTERNAL
+end
 declare extern type EnumMakeupType_INTERNAL extends Enum with
 	Eye: EnumMakeupType
 	Face: EnumMakeupType
@@ -4015,7 +4665,9 @@ declare extern type EnumMakeupType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMakeupType?
 	function FromValue(self, Value: number): EnumMakeupType?
 end
-declare extern type EnumMarketplaceBulkPurchasePromptStatus extends EnumItem with end
+declare extern type EnumMarketplaceBulkPurchasePromptStatus extends EnumItem with
+	read EnumType: EnumMarketplaceBulkPurchasePromptStatus_INTERNAL
+end
 declare extern type EnumMarketplaceBulkPurchasePromptStatus_INTERNAL extends Enum with
 	Aborted: EnumMarketplaceBulkPurchasePromptStatus
 	Completed: EnumMarketplaceBulkPurchasePromptStatus
@@ -4024,7 +4676,9 @@ declare extern type EnumMarketplaceBulkPurchasePromptStatus_INTERNAL extends Enu
 	function FromName(self, Name: string): EnumMarketplaceBulkPurchasePromptStatus?
 	function FromValue(self, Value: number): EnumMarketplaceBulkPurchasePromptStatus?
 end
-declare extern type EnumMarketplaceItemPurchaseStatus extends EnumItem with end
+declare extern type EnumMarketplaceItemPurchaseStatus extends EnumItem with
+	read EnumType: EnumMarketplaceItemPurchaseStatus_INTERNAL
+end
 declare extern type EnumMarketplaceItemPurchaseStatus_INTERNAL extends Enum with
 	AlreadyOwned: EnumMarketplaceItemPurchaseStatus
 	InsufficientMembership: EnumMarketplaceItemPurchaseStatus
@@ -4043,7 +4697,9 @@ declare extern type EnumMarketplaceItemPurchaseStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMarketplaceItemPurchaseStatus?
 	function FromValue(self, Value: number): EnumMarketplaceItemPurchaseStatus?
 end
-declare extern type EnumMarketplaceProductType extends EnumItem with end
+declare extern type EnumMarketplaceProductType extends EnumItem with
+	read EnumType: EnumMarketplaceProductType_INTERNAL
+end
 declare extern type EnumMarketplaceProductType_INTERNAL extends Enum with
 	AvatarAsset: EnumMarketplaceProductType
 	AvatarBundle: EnumMarketplaceProductType
@@ -4051,7 +4707,9 @@ declare extern type EnumMarketplaceProductType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMarketplaceProductType?
 	function FromValue(self, Value: number): EnumMarketplaceProductType?
 end
-declare extern type EnumMarkupKind extends EnumItem with end
+declare extern type EnumMarkupKind extends EnumItem with
+	read EnumType: EnumMarkupKind_INTERNAL
+end
 declare extern type EnumMarkupKind_INTERNAL extends Enum with
 	Markdown: EnumMarkupKind
 	PlainText: EnumMarkupKind
@@ -4059,7 +4717,9 @@ declare extern type EnumMarkupKind_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMarkupKind?
 	function FromValue(self, Value: number): EnumMarkupKind?
 end
-declare extern type EnumMatchmakingType extends EnumItem with end
+declare extern type EnumMatchmakingType extends EnumItem with
+	read EnumType: EnumMatchmakingType_INTERNAL
+end
 declare extern type EnumMatchmakingType_INTERNAL extends Enum with
 	Default: EnumMatchmakingType
 	PlayStationOnly: EnumMatchmakingType
@@ -4068,7 +4728,9 @@ declare extern type EnumMatchmakingType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMatchmakingType?
 	function FromValue(self, Value: number): EnumMatchmakingType?
 end
-declare extern type EnumMaterial extends EnumItem with end
+declare extern type EnumMaterial extends EnumItem with
+	read EnumType: EnumMaterial_INTERNAL
+end
 declare extern type EnumMaterial_INTERNAL extends Enum with
 	Air: EnumMaterial
 	Asphalt: EnumMaterial
@@ -4119,7 +4781,9 @@ declare extern type EnumMaterial_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMaterial?
 	function FromValue(self, Value: number): EnumMaterial?
 end
-declare extern type EnumMaterialPattern extends EnumItem with end
+declare extern type EnumMaterialPattern extends EnumItem with
+	read EnumType: EnumMaterialPattern_INTERNAL
+end
 declare extern type EnumMaterialPattern_INTERNAL extends Enum with
 	Organic: EnumMaterialPattern
 	Regular: EnumMaterialPattern
@@ -4127,7 +4791,9 @@ declare extern type EnumMaterialPattern_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMaterialPattern?
 	function FromValue(self, Value: number): EnumMaterialPattern?
 end
-declare extern type EnumMembershipType extends EnumItem with end
+declare extern type EnumMembershipType extends EnumItem with
+	read EnumType: EnumMembershipType_INTERNAL
+end
 declare extern type EnumMembershipType_INTERNAL extends Enum with
 	BuildersClub: EnumMembershipType
 	None: EnumMembershipType
@@ -4138,7 +4804,9 @@ declare extern type EnumMembershipType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMembershipType?
 	function FromValue(self, Value: number): EnumMembershipType?
 end
-declare extern type EnumMergeResolution extends EnumItem with end
+declare extern type EnumMergeResolution extends EnumItem with
+	read EnumType: EnumMergeResolution_INTERNAL
+end
 declare extern type EnumMergeResolution_INTERNAL extends Enum with
 	Manual: EnumMergeResolution
 	None: EnumMergeResolution
@@ -4148,7 +4816,9 @@ declare extern type EnumMergeResolution_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMergeResolution?
 	function FromValue(self, Value: number): EnumMergeResolution?
 end
-declare extern type EnumMergeStatus extends EnumItem with end
+declare extern type EnumMergeStatus extends EnumItem with
+	read EnumType: EnumMergeStatus_INTERNAL
+end
 declare extern type EnumMergeStatus_INTERNAL extends Enum with
 	Loading: EnumMergeStatus
 	Merging: EnumMergeStatus
@@ -4157,7 +4827,9 @@ declare extern type EnumMergeStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMergeStatus?
 	function FromValue(self, Value: number): EnumMergeStatus?
 end
-declare extern type EnumMeshAttribute extends EnumItem with end
+declare extern type EnumMeshAttribute extends EnumItem with
+	read EnumType: EnumMeshAttribute_INTERNAL
+end
 declare extern type EnumMeshAttribute_INTERNAL extends Enum with
 	Color: EnumMeshAttribute
 	Face: EnumMeshAttribute
@@ -4168,7 +4840,9 @@ declare extern type EnumMeshAttribute_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMeshAttribute?
 	function FromValue(self, Value: number): EnumMeshAttribute?
 end
-declare extern type EnumMeshPartDetailLevel extends EnumItem with end
+declare extern type EnumMeshPartDetailLevel extends EnumItem with
+	read EnumType: EnumMeshPartDetailLevel_INTERNAL
+end
 declare extern type EnumMeshPartDetailLevel_INTERNAL extends Enum with
 	DistanceBased: EnumMeshPartDetailLevel
 	Level00: EnumMeshPartDetailLevel
@@ -4185,7 +4859,9 @@ declare extern type EnumMeshPartDetailLevel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMeshPartDetailLevel?
 	function FromValue(self, Value: number): EnumMeshPartDetailLevel?
 end
-declare extern type EnumMeshPartHeadsAndAccessories extends EnumItem with end
+declare extern type EnumMeshPartHeadsAndAccessories extends EnumItem with
+	read EnumType: EnumMeshPartHeadsAndAccessories_INTERNAL
+end
 declare extern type EnumMeshPartHeadsAndAccessories_INTERNAL extends Enum with
 	Default: EnumMeshPartHeadsAndAccessories
 	Disabled: EnumMeshPartHeadsAndAccessories
@@ -4194,7 +4870,9 @@ declare extern type EnumMeshPartHeadsAndAccessories_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMeshPartHeadsAndAccessories?
 	function FromValue(self, Value: number): EnumMeshPartHeadsAndAccessories?
 end
-declare extern type EnumMeshScaleUnit extends EnumItem with end
+declare extern type EnumMeshScaleUnit extends EnumItem with
+	read EnumType: EnumMeshScaleUnit_INTERNAL
+end
 declare extern type EnumMeshScaleUnit_INTERNAL extends Enum with
 	CM: EnumMeshScaleUnit
 	Foot: EnumMeshScaleUnit
@@ -4206,7 +4884,9 @@ declare extern type EnumMeshScaleUnit_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMeshScaleUnit?
 	function FromValue(self, Value: number): EnumMeshScaleUnit?
 end
-declare extern type EnumMeshType extends EnumItem with end
+declare extern type EnumMeshType extends EnumItem with
+	read EnumType: EnumMeshType_INTERNAL
+end
 declare extern type EnumMeshType_INTERNAL extends Enum with
 	Brick: EnumMeshType
 	CornerWedge: EnumMeshType
@@ -4224,7 +4904,9 @@ declare extern type EnumMeshType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMeshType?
 	function FromValue(self, Value: number): EnumMeshType?
 end
-declare extern type EnumMessageType extends EnumItem with end
+declare extern type EnumMessageType extends EnumItem with
+	read EnumType: EnumMessageType_INTERNAL
+end
 declare extern type EnumMessageType_INTERNAL extends Enum with
 	MessageError: EnumMessageType
 	MessageInfo: EnumMessageType
@@ -4234,7 +4916,9 @@ declare extern type EnumMessageType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMessageType?
 	function FromValue(self, Value: number): EnumMessageType?
 end
-declare extern type EnumMetadataFieldType extends EnumItem with end
+declare extern type EnumMetadataFieldType extends EnumItem with
+	read EnumType: EnumMetadataFieldType_INTERNAL
+end
 declare extern type EnumMetadataFieldType_INTERNAL extends Enum with
 	Buffer: EnumMetadataFieldType
 	CFrame: EnumMetadataFieldType
@@ -4254,7 +4938,9 @@ declare extern type EnumMetadataFieldType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMetadataFieldType?
 	function FromValue(self, Value: number): EnumMetadataFieldType?
 end
-declare extern type EnumModelLevelOfDetail extends EnumItem with end
+declare extern type EnumModelLevelOfDetail extends EnumItem with
+	read EnumType: EnumModelLevelOfDetail_INTERNAL
+end
 declare extern type EnumModelLevelOfDetail_INTERNAL extends Enum with
 	Automatic: EnumModelLevelOfDetail
 	Disabled: EnumModelLevelOfDetail
@@ -4264,7 +4950,9 @@ declare extern type EnumModelLevelOfDetail_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumModelLevelOfDetail?
 	function FromValue(self, Value: number): EnumModelLevelOfDetail?
 end
-declare extern type EnumModelStreamingBehavior extends EnumItem with end
+declare extern type EnumModelStreamingBehavior extends EnumItem with
+	read EnumType: EnumModelStreamingBehavior_INTERNAL
+end
 declare extern type EnumModelStreamingBehavior_INTERNAL extends Enum with
 	Default: EnumModelStreamingBehavior
 	Improved: EnumModelStreamingBehavior
@@ -4273,7 +4961,9 @@ declare extern type EnumModelStreamingBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumModelStreamingBehavior?
 	function FromValue(self, Value: number): EnumModelStreamingBehavior?
 end
-declare extern type EnumModelStreamingMode extends EnumItem with end
+declare extern type EnumModelStreamingMode extends EnumItem with
+	read EnumType: EnumModelStreamingMode_INTERNAL
+end
 declare extern type EnumModelStreamingMode_INTERNAL extends Enum with
 	Atomic: EnumModelStreamingMode
 	Default: EnumModelStreamingMode
@@ -4284,7 +4974,9 @@ declare extern type EnumModelStreamingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumModelStreamingMode?
 	function FromValue(self, Value: number): EnumModelStreamingMode?
 end
-declare extern type EnumModerationResultCategory extends EnumItem with end
+declare extern type EnumModerationResultCategory extends EnumItem with
+	read EnumType: EnumModerationResultCategory_INTERNAL
+end
 declare extern type EnumModerationResultCategory_INTERNAL extends Enum with
 	Borderline: EnumModerationResultCategory
 	NoViolationDetected: EnumModerationResultCategory
@@ -4293,7 +4985,9 @@ declare extern type EnumModerationResultCategory_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumModerationResultCategory?
 	function FromValue(self, Value: number): EnumModerationResultCategory?
 end
-declare extern type EnumModerationResultLabel extends EnumItem with end
+declare extern type EnumModerationResultLabel extends EnumItem with
+	read EnumType: EnumModerationResultLabel_INTERNAL
+end
 declare extern type EnumModerationResultLabel_INTERNAL extends Enum with
 	ChildExploitation: EnumModerationResultLabel
 	DiscriminationSlursAndHateSpeech: EnumModerationResultLabel
@@ -4310,7 +5004,9 @@ declare extern type EnumModerationResultLabel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumModerationResultLabel?
 	function FromValue(self, Value: number): EnumModerationResultLabel?
 end
-declare extern type EnumModerationStatus extends EnumItem with end
+declare extern type EnumModerationStatus extends EnumItem with
+	read EnumType: EnumModerationStatus_INTERNAL
+end
 declare extern type EnumModerationStatus_INTERNAL extends Enum with
 	Invalid: EnumModerationStatus
 	NotApplicable: EnumModerationStatus
@@ -4321,7 +5017,9 @@ declare extern type EnumModerationStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumModerationStatus?
 	function FromValue(self, Value: number): EnumModerationStatus?
 end
-declare extern type EnumModifierKey extends EnumItem with end
+declare extern type EnumModifierKey extends EnumItem with
+	read EnumType: EnumModifierKey_INTERNAL
+end
 declare extern type EnumModifierKey_INTERNAL extends Enum with
 	Alt: EnumModifierKey
 	Ctrl: EnumModifierKey
@@ -4331,7 +5029,9 @@ declare extern type EnumModifierKey_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumModifierKey?
 	function FromValue(self, Value: number): EnumModifierKey?
 end
-declare extern type EnumMouseBehavior extends EnumItem with end
+declare extern type EnumMouseBehavior extends EnumItem with
+	read EnumType: EnumMouseBehavior_INTERNAL
+end
 declare extern type EnumMouseBehavior_INTERNAL extends Enum with
 	Default: EnumMouseBehavior
 	LockCenter: EnumMouseBehavior
@@ -4340,7 +5040,9 @@ declare extern type EnumMouseBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMouseBehavior?
 	function FromValue(self, Value: number): EnumMouseBehavior?
 end
-declare extern type EnumMoveState extends EnumItem with end
+declare extern type EnumMoveState extends EnumItem with
+	read EnumType: EnumMoveState_INTERNAL
+end
 declare extern type EnumMoveState_INTERNAL extends Enum with
 	AirFree: EnumMoveState
 	Coasting: EnumMoveState
@@ -4351,7 +5053,9 @@ declare extern type EnumMoveState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMoveState?
 	function FromValue(self, Value: number): EnumMoveState?
 end
-declare extern type EnumMuteState extends EnumItem with end
+declare extern type EnumMuteState extends EnumItem with
+	read EnumType: EnumMuteState_INTERNAL
+end
 declare extern type EnumMuteState_INTERNAL extends Enum with
 	Muted: EnumMuteState
 	Unmuted: EnumMuteState
@@ -4359,7 +5063,9 @@ declare extern type EnumMuteState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMuteState?
 	function FromValue(self, Value: number): EnumMuteState?
 end
-declare extern type EnumNameOcclusion extends EnumItem with end
+declare extern type EnumNameOcclusion extends EnumItem with
+	read EnumType: EnumNameOcclusion_INTERNAL
+end
 declare extern type EnumNameOcclusion_INTERNAL extends Enum with
 	EnemyOcclusion: EnumNameOcclusion
 	NoOcclusion: EnumNameOcclusion
@@ -4368,7 +5074,9 @@ declare extern type EnumNameOcclusion_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumNameOcclusion?
 	function FromValue(self, Value: number): EnumNameOcclusion?
 end
-declare extern type EnumNegateOperationHiddenHistory extends EnumItem with end
+declare extern type EnumNegateOperationHiddenHistory extends EnumItem with
+	read EnumType: EnumNegateOperationHiddenHistory_INTERNAL
+end
 declare extern type EnumNegateOperationHiddenHistory_INTERNAL extends Enum with
 	NegatedIntersection: EnumNegateOperationHiddenHistory
 	NegatedUnion: EnumNegateOperationHiddenHistory
@@ -4377,7 +5085,9 @@ declare extern type EnumNegateOperationHiddenHistory_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumNegateOperationHiddenHistory?
 	function FromValue(self, Value: number): EnumNegateOperationHiddenHistory?
 end
-declare extern type EnumNetworkOwnership extends EnumItem with end
+declare extern type EnumNetworkOwnership extends EnumItem with
+	read EnumType: EnumNetworkOwnership_INTERNAL
+end
 declare extern type EnumNetworkOwnership_INTERNAL extends Enum with
 	Automatic: EnumNetworkOwnership
 	Manual: EnumNetworkOwnership
@@ -4386,7 +5096,9 @@ declare extern type EnumNetworkOwnership_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumNetworkOwnership?
 	function FromValue(self, Value: number): EnumNetworkOwnership?
 end
-declare extern type EnumNetworkStatus extends EnumItem with end
+declare extern type EnumNetworkStatus extends EnumItem with
+	read EnumType: EnumNetworkStatus_INTERNAL
+end
 declare extern type EnumNetworkStatus_INTERNAL extends Enum with
 	Connected: EnumNetworkStatus
 	Disconnected: EnumNetworkStatus
@@ -4395,14 +5107,18 @@ declare extern type EnumNetworkStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumNetworkStatus?
 	function FromValue(self, Value: number): EnumNetworkStatus?
 end
-declare extern type EnumNoiseType extends EnumItem with end
+declare extern type EnumNoiseType extends EnumItem with
+	read EnumType: EnumNoiseType_INTERNAL
+end
 declare extern type EnumNoiseType_INTERNAL extends Enum with
 	SimplexGabor: EnumNoiseType
 	function GetEnumItems(self): { EnumNoiseType }
 	function FromName(self, Name: string): EnumNoiseType?
 	function FromValue(self, Value: number): EnumNoiseType?
 end
-declare extern type EnumNormalId extends EnumItem with end
+declare extern type EnumNormalId extends EnumItem with
+	read EnumType: EnumNormalId_INTERNAL
+end
 declare extern type EnumNormalId_INTERNAL extends Enum with
 	Back: EnumNormalId
 	Bottom: EnumNormalId
@@ -4414,7 +5130,9 @@ declare extern type EnumNormalId_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumNormalId?
 	function FromValue(self, Value: number): EnumNormalId?
 end
-declare extern type EnumNotificationButtonType extends EnumItem with end
+declare extern type EnumNotificationButtonType extends EnumItem with
+	read EnumType: EnumNotificationButtonType_INTERNAL
+end
 declare extern type EnumNotificationButtonType_INTERNAL extends Enum with
 	Primary: EnumNotificationButtonType
 	Secondary: EnumNotificationButtonType
@@ -4422,7 +5140,9 @@ declare extern type EnumNotificationButtonType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumNotificationButtonType?
 	function FromValue(self, Value: number): EnumNotificationButtonType?
 end
-declare extern type EnumOperationType extends EnumItem with end
+declare extern type EnumOperationType extends EnumItem with
+	read EnumType: EnumOperationType_INTERNAL
+end
 declare extern type EnumOperationType_INTERNAL extends Enum with
 	Intersection: EnumOperationType
 	Null: EnumOperationType
@@ -4433,7 +5153,9 @@ declare extern type EnumOperationType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumOperationType?
 	function FromValue(self, Value: number): EnumOperationType?
 end
-declare extern type EnumOrientationAlignmentMode extends EnumItem with end
+declare extern type EnumOrientationAlignmentMode extends EnumItem with
+	read EnumType: EnumOrientationAlignmentMode_INTERNAL
+end
 declare extern type EnumOrientationAlignmentMode_INTERNAL extends Enum with
 	OneAttachment: EnumOrientationAlignmentMode
 	TwoAttachment: EnumOrientationAlignmentMode
@@ -4441,7 +5163,9 @@ declare extern type EnumOrientationAlignmentMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumOrientationAlignmentMode?
 	function FromValue(self, Value: number): EnumOrientationAlignmentMode?
 end
-declare extern type EnumOrthographicMode extends EnumItem with end
+declare extern type EnumOrthographicMode extends EnumItem with
+	read EnumType: EnumOrthographicMode_INTERNAL
+end
 declare extern type EnumOrthographicMode_INTERNAL extends Enum with
 	Diagonal: EnumOrthographicMode
 	Horizontal: EnumOrthographicMode
@@ -4451,7 +5175,9 @@ declare extern type EnumOrthographicMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumOrthographicMode?
 	function FromValue(self, Value: number): EnumOrthographicMode?
 end
-declare extern type EnumOutfitSource extends EnumItem with end
+declare extern type EnumOutfitSource extends EnumItem with
+	read EnumType: EnumOutfitSource_INTERNAL
+end
 declare extern type EnumOutfitSource_INTERNAL extends Enum with
 	All: EnumOutfitSource
 	Created: EnumOutfitSource
@@ -4460,7 +5186,9 @@ declare extern type EnumOutfitSource_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumOutfitSource?
 	function FromValue(self, Value: number): EnumOutfitSource?
 end
-declare extern type EnumOutfitType extends EnumItem with end
+declare extern type EnumOutfitType extends EnumItem with
+	read EnumType: EnumOutfitType_INTERNAL
+end
 declare extern type EnumOutfitType_INTERNAL extends Enum with
 	All: EnumOutfitType
 	Avatar: EnumOutfitType
@@ -4471,7 +5199,9 @@ declare extern type EnumOutfitType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumOutfitType?
 	function FromValue(self, Value: number): EnumOutfitType?
 end
-declare extern type EnumOutputLayoutMode extends EnumItem with end
+declare extern type EnumOutputLayoutMode extends EnumItem with
+	read EnumType: EnumOutputLayoutMode_INTERNAL
+end
 declare extern type EnumOutputLayoutMode_INTERNAL extends Enum with
 	Horizontal: EnumOutputLayoutMode
 	Vertical: EnumOutputLayoutMode
@@ -4479,7 +5209,9 @@ declare extern type EnumOutputLayoutMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumOutputLayoutMode?
 	function FromValue(self, Value: number): EnumOutputLayoutMode?
 end
-declare extern type EnumOverrideMouseIconBehavior extends EnumItem with end
+declare extern type EnumOverrideMouseIconBehavior extends EnumItem with
+	read EnumType: EnumOverrideMouseIconBehavior_INTERNAL
+end
 declare extern type EnumOverrideMouseIconBehavior_INTERNAL extends Enum with
 	ForceHide: EnumOverrideMouseIconBehavior
 	ForceShow: EnumOverrideMouseIconBehavior
@@ -4488,7 +5220,9 @@ declare extern type EnumOverrideMouseIconBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumOverrideMouseIconBehavior?
 	function FromValue(self, Value: number): EnumOverrideMouseIconBehavior?
 end
-declare extern type EnumPackagePermission extends EnumItem with end
+declare extern type EnumPackagePermission extends EnumItem with
+	read EnumType: EnumPackagePermission_INTERNAL
+end
 declare extern type EnumPackagePermission_INTERNAL extends Enum with
 	Edit: EnumPackagePermission
 	NoAccess: EnumPackagePermission
@@ -4500,7 +5234,9 @@ declare extern type EnumPackagePermission_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPackagePermission?
 	function FromValue(self, Value: number): EnumPackagePermission?
 end
-declare extern type EnumPageMilestoneType extends EnumItem with end
+declare extern type EnumPageMilestoneType extends EnumItem with
+	read EnumType: EnumPageMilestoneType_INTERNAL
+end
 declare extern type EnumPageMilestoneType_INTERNAL extends Enum with
 	FunctionallyReady: EnumPageMilestoneType
 	Interactive: EnumPageMilestoneType
@@ -4510,7 +5246,9 @@ declare extern type EnumPageMilestoneType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPageMilestoneType?
 	function FromValue(self, Value: number): EnumPageMilestoneType?
 end
-declare extern type EnumPageType extends EnumItem with end
+declare extern type EnumPageType extends EnumItem with
+	read EnumType: EnumPageType_INTERNAL
+end
 declare extern type EnumPageType_INTERNAL extends Enum with
 	AvatarEditor: EnumPageType
 	AvatarMarketplace: EnumPageType
@@ -4520,7 +5258,9 @@ declare extern type EnumPageType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPageType?
 	function FromValue(self, Value: number): EnumPageType?
 end
-declare extern type EnumPartType extends EnumItem with end
+declare extern type EnumPartType extends EnumItem with
+	read EnumType: EnumPartType_INTERNAL
+end
 declare extern type EnumPartType_INTERNAL extends Enum with
 	Ball: EnumPartType
 	Block: EnumPartType
@@ -4531,7 +5271,9 @@ declare extern type EnumPartType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPartType?
 	function FromValue(self, Value: number): EnumPartType?
 end
-declare extern type EnumParticleEmitter2DEmissionMode extends EnumItem with end
+declare extern type EnumParticleEmitter2DEmissionMode extends EnumItem with
+	read EnumType: EnumParticleEmitter2DEmissionMode_INTERNAL
+end
 declare extern type EnumParticleEmitter2DEmissionMode_INTERNAL extends Enum with
 	BoundingBox: EnumParticleEmitter2DEmissionMode
 	Point: EnumParticleEmitter2DEmissionMode
@@ -4539,7 +5281,9 @@ declare extern type EnumParticleEmitter2DEmissionMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumParticleEmitter2DEmissionMode?
 	function FromValue(self, Value: number): EnumParticleEmitter2DEmissionMode?
 end
-declare extern type EnumParticleEmitterShape extends EnumItem with end
+declare extern type EnumParticleEmitterShape extends EnumItem with
+	read EnumType: EnumParticleEmitterShape_INTERNAL
+end
 declare extern type EnumParticleEmitterShape_INTERNAL extends Enum with
 	Box: EnumParticleEmitterShape
 	Cylinder: EnumParticleEmitterShape
@@ -4549,7 +5293,9 @@ declare extern type EnumParticleEmitterShape_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumParticleEmitterShape?
 	function FromValue(self, Value: number): EnumParticleEmitterShape?
 end
-declare extern type EnumParticleEmitterShapeInOut extends EnumItem with end
+declare extern type EnumParticleEmitterShapeInOut extends EnumItem with
+	read EnumType: EnumParticleEmitterShapeInOut_INTERNAL
+end
 declare extern type EnumParticleEmitterShapeInOut_INTERNAL extends Enum with
 	InAndOut: EnumParticleEmitterShapeInOut
 	Inward: EnumParticleEmitterShapeInOut
@@ -4558,7 +5304,9 @@ declare extern type EnumParticleEmitterShapeInOut_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumParticleEmitterShapeInOut?
 	function FromValue(self, Value: number): EnumParticleEmitterShapeInOut?
 end
-declare extern type EnumParticleEmitterShapeStyle extends EnumItem with end
+declare extern type EnumParticleEmitterShapeStyle extends EnumItem with
+	read EnumType: EnumParticleEmitterShapeStyle_INTERNAL
+end
 declare extern type EnumParticleEmitterShapeStyle_INTERNAL extends Enum with
 	Surface: EnumParticleEmitterShapeStyle
 	Volume: EnumParticleEmitterShapeStyle
@@ -4566,7 +5314,9 @@ declare extern type EnumParticleEmitterShapeStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumParticleEmitterShapeStyle?
 	function FromValue(self, Value: number): EnumParticleEmitterShapeStyle?
 end
-declare extern type EnumParticleFlipbookLayout extends EnumItem with end
+declare extern type EnumParticleFlipbookLayout extends EnumItem with
+	read EnumType: EnumParticleFlipbookLayout_INTERNAL
+end
 declare extern type EnumParticleFlipbookLayout_INTERNAL extends Enum with
 	Custom: EnumParticleFlipbookLayout
 	Grid2x2: EnumParticleFlipbookLayout
@@ -4577,7 +5327,9 @@ declare extern type EnumParticleFlipbookLayout_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumParticleFlipbookLayout?
 	function FromValue(self, Value: number): EnumParticleFlipbookLayout?
 end
-declare extern type EnumParticleFlipbookMode extends EnumItem with end
+declare extern type EnumParticleFlipbookMode extends EnumItem with
+	read EnumType: EnumParticleFlipbookMode_INTERNAL
+end
 declare extern type EnumParticleFlipbookMode_INTERNAL extends Enum with
 	Loop: EnumParticleFlipbookMode
 	OneShot: EnumParticleFlipbookMode
@@ -4587,7 +5339,9 @@ declare extern type EnumParticleFlipbookMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumParticleFlipbookMode?
 	function FromValue(self, Value: number): EnumParticleFlipbookMode?
 end
-declare extern type EnumParticleFlipbookTextureCompatible extends EnumItem with end
+declare extern type EnumParticleFlipbookTextureCompatible extends EnumItem with
+	read EnumType: EnumParticleFlipbookTextureCompatible_INTERNAL
+end
 declare extern type EnumParticleFlipbookTextureCompatible_INTERNAL extends Enum with
 	Compatible: EnumParticleFlipbookTextureCompatible
 	NotCompatible: EnumParticleFlipbookTextureCompatible
@@ -4596,7 +5350,9 @@ declare extern type EnumParticleFlipbookTextureCompatible_INTERNAL extends Enum 
 	function FromName(self, Name: string): EnumParticleFlipbookTextureCompatible?
 	function FromValue(self, Value: number): EnumParticleFlipbookTextureCompatible?
 end
-declare extern type EnumParticleOrientation extends EnumItem with end
+declare extern type EnumParticleOrientation extends EnumItem with
+	read EnumType: EnumParticleOrientation_INTERNAL
+end
 declare extern type EnumParticleOrientation_INTERNAL extends Enum with
 	FacingCamera: EnumParticleOrientation
 	FacingCameraWorldUp: EnumParticleOrientation
@@ -4606,7 +5362,9 @@ declare extern type EnumParticleOrientation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumParticleOrientation?
 	function FromValue(self, Value: number): EnumParticleOrientation?
 end
-declare extern type EnumPathStatus extends EnumItem with end
+declare extern type EnumPathStatus extends EnumItem with
+	read EnumType: EnumPathStatus_INTERNAL
+end
 declare extern type EnumPathStatus_INTERNAL extends Enum with
 	ClosestNoPath: EnumPathStatus
 	ClosestOutOfRange: EnumPathStatus
@@ -4618,7 +5376,9 @@ declare extern type EnumPathStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPathStatus?
 	function FromValue(self, Value: number): EnumPathStatus?
 end
-declare extern type EnumPathWaypointAction extends EnumItem with end
+declare extern type EnumPathWaypointAction extends EnumItem with
+	read EnumType: EnumPathWaypointAction_INTERNAL
+end
 declare extern type EnumPathWaypointAction_INTERNAL extends Enum with
 	Custom: EnumPathWaypointAction
 	Jump: EnumPathWaypointAction
@@ -4627,7 +5387,9 @@ declare extern type EnumPathWaypointAction_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPathWaypointAction?
 	function FromValue(self, Value: number): EnumPathWaypointAction?
 end
-declare extern type EnumPathfindingUseImprovedSearch extends EnumItem with end
+declare extern type EnumPathfindingUseImprovedSearch extends EnumItem with
+	read EnumType: EnumPathfindingUseImprovedSearch_INTERNAL
+end
 declare extern type EnumPathfindingUseImprovedSearch_INTERNAL extends Enum with
 	Default: EnumPathfindingUseImprovedSearch
 	Disabled: EnumPathfindingUseImprovedSearch
@@ -4636,7 +5398,9 @@ declare extern type EnumPathfindingUseImprovedSearch_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPathfindingUseImprovedSearch?
 	function FromValue(self, Value: number): EnumPathfindingUseImprovedSearch?
 end
-declare extern type EnumPeoplePageLayout extends EnumItem with end
+declare extern type EnumPeoplePageLayout extends EnumItem with
+	read EnumType: EnumPeoplePageLayout_INTERNAL
+end
 declare extern type EnumPeoplePageLayout_INTERNAL extends Enum with
 	Card: EnumPeoplePageLayout
 	List: EnumPeoplePageLayout
@@ -4644,7 +5408,9 @@ declare extern type EnumPeoplePageLayout_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPeoplePageLayout?
 	function FromValue(self, Value: number): EnumPeoplePageLayout?
 end
-declare extern type EnumPerformanceOverlayMode extends EnumItem with end
+declare extern type EnumPerformanceOverlayMode extends EnumItem with
+	read EnumType: EnumPerformanceOverlayMode_INTERNAL
+end
 declare extern type EnumPerformanceOverlayMode_INTERNAL extends Enum with
 	Decals: EnumPerformanceOverlayMode
 	Lights: EnumPerformanceOverlayMode
@@ -4654,7 +5420,9 @@ declare extern type EnumPerformanceOverlayMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPerformanceOverlayMode?
 	function FromValue(self, Value: number): EnumPerformanceOverlayMode?
 end
-declare extern type EnumPermissionLevelShown extends EnumItem with end
+declare extern type EnumPermissionLevelShown extends EnumItem with
+	read EnumType: EnumPermissionLevelShown_INTERNAL
+end
 declare extern type EnumPermissionLevelShown_INTERNAL extends Enum with
 	Game: EnumPermissionLevelShown
 	Roblox: EnumPermissionLevelShown
@@ -4665,7 +5433,9 @@ declare extern type EnumPermissionLevelShown_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPermissionLevelShown?
 	function FromValue(self, Value: number): EnumPermissionLevelShown?
 end
-declare extern type EnumPhysicalConstraintType extends EnumItem with end
+declare extern type EnumPhysicalConstraintType extends EnumItem with
+	read EnumType: EnumPhysicalConstraintType_INTERNAL
+end
 declare extern type EnumPhysicalConstraintType_INTERNAL extends Enum with
 	AnimationConstraint: EnumPhysicalConstraintType
 	Motor6D: EnumPhysicalConstraintType
@@ -4673,7 +5443,9 @@ declare extern type EnumPhysicalConstraintType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPhysicalConstraintType?
 	function FromValue(self, Value: number): EnumPhysicalConstraintType?
 end
-declare extern type EnumPhysicsSimulationRate extends EnumItem with end
+declare extern type EnumPhysicsSimulationRate extends EnumItem with
+	read EnumType: EnumPhysicsSimulationRate_INTERNAL
+end
 declare extern type EnumPhysicsSimulationRate_INTERNAL extends Enum with
 	Fixed120Hz: EnumPhysicsSimulationRate
 	Fixed240Hz: EnumPhysicsSimulationRate
@@ -4682,7 +5454,9 @@ declare extern type EnumPhysicsSimulationRate_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPhysicsSimulationRate?
 	function FromValue(self, Value: number): EnumPhysicsSimulationRate?
 end
-declare extern type EnumPhysicsSteppingMethod extends EnumItem with end
+declare extern type EnumPhysicsSteppingMethod extends EnumItem with
+	read EnumType: EnumPhysicsSteppingMethod_INTERNAL
+end
 declare extern type EnumPhysicsSteppingMethod_INTERNAL extends Enum with
 	Adaptive: EnumPhysicsSteppingMethod
 	Default: EnumPhysicsSteppingMethod
@@ -4691,7 +5465,9 @@ declare extern type EnumPhysicsSteppingMethod_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPhysicsSteppingMethod?
 	function FromValue(self, Value: number): EnumPhysicsSteppingMethod?
 end
-declare extern type EnumPinExperienceStatus extends EnumItem with end
+declare extern type EnumPinExperienceStatus extends EnumItem with
+	read EnumType: EnumPinExperienceStatus_INTERNAL
+end
 declare extern type EnumPinExperienceStatus_INTERNAL extends Enum with
 	AlreadyExists: EnumPinExperienceStatus
 	Failure: EnumPinExperienceStatus
@@ -4700,7 +5476,9 @@ declare extern type EnumPinExperienceStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPinExperienceStatus?
 	function FromValue(self, Value: number): EnumPinExperienceStatus?
 end
-declare extern type EnumPioneerSource extends EnumItem with end
+declare extern type EnumPioneerSource extends EnumItem with
+	read EnumType: EnumPioneerSource_INTERNAL
+end
 declare extern type EnumPioneerSource_INTERNAL extends Enum with
 	DaveyBazooka: EnumPioneerSource
 	Oof: EnumPioneerSource
@@ -4710,7 +5488,9 @@ declare extern type EnumPioneerSource_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPioneerSource?
 	function FromValue(self, Value: number): EnumPioneerSource?
 end
-declare extern type EnumPlaceContentPreference extends EnumItem with end
+declare extern type EnumPlaceContentPreference extends EnumItem with
+	read EnumType: EnumPlaceContentPreference_INTERNAL
+end
 declare extern type EnumPlaceContentPreference_INTERNAL extends Enum with
 	All: EnumPlaceContentPreference
 	MentionsAndReplies: EnumPlaceContentPreference
@@ -4720,7 +5500,9 @@ declare extern type EnumPlaceContentPreference_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlaceContentPreference?
 	function FromValue(self, Value: number): EnumPlaceContentPreference?
 end
-declare extern type EnumPlacePublishType extends EnumItem with end
+declare extern type EnumPlacePublishType extends EnumItem with
+	read EnumType: EnumPlacePublishType_INTERNAL
+end
 declare extern type EnumPlacePublishType_INTERNAL extends Enum with
 	None: EnumPlacePublishType
 	Publish: EnumPlacePublishType
@@ -4729,7 +5511,9 @@ declare extern type EnumPlacePublishType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlacePublishType?
 	function FromValue(self, Value: number): EnumPlacePublishType?
 end
-declare extern type EnumPlatform extends EnumItem with end
+declare extern type EnumPlatform extends EnumItem with
+	read EnumType: EnumPlatform_INTERNAL
+end
 declare extern type EnumPlatform_INTERNAL extends Enum with
 	Android: EnumPlatform
 	AndroidTV: EnumPlatform
@@ -4758,7 +5542,9 @@ declare extern type EnumPlatform_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlatform?
 	function FromValue(self, Value: number): EnumPlatform?
 end
-declare extern type EnumPlaybackState extends EnumItem with end
+declare extern type EnumPlaybackState extends EnumItem with
+	read EnumType: EnumPlaybackState_INTERNAL
+end
 declare extern type EnumPlaybackState_INTERNAL extends Enum with
 	Begin: EnumPlaybackState
 	Cancelled: EnumPlaybackState
@@ -4770,7 +5556,9 @@ declare extern type EnumPlaybackState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlaybackState?
 	function FromValue(self, Value: number): EnumPlaybackState?
 end
-declare extern type EnumPlayerActions extends EnumItem with end
+declare extern type EnumPlayerActions extends EnumItem with
+	read EnumType: EnumPlayerActions_INTERNAL
+end
 declare extern type EnumPlayerActions_INTERNAL extends Enum with
 	CharacterBackward: EnumPlayerActions
 	CharacterForward: EnumPlayerActions
@@ -4781,7 +5569,9 @@ declare extern type EnumPlayerActions_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlayerActions?
 	function FromValue(self, Value: number): EnumPlayerActions?
 end
-declare extern type EnumPlayerCharacterDestroyBehavior extends EnumItem with end
+declare extern type EnumPlayerCharacterDestroyBehavior extends EnumItem with
+	read EnumType: EnumPlayerCharacterDestroyBehavior_INTERNAL
+end
 declare extern type EnumPlayerCharacterDestroyBehavior_INTERNAL extends Enum with
 	Default: EnumPlayerCharacterDestroyBehavior
 	Disabled: EnumPlayerCharacterDestroyBehavior
@@ -4790,7 +5580,9 @@ declare extern type EnumPlayerCharacterDestroyBehavior_INTERNAL extends Enum wit
 	function FromName(self, Name: string): EnumPlayerCharacterDestroyBehavior?
 	function FromValue(self, Value: number): EnumPlayerCharacterDestroyBehavior?
 end
-declare extern type EnumPlayerChatType extends EnumItem with end
+declare extern type EnumPlayerChatType extends EnumItem with
+	read EnumType: EnumPlayerChatType_INTERNAL
+end
 declare extern type EnumPlayerChatType_INTERNAL extends Enum with
 	All: EnumPlayerChatType
 	Team: EnumPlayerChatType
@@ -4799,7 +5591,9 @@ declare extern type EnumPlayerChatType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlayerChatType?
 	function FromValue(self, Value: number): EnumPlayerChatType?
 end
-declare extern type EnumPlayerDataErrorState extends EnumItem with end
+declare extern type EnumPlayerDataErrorState extends EnumItem with
+	read EnumType: EnumPlayerDataErrorState_INTERNAL
+end
 declare extern type EnumPlayerDataErrorState_INTERNAL extends Enum with
 	FlushFailed: EnumPlayerDataErrorState
 	LoadFailed: EnumPlayerDataErrorState
@@ -4809,7 +5603,9 @@ declare extern type EnumPlayerDataErrorState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlayerDataErrorState?
 	function FromValue(self, Value: number): EnumPlayerDataErrorState?
 end
-declare extern type EnumPlayerDataLoadFailureBehavior extends EnumItem with end
+declare extern type EnumPlayerDataLoadFailureBehavior extends EnumItem with
+	read EnumType: EnumPlayerDataLoadFailureBehavior_INTERNAL
+end
 declare extern type EnumPlayerDataLoadFailureBehavior_INTERNAL extends Enum with
 	Failure: EnumPlayerDataLoadFailureBehavior
 	FallbackToDefault: EnumPlayerDataLoadFailureBehavior
@@ -4818,7 +5614,9 @@ declare extern type EnumPlayerDataLoadFailureBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlayerDataLoadFailureBehavior?
 	function FromValue(self, Value: number): EnumPlayerDataLoadFailureBehavior?
 end
-declare extern type EnumPlayerExitReason extends EnumItem with end
+declare extern type EnumPlayerExitReason extends EnumItem with
+	read EnumType: EnumPlayerExitReason_INTERNAL
+end
 declare extern type EnumPlayerExitReason_INTERNAL extends Enum with
 	CreatorKick: EnumPlayerExitReason
 	PlatformKick: EnumPlayerExitReason
@@ -4827,7 +5625,9 @@ declare extern type EnumPlayerExitReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlayerExitReason?
 	function FromValue(self, Value: number): EnumPlayerExitReason?
 end
-declare extern type EnumPlayerPlatformActivationStatus extends EnumItem with end
+declare extern type EnumPlayerPlatformActivationStatus extends EnumItem with
+	read EnumType: EnumPlayerPlatformActivationStatus_INTERNAL
+end
 declare extern type EnumPlayerPlatformActivationStatus_INTERNAL extends Enum with
 	Active: EnumPlayerPlatformActivationStatus
 	Lapsed: EnumPlayerPlatformActivationStatus
@@ -4838,7 +5638,9 @@ declare extern type EnumPlayerPlatformActivationStatus_INTERNAL extends Enum wit
 	function FromName(self, Name: string): EnumPlayerPlatformActivationStatus?
 	function FromValue(self, Value: number): EnumPlayerPlatformActivationStatus?
 end
-declare extern type EnumPlayerPlatformSpenderStatus extends EnumItem with end
+declare extern type EnumPlayerPlatformSpenderStatus extends EnumItem with
+	read EnumType: EnumPlayerPlatformSpenderStatus_INTERNAL
+end
 declare extern type EnumPlayerPlatformSpenderStatus_INTERNAL extends Enum with
 	Active: EnumPlayerPlatformSpenderStatus
 	OtherPayer: EnumPlayerPlatformSpenderStatus
@@ -4847,7 +5649,9 @@ declare extern type EnumPlayerPlatformSpenderStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlayerPlatformSpenderStatus?
 	function FromValue(self, Value: number): EnumPlayerPlatformSpenderStatus?
 end
-declare extern type EnumPluginConnectionTargetType extends EnumItem with end
+declare extern type EnumPluginConnectionTargetType extends EnumItem with
+	read EnumType: EnumPluginConnectionTargetType_INTERNAL
+end
 declare extern type EnumPluginConnectionTargetType_INTERNAL extends Enum with
 	Edit: EnumPluginConnectionTargetType
 	Test: EnumPluginConnectionTargetType
@@ -4855,7 +5659,9 @@ declare extern type EnumPluginConnectionTargetType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPluginConnectionTargetType?
 	function FromValue(self, Value: number): EnumPluginConnectionTargetType?
 end
-declare extern type EnumPoseEasingDirection extends EnumItem with end
+declare extern type EnumPoseEasingDirection extends EnumItem with
+	read EnumType: EnumPoseEasingDirection_INTERNAL
+end
 declare extern type EnumPoseEasingDirection_INTERNAL extends Enum with
 	In: EnumPoseEasingDirection
 	InOut: EnumPoseEasingDirection
@@ -4864,7 +5670,9 @@ declare extern type EnumPoseEasingDirection_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPoseEasingDirection?
 	function FromValue(self, Value: number): EnumPoseEasingDirection?
 end
-declare extern type EnumPoseEasingStyle extends EnumItem with end
+declare extern type EnumPoseEasingStyle extends EnumItem with
+	read EnumType: EnumPoseEasingStyle_INTERNAL
+end
 declare extern type EnumPoseEasingStyle_INTERNAL extends Enum with
 	Bounce: EnumPoseEasingStyle
 	Constant: EnumPoseEasingStyle
@@ -4876,7 +5684,9 @@ declare extern type EnumPoseEasingStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPoseEasingStyle?
 	function FromValue(self, Value: number): EnumPoseEasingStyle?
 end
-declare extern type EnumPositionAlignmentMode extends EnumItem with end
+declare extern type EnumPositionAlignmentMode extends EnumItem with
+	read EnumType: EnumPositionAlignmentMode_INTERNAL
+end
 declare extern type EnumPositionAlignmentMode_INTERNAL extends Enum with
 	OneAttachment: EnumPositionAlignmentMode
 	TwoAttachment: EnumPositionAlignmentMode
@@ -4884,7 +5694,9 @@ declare extern type EnumPositionAlignmentMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPositionAlignmentMode?
 	function FromValue(self, Value: number): EnumPositionAlignmentMode?
 end
-declare extern type EnumPredictionMode extends EnumItem with end
+declare extern type EnumPredictionMode extends EnumItem with
+	read EnumType: EnumPredictionMode_INTERNAL
+end
 declare extern type EnumPredictionMode_INTERNAL extends Enum with
 	Automatic: EnumPredictionMode
 	Off: EnumPredictionMode
@@ -4893,7 +5705,9 @@ declare extern type EnumPredictionMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPredictionMode?
 	function FromValue(self, Value: number): EnumPredictionMode?
 end
-declare extern type EnumPredictionStatus extends EnumItem with end
+declare extern type EnumPredictionStatus extends EnumItem with
+	read EnumType: EnumPredictionStatus_INTERNAL
+end
 declare extern type EnumPredictionStatus_INTERNAL extends Enum with
 	Authoritative: EnumPredictionStatus
 	None: EnumPredictionStatus
@@ -4902,7 +5716,9 @@ declare extern type EnumPredictionStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPredictionStatus?
 	function FromValue(self, Value: number): EnumPredictionStatus?
 end
-declare extern type EnumPredictiveStreamingMode extends EnumItem with end
+declare extern type EnumPredictiveStreamingMode extends EnumItem with
+	read EnumType: EnumPredictiveStreamingMode_INTERNAL
+end
 declare extern type EnumPredictiveStreamingMode_INTERNAL extends Enum with
 	Default: EnumPredictiveStreamingMode
 	Disabled: EnumPredictiveStreamingMode
@@ -4911,7 +5727,9 @@ declare extern type EnumPredictiveStreamingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPredictiveStreamingMode?
 	function FromValue(self, Value: number): EnumPredictiveStreamingMode?
 end
-declare extern type EnumPreferredInput extends EnumItem with end
+declare extern type EnumPreferredInput extends EnumItem with
+	read EnumType: EnumPreferredInput_INTERNAL
+end
 declare extern type EnumPreferredInput_INTERNAL extends Enum with
 	Gamepad: EnumPreferredInput
 	KeyboardAndMouse: EnumPreferredInput
@@ -4921,7 +5739,9 @@ declare extern type EnumPreferredInput_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPreferredInput?
 	function FromValue(self, Value: number): EnumPreferredInput?
 end
-declare extern type EnumPreferredTextSize extends EnumItem with end
+declare extern type EnumPreferredTextSize extends EnumItem with
+	read EnumType: EnumPreferredTextSize_INTERNAL
+end
 declare extern type EnumPreferredTextSize_INTERNAL extends Enum with
 	Large: EnumPreferredTextSize
 	Larger: EnumPreferredTextSize
@@ -4931,7 +5751,9 @@ declare extern type EnumPreferredTextSize_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPreferredTextSize?
 	function FromValue(self, Value: number): EnumPreferredTextSize?
 end
-declare extern type EnumPrefetchDownloadStatus extends EnumItem with end
+declare extern type EnumPrefetchDownloadStatus extends EnumItem with
+	read EnumType: EnumPrefetchDownloadStatus_INTERNAL
+end
 declare extern type EnumPrefetchDownloadStatus_INTERNAL extends Enum with
 	Completed: EnumPrefetchDownloadStatus
 	Failed: EnumPrefetchDownloadStatus
@@ -4941,7 +5763,9 @@ declare extern type EnumPrefetchDownloadStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPrefetchDownloadStatus?
 	function FromValue(self, Value: number): EnumPrefetchDownloadStatus?
 end
-declare extern type EnumPrimalPhysicsSolver extends EnumItem with end
+declare extern type EnumPrimalPhysicsSolver extends EnumItem with
+	read EnumType: EnumPrimalPhysicsSolver_INTERNAL
+end
 declare extern type EnumPrimalPhysicsSolver_INTERNAL extends Enum with
 	Default: EnumPrimalPhysicsSolver
 	Disabled: EnumPrimalPhysicsSolver
@@ -4950,7 +5774,9 @@ declare extern type EnumPrimalPhysicsSolver_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPrimalPhysicsSolver?
 	function FromValue(self, Value: number): EnumPrimalPhysicsSolver?
 end
-declare extern type EnumPrimitiveType extends EnumItem with end
+declare extern type EnumPrimitiveType extends EnumItem with
+	read EnumType: EnumPrimitiveType_INTERNAL
+end
 declare extern type EnumPrimitiveType_INTERNAL extends Enum with
 	Ball: EnumPrimitiveType
 	Block: EnumPrimitiveType
@@ -4962,7 +5788,9 @@ declare extern type EnumPrimitiveType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPrimitiveType?
 	function FromValue(self, Value: number): EnumPrimitiveType?
 end
-declare extern type EnumPrivilegeType extends EnumItem with end
+declare extern type EnumPrivilegeType extends EnumItem with
+	read EnumType: EnumPrivilegeType_INTERNAL
+end
 declare extern type EnumPrivilegeType_INTERNAL extends Enum with
 	Admin: EnumPrivilegeType
 	Banned: EnumPrivilegeType
@@ -4973,7 +5801,9 @@ declare extern type EnumPrivilegeType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPrivilegeType?
 	function FromValue(self, Value: number): EnumPrivilegeType?
 end
-declare extern type EnumProductLocationRestriction extends EnumItem with end
+declare extern type EnumProductLocationRestriction extends EnumItem with
+	read EnumType: EnumProductLocationRestriction_INTERNAL
+end
 declare extern type EnumProductLocationRestriction_INTERNAL extends Enum with
 	AllGames: EnumProductLocationRestriction
 	AllowedGames: EnumProductLocationRestriction
@@ -4982,7 +5812,9 @@ declare extern type EnumProductLocationRestriction_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumProductLocationRestriction?
 	function FromValue(self, Value: number): EnumProductLocationRestriction?
 end
-declare extern type EnumProductPurchaseChannel extends EnumItem with end
+declare extern type EnumProductPurchaseChannel extends EnumItem with
+	read EnumType: EnumProductPurchaseChannel_INTERNAL
+end
 declare extern type EnumProductPurchaseChannel_INTERNAL extends Enum with
 	AdReward: EnumProductPurchaseChannel
 	CommerceProduct: EnumProductPurchaseChannel
@@ -4992,7 +5824,9 @@ declare extern type EnumProductPurchaseChannel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumProductPurchaseChannel?
 	function FromValue(self, Value: number): EnumProductPurchaseChannel?
 end
-declare extern type EnumProductPurchaseDecision extends EnumItem with end
+declare extern type EnumProductPurchaseDecision extends EnumItem with
+	read EnumType: EnumProductPurchaseDecision_INTERNAL
+end
 declare extern type EnumProductPurchaseDecision_INTERNAL extends Enum with
 	NotProcessedYet: EnumProductPurchaseDecision
 	PurchaseGranted: EnumProductPurchaseDecision
@@ -5000,7 +5834,9 @@ declare extern type EnumProductPurchaseDecision_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumProductPurchaseDecision?
 	function FromValue(self, Value: number): EnumProductPurchaseDecision?
 end
-declare extern type EnumProjectionType extends EnumItem with end
+declare extern type EnumProjectionType extends EnumItem with
+	read EnumType: EnumProjectionType_INTERNAL
+end
 declare extern type EnumProjectionType_INTERNAL extends Enum with
 	Orthographic: EnumProjectionType
 	Perspective: EnumProjectionType
@@ -5008,7 +5844,9 @@ declare extern type EnumProjectionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumProjectionType?
 	function FromValue(self, Value: number): EnumProjectionType?
 end
-declare extern type EnumPromptCreateAssetResult extends EnumItem with end
+declare extern type EnumPromptCreateAssetResult extends EnumItem with
+	read EnumType: EnumPromptCreateAssetResult_INTERNAL
+end
 declare extern type EnumPromptCreateAssetResult_INTERNAL extends Enum with
 	ModeratedName: EnumPromptCreateAssetResult
 	NoUserInput: EnumPromptCreateAssetResult
@@ -5024,7 +5862,9 @@ declare extern type EnumPromptCreateAssetResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPromptCreateAssetResult?
 	function FromValue(self, Value: number): EnumPromptCreateAssetResult?
 end
-declare extern type EnumPromptCreateAvatarResult extends EnumItem with end
+declare extern type EnumPromptCreateAvatarResult extends EnumItem with
+	read EnumType: EnumPromptCreateAvatarResult_INTERNAL
+end
 declare extern type EnumPromptCreateAvatarResult_INTERNAL extends Enum with
 	InvalidHumanoidDescription: EnumPromptCreateAvatarResult
 	MaxOutfits: EnumPromptCreateAvatarResult
@@ -5042,7 +5882,9 @@ declare extern type EnumPromptCreateAvatarResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPromptCreateAvatarResult?
 	function FromValue(self, Value: number): EnumPromptCreateAvatarResult?
 end
-declare extern type EnumPromptCreateOutfitResult extends EnumItem with end
+declare extern type EnumPromptCreateOutfitResult extends EnumItem with
+	read EnumType: EnumPromptCreateOutfitResult_INTERNAL
+end
 declare extern type EnumPromptCreateOutfitResult_INTERNAL extends Enum with
 	CreationFailure: EnumPromptCreateOutfitResult
 	NoUserInput: EnumPromptCreateOutfitResult
@@ -5056,7 +5898,9 @@ declare extern type EnumPromptCreateOutfitResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPromptCreateOutfitResult?
 	function FromValue(self, Value: number): EnumPromptCreateOutfitResult?
 end
-declare extern type EnumPromptCreatePlatformContentResult extends EnumItem with end
+declare extern type EnumPromptCreatePlatformContentResult extends EnumItem with
+	read EnumType: EnumPromptCreatePlatformContentResult_INTERNAL
+end
 declare extern type EnumPromptCreatePlatformContentResult_INTERNAL extends Enum with
 	ModeratedName: EnumPromptCreatePlatformContentResult
 	NoUserInput: EnumPromptCreatePlatformContentResult
@@ -5072,7 +5916,9 @@ declare extern type EnumPromptCreatePlatformContentResult_INTERNAL extends Enum 
 	function FromName(self, Name: string): EnumPromptCreatePlatformContentResult?
 	function FromValue(self, Value: number): EnumPromptCreatePlatformContentResult?
 end
-declare extern type EnumPromptExperienceDetailsResult extends EnumItem with end
+declare extern type EnumPromptExperienceDetailsResult extends EnumItem with
+	read EnumType: EnumPromptExperienceDetailsResult_INTERNAL
+end
 declare extern type EnumPromptExperienceDetailsResult_INTERNAL extends Enum with
 	PromptClosed: EnumPromptExperienceDetailsResult
 	TeleportAttempted: EnumPromptExperienceDetailsResult
@@ -5080,7 +5926,9 @@ declare extern type EnumPromptExperienceDetailsResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPromptExperienceDetailsResult?
 	function FromValue(self, Value: number): EnumPromptExperienceDetailsResult?
 end
-declare extern type EnumPromptLinkSharingResult extends EnumItem with end
+declare extern type EnumPromptLinkSharingResult extends EnumItem with
+	read EnumType: EnumPromptLinkSharingResult_INTERNAL
+end
 declare extern type EnumPromptLinkSharingResult_INTERNAL extends Enum with
 	InvalidLaunchData: EnumPromptLinkSharingResult
 	PlayerLeft: EnumPromptLinkSharingResult
@@ -5089,7 +5937,9 @@ declare extern type EnumPromptLinkSharingResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPromptLinkSharingResult?
 	function FromValue(self, Value: number): EnumPromptLinkSharingResult?
 end
-declare extern type EnumPromptPublishAssetResult extends EnumItem with end
+declare extern type EnumPromptPublishAssetResult extends EnumItem with
+	read EnumType: EnumPromptPublishAssetResult_INTERNAL
+end
 declare extern type EnumPromptPublishAssetResult_INTERNAL extends Enum with
 	NoUserInput: EnumPromptPublishAssetResult
 	PermissionDenied: EnumPromptPublishAssetResult
@@ -5101,7 +5951,9 @@ declare extern type EnumPromptPublishAssetResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPromptPublishAssetResult?
 	function FromValue(self, Value: number): EnumPromptPublishAssetResult?
 end
-declare extern type EnumPropertyStatus extends EnumItem with end
+declare extern type EnumPropertyStatus extends EnumItem with
+	read EnumType: EnumPropertyStatus_INTERNAL
+end
 declare extern type EnumPropertyStatus_INTERNAL extends Enum with
 	Error: EnumPropertyStatus
 	Ok: EnumPropertyStatus
@@ -5110,7 +5962,9 @@ declare extern type EnumPropertyStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPropertyStatus?
 	function FromValue(self, Value: number): EnumPropertyStatus?
 end
-declare extern type EnumProximityPromptExclusivity extends EnumItem with end
+declare extern type EnumProximityPromptExclusivity extends EnumItem with
+	read EnumType: EnumProximityPromptExclusivity_INTERNAL
+end
 declare extern type EnumProximityPromptExclusivity_INTERNAL extends Enum with
 	AlwaysShow: EnumProximityPromptExclusivity
 	OneGlobally: EnumProximityPromptExclusivity
@@ -5119,7 +5973,9 @@ declare extern type EnumProximityPromptExclusivity_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumProximityPromptExclusivity?
 	function FromValue(self, Value: number): EnumProximityPromptExclusivity?
 end
-declare extern type EnumProximityPromptInputType extends EnumItem with end
+declare extern type EnumProximityPromptInputType extends EnumItem with
+	read EnumType: EnumProximityPromptInputType_INTERNAL
+end
 declare extern type EnumProximityPromptInputType_INTERNAL extends Enum with
 	Gamepad: EnumProximityPromptInputType
 	Keyboard: EnumProximityPromptInputType
@@ -5128,7 +5984,9 @@ declare extern type EnumProximityPromptInputType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumProximityPromptInputType?
 	function FromValue(self, Value: number): EnumProximityPromptInputType?
 end
-declare extern type EnumProximityPromptStyle extends EnumItem with end
+declare extern type EnumProximityPromptStyle extends EnumItem with
+	read EnumType: EnumProximityPromptStyle_INTERNAL
+end
 declare extern type EnumProximityPromptStyle_INTERNAL extends Enum with
 	Custom: EnumProximityPromptStyle
 	Default: EnumProximityPromptStyle
@@ -5136,7 +5994,9 @@ declare extern type EnumProximityPromptStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumProximityPromptStyle?
 	function FromValue(self, Value: number): EnumProximityPromptStyle?
 end
-declare extern type EnumPurchaseOption extends EnumItem with end
+declare extern type EnumPurchaseOption extends EnumItem with
+	read EnumType: EnumPurchaseOption_INTERNAL
+end
 declare extern type EnumPurchaseOption_INTERNAL extends Enum with
 	Permanent: EnumPurchaseOption
 	TimedOption: EnumPurchaseOption
@@ -5144,7 +6004,9 @@ declare extern type EnumPurchaseOption_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPurchaseOption?
 	function FromValue(self, Value: number): EnumPurchaseOption?
 end
-declare extern type EnumQualityLevel extends EnumItem with end
+declare extern type EnumQualityLevel extends EnumItem with
+	read EnumType: EnumQualityLevel_INTERNAL
+end
 declare extern type EnumQualityLevel_INTERNAL extends Enum with
 	Automatic: EnumQualityLevel
 	Level01: EnumQualityLevel
@@ -5172,7 +6034,9 @@ declare extern type EnumQualityLevel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumQualityLevel?
 	function FromValue(self, Value: number): EnumQualityLevel?
 end
-declare extern type EnumQueueDecision extends EnumItem with end
+declare extern type EnumQueueDecision extends EnumItem with
+	read EnumType: EnumQueueDecision_INTERNAL
+end
 declare extern type EnumQueueDecision_INTERNAL extends Enum with
 	Commit: EnumQueueDecision
 	Defer: EnumQueueDecision
@@ -5180,7 +6044,9 @@ declare extern type EnumQueueDecision_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumQueueDecision?
 	function FromValue(self, Value: number): EnumQueueDecision?
 end
-declare extern type EnumR15CollisionType extends EnumItem with end
+declare extern type EnumR15CollisionType extends EnumItem with
+	read EnumType: EnumR15CollisionType_INTERNAL
+end
 declare extern type EnumR15CollisionType_INTERNAL extends Enum with
 	InnerBox: EnumR15CollisionType
 	OuterBox: EnumR15CollisionType
@@ -5188,7 +6054,9 @@ declare extern type EnumR15CollisionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumR15CollisionType?
 	function FromValue(self, Value: number): EnumR15CollisionType?
 end
-declare extern type EnumRaycastFilterType extends EnumItem with end
+declare extern type EnumRaycastFilterType extends EnumItem with
+	read EnumType: EnumRaycastFilterType_INTERNAL
+end
 declare extern type EnumRaycastFilterType_INTERNAL extends Enum with
 	Exclude: EnumRaycastFilterType
 	Include: EnumRaycastFilterType
@@ -5196,7 +6064,9 @@ declare extern type EnumRaycastFilterType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRaycastFilterType?
 	function FromValue(self, Value: number): EnumRaycastFilterType?
 end
-declare extern type EnumReadCapturesFromGalleryResult extends EnumItem with end
+declare extern type EnumReadCapturesFromGalleryResult extends EnumItem with
+	read EnumType: EnumReadCapturesFromGalleryResult_INTERNAL
+end
 declare extern type EnumReadCapturesFromGalleryResult_INTERNAL extends Enum with
 	NeedPermission: EnumReadCapturesFromGalleryResult
 	Success: EnumReadCapturesFromGalleryResult
@@ -5204,7 +6074,9 @@ declare extern type EnumReadCapturesFromGalleryResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumReadCapturesFromGalleryResult?
 	function FromValue(self, Value: number): EnumReadCapturesFromGalleryResult?
 end
-declare extern type EnumReceiptDecision extends EnumItem with end
+declare extern type EnumReceiptDecision extends EnumItem with
+	read EnumType: EnumReceiptDecision_INTERNAL
+end
 declare extern type EnumReceiptDecision_INTERNAL extends Enum with
 	NotProcessedYet: EnumReceiptDecision
 	Processed: EnumReceiptDecision
@@ -5212,7 +6084,9 @@ declare extern type EnumReceiptDecision_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumReceiptDecision?
 	function FromValue(self, Value: number): EnumReceiptDecision?
 end
-declare extern type EnumReceiptType extends EnumItem with end
+declare extern type EnumReceiptType extends EnumItem with
+	read EnumType: EnumReceiptType_INTERNAL
+end
 declare extern type EnumReceiptType_INTERNAL extends Enum with
 	DeveloperProduct: EnumReceiptType
 	RobuxTransferReceiver: EnumReceiptType
@@ -5221,7 +6095,9 @@ declare extern type EnumReceiptType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumReceiptType?
 	function FromValue(self, Value: number): EnumReceiptType?
 end
-declare extern type EnumRecommendationActionType extends EnumItem with end
+declare extern type EnumRecommendationActionType extends EnumItem with
+	read EnumType: EnumRecommendationActionType_INTERNAL
+end
 declare extern type EnumRecommendationActionType_INTERNAL extends Enum with
 	AddReaction: EnumRecommendationActionType
 	Comment: EnumRecommendationActionType
@@ -5234,7 +6110,9 @@ declare extern type EnumRecommendationActionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRecommendationActionType?
 	function FromValue(self, Value: number): EnumRecommendationActionType?
 end
-declare extern type EnumRecommendationDepartureIntent extends EnumItem with end
+declare extern type EnumRecommendationDepartureIntent extends EnumItem with
+	read EnumType: EnumRecommendationDepartureIntent_INTERNAL
+end
 declare extern type EnumRecommendationDepartureIntent_INTERNAL extends Enum with
 	Negative: EnumRecommendationDepartureIntent
 	Neutral: EnumRecommendationDepartureIntent
@@ -5243,7 +6121,9 @@ declare extern type EnumRecommendationDepartureIntent_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRecommendationDepartureIntent?
 	function FromValue(self, Value: number): EnumRecommendationDepartureIntent?
 end
-declare extern type EnumRecommendationImpressionType extends EnumItem with end
+declare extern type EnumRecommendationImpressionType extends EnumItem with
+	read EnumType: EnumRecommendationImpressionType_INTERNAL
+end
 declare extern type EnumRecommendationImpressionType_INTERNAL extends Enum with
 	NotViewable: EnumRecommendationImpressionType
 	View: EnumRecommendationImpressionType
@@ -5251,7 +6131,9 @@ declare extern type EnumRecommendationImpressionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRecommendationImpressionType?
 	function FromValue(self, Value: number): EnumRecommendationImpressionType?
 end
-declare extern type EnumRecommendationItemContentType extends EnumItem with end
+declare extern type EnumRecommendationItemContentType extends EnumItem with
+	read EnumType: EnumRecommendationItemContentType_INTERNAL
+end
 declare extern type EnumRecommendationItemContentType_INTERNAL extends Enum with
 	Dynamic: EnumRecommendationItemContentType
 	Interactive: EnumRecommendationItemContentType
@@ -5260,7 +6142,9 @@ declare extern type EnumRecommendationItemContentType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRecommendationItemContentType?
 	function FromValue(self, Value: number): EnumRecommendationItemContentType?
 end
-declare extern type EnumRecommendationItemVisibility extends EnumItem with end
+declare extern type EnumRecommendationItemVisibility extends EnumItem with
+	read EnumType: EnumRecommendationItemVisibility_INTERNAL
+end
 declare extern type EnumRecommendationItemVisibility_INTERNAL extends Enum with
 	Private: EnumRecommendationItemVisibility
 	Public: EnumRecommendationItemVisibility
@@ -5268,7 +6152,9 @@ declare extern type EnumRecommendationItemVisibility_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRecommendationItemVisibility?
 	function FromValue(self, Value: number): EnumRecommendationItemVisibility?
 end
-declare extern type EnumRecommendationPreferenceTargetType extends EnumItem with end
+declare extern type EnumRecommendationPreferenceTargetType extends EnumItem with
+	read EnumType: EnumRecommendationPreferenceTargetType_INTERNAL
+end
 declare extern type EnumRecommendationPreferenceTargetType_INTERNAL extends Enum with
 	CustomTag: EnumRecommendationPreferenceTargetType
 	Universe: EnumRecommendationPreferenceTargetType
@@ -5277,7 +6163,9 @@ declare extern type EnumRecommendationPreferenceTargetType_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumRecommendationPreferenceTargetType?
 	function FromValue(self, Value: number): EnumRecommendationPreferenceTargetType?
 end
-declare extern type EnumRecommendationPreferenceType extends EnumItem with end
+declare extern type EnumRecommendationPreferenceType extends EnumItem with
+	read EnumType: EnumRecommendationPreferenceType_INTERNAL
+end
 declare extern type EnumRecommendationPreferenceType_INTERNAL extends Enum with
 	AddFollow: EnumRecommendationPreferenceType
 	AddMute: EnumRecommendationPreferenceType
@@ -5287,7 +6175,9 @@ declare extern type EnumRecommendationPreferenceType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRecommendationPreferenceType?
 	function FromValue(self, Value: number): EnumRecommendationPreferenceType?
 end
-declare extern type EnumRejectCharacterDeletions extends EnumItem with end
+declare extern type EnumRejectCharacterDeletions extends EnumItem with
+	read EnumType: EnumRejectCharacterDeletions_INTERNAL
+end
 declare extern type EnumRejectCharacterDeletions_INTERNAL extends Enum with
 	Default: EnumRejectCharacterDeletions
 	Disabled: EnumRejectCharacterDeletions
@@ -5296,7 +6186,9 @@ declare extern type EnumRejectCharacterDeletions_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRejectCharacterDeletions?
 	function FromValue(self, Value: number): EnumRejectCharacterDeletions?
 end
-declare extern type EnumRenderFidelity extends EnumItem with end
+declare extern type EnumRenderFidelity extends EnumItem with
+	read EnumType: EnumRenderFidelity_INTERNAL
+end
 declare extern type EnumRenderFidelity_INTERNAL extends Enum with
 	Automatic: EnumRenderFidelity
 	Performance: EnumRenderFidelity
@@ -5305,7 +6197,9 @@ declare extern type EnumRenderFidelity_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRenderFidelity?
 	function FromValue(self, Value: number): EnumRenderFidelity?
 end
-declare extern type EnumRenderPriority extends EnumItem with end
+declare extern type EnumRenderPriority extends EnumItem with
+	read EnumType: EnumRenderPriority_INTERNAL
+end
 declare extern type EnumRenderPriority_INTERNAL extends Enum with
 	Camera: EnumRenderPriority
 	Character: EnumRenderPriority
@@ -5316,7 +6210,9 @@ declare extern type EnumRenderPriority_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRenderPriority?
 	function FromValue(self, Value: number): EnumRenderPriority?
 end
-declare extern type EnumRenderingCacheOptimizationMode extends EnumItem with end
+declare extern type EnumRenderingCacheOptimizationMode extends EnumItem with
+	read EnumType: EnumRenderingCacheOptimizationMode_INTERNAL
+end
 declare extern type EnumRenderingCacheOptimizationMode_INTERNAL extends Enum with
 	Default: EnumRenderingCacheOptimizationMode
 	Disabled: EnumRenderingCacheOptimizationMode
@@ -5325,7 +6221,9 @@ declare extern type EnumRenderingCacheOptimizationMode_INTERNAL extends Enum wit
 	function FromName(self, Name: string): EnumRenderingCacheOptimizationMode?
 	function FromValue(self, Value: number): EnumRenderingCacheOptimizationMode?
 end
-declare extern type EnumRenderingTestComparisonMethod extends EnumItem with end
+declare extern type EnumRenderingTestComparisonMethod extends EnumItem with
+	read EnumType: EnumRenderingTestComparisonMethod_INTERNAL
+end
 declare extern type EnumRenderingTestComparisonMethod_INTERNAL extends Enum with
 	diff: EnumRenderingTestComparisonMethod
 	psnr: EnumRenderingTestComparisonMethod
@@ -5333,7 +6231,9 @@ declare extern type EnumRenderingTestComparisonMethod_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRenderingTestComparisonMethod?
 	function FromValue(self, Value: number): EnumRenderingTestComparisonMethod?
 end
-declare extern type EnumReplicateInstanceDestroySetting extends EnumItem with end
+declare extern type EnumReplicateInstanceDestroySetting extends EnumItem with
+	read EnumType: EnumReplicateInstanceDestroySetting_INTERNAL
+end
 declare extern type EnumReplicateInstanceDestroySetting_INTERNAL extends Enum with
 	Default: EnumReplicateInstanceDestroySetting
 	Disabled: EnumReplicateInstanceDestroySetting
@@ -5342,7 +6242,9 @@ declare extern type EnumReplicateInstanceDestroySetting_INTERNAL extends Enum wi
 	function FromName(self, Name: string): EnumReplicateInstanceDestroySetting?
 	function FromValue(self, Value: number): EnumReplicateInstanceDestroySetting?
 end
-declare extern type EnumReplicationMode extends EnumItem with end
+declare extern type EnumReplicationMode extends EnumItem with
+	read EnumType: EnumReplicationMode_INTERNAL
+end
 declare extern type EnumReplicationMode_INTERNAL extends Enum with
 	Automatic: EnumReplicationMode
 	High: EnumReplicationMode
@@ -5352,7 +6254,9 @@ declare extern type EnumReplicationMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumReplicationMode?
 	function FromValue(self, Value: number): EnumReplicationMode?
 end
-declare extern type EnumResamplerMode extends EnumItem with end
+declare extern type EnumResamplerMode extends EnumItem with
+	read EnumType: EnumResamplerMode_INTERNAL
+end
 declare extern type EnumResamplerMode_INTERNAL extends Enum with
 	Default: EnumResamplerMode
 	Pixelated: EnumResamplerMode
@@ -5360,7 +6264,9 @@ declare extern type EnumResamplerMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumResamplerMode?
 	function FromValue(self, Value: number): EnumResamplerMode?
 end
-declare extern type EnumReservedHighlightId extends EnumItem with end
+declare extern type EnumReservedHighlightId extends EnumItem with
+	read EnumType: EnumReservedHighlightId_INTERNAL
+end
 declare extern type EnumReservedHighlightId_INTERNAL extends Enum with
 	Active: EnumReservedHighlightId
 	Hover: EnumReservedHighlightId
@@ -5371,7 +6277,9 @@ declare extern type EnumReservedHighlightId_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumReservedHighlightId?
 	function FromValue(self, Value: number): EnumReservedHighlightId?
 end
-declare extern type EnumRestPose extends EnumItem with end
+declare extern type EnumRestPose extends EnumItem with
+	read EnumType: EnumRestPose_INTERNAL
+end
 declare extern type EnumRestPose_INTERNAL extends Enum with
 	Custom: EnumRestPose
 	Default: EnumRestPose
@@ -5380,7 +6288,9 @@ declare extern type EnumRestPose_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRestPose?
 	function FromValue(self, Value: number): EnumRestPose?
 end
-declare extern type EnumRestPoseModel extends EnumItem with end
+declare extern type EnumRestPoseModel extends EnumItem with
+	read EnumType: EnumRestPoseModel_INTERNAL
+end
 declare extern type EnumRestPoseModel_INTERNAL extends Enum with
 	FromCustomClip: EnumRestPoseModel
 	FromRigInACE: EnumRestPoseModel
@@ -5390,7 +6300,9 @@ declare extern type EnumRestPoseModel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRestPoseModel?
 	function FromValue(self, Value: number): EnumRestPoseModel?
 end
-declare extern type EnumReturnKeyType extends EnumItem with end
+declare extern type EnumReturnKeyType extends EnumItem with
+	read EnumType: EnumReturnKeyType_INTERNAL
+end
 declare extern type EnumReturnKeyType_INTERNAL extends Enum with
 	Default: EnumReturnKeyType
 	Done: EnumReturnKeyType
@@ -5402,7 +6314,9 @@ declare extern type EnumReturnKeyType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumReturnKeyType?
 	function FromValue(self, Value: number): EnumReturnKeyType?
 end
-declare extern type EnumReverbType extends EnumItem with end
+declare extern type EnumReverbType extends EnumItem with
+	read EnumType: EnumReverbType_INTERNAL
+end
 declare extern type EnumReverbType_INTERNAL extends Enum with
 	Alley: EnumReverbType
 	Arena: EnumReverbType
@@ -5432,7 +6346,9 @@ declare extern type EnumReverbType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumReverbType?
 	function FromValue(self, Value: number): EnumReverbType?
 end
-declare extern type EnumReviewableContentState extends EnumItem with end
+declare extern type EnumReviewableContentState extends EnumItem with
+	read EnumType: EnumReviewableContentState_INTERNAL
+end
 declare extern type EnumReviewableContentState_INTERNAL extends Enum with
 	Completed: EnumReviewableContentState
 	Failed: EnumReviewableContentState
@@ -5441,7 +6357,9 @@ declare extern type EnumReviewableContentState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumReviewableContentState?
 	function FromValue(self, Value: number): EnumReviewableContentState?
 end
-declare extern type EnumRibbonTool extends EnumItem with end
+declare extern type EnumRibbonTool extends EnumItem with
+	read EnumType: EnumRibbonTool_INTERNAL
+end
 declare extern type EnumRibbonTool_INTERNAL extends Enum with
 	ColorPicker: EnumRibbonTool
 	Group: EnumRibbonTool
@@ -5458,7 +6376,9 @@ declare extern type EnumRibbonTool_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRibbonTool?
 	function FromValue(self, Value: number): EnumRibbonTool?
 end
-declare extern type EnumRigLabel extends EnumItem with end
+declare extern type EnumRigLabel extends EnumItem with
+	read EnumType: EnumRigLabel_INTERNAL
+end
 declare extern type EnumRigLabel_INTERNAL extends Enum with
 	Chest: EnumRigLabel
 	HeadBase: EnumRigLabel
@@ -5502,7 +6422,9 @@ declare extern type EnumRigLabel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRigLabel?
 	function FromValue(self, Value: number): EnumRigLabel?
 end
-declare extern type EnumRigScale extends EnumItem with end
+declare extern type EnumRigScale extends EnumItem with
+	read EnumType: EnumRigScale_INTERNAL
+end
 declare extern type EnumRigScale_INTERNAL extends Enum with
 	Default: EnumRigScale
 	Rthro: EnumRigScale
@@ -5511,7 +6433,9 @@ declare extern type EnumRigScale_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRigScale?
 	function FromValue(self, Value: number): EnumRigScale?
 end
-declare extern type EnumRigType extends EnumItem with end
+declare extern type EnumRigType extends EnumItem with
+	read EnumType: EnumRigType_INTERNAL
+end
 declare extern type EnumRigType_INTERNAL extends Enum with
 	Custom: EnumRigType
 	CustomHumanoid: EnumRigType
@@ -5521,7 +6445,9 @@ declare extern type EnumRigType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRigType?
 	function FromValue(self, Value: number): EnumRigType?
 end
-declare extern type EnumRobuxTransferEligibility extends EnumItem with end
+declare extern type EnumRobuxTransferEligibility extends EnumItem with
+	read EnumType: EnumRobuxTransferEligibility_INTERNAL
+end
 declare extern type EnumRobuxTransferEligibility_INTERNAL extends Enum with
 	Eligible: EnumRobuxTransferEligibility
 	ReceiverNotEligible: EnumRobuxTransferEligibility
@@ -5531,7 +6457,9 @@ declare extern type EnumRobuxTransferEligibility_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRobuxTransferEligibility?
 	function FromValue(self, Value: number): EnumRobuxTransferEligibility?
 end
-declare extern type EnumRollOffMode extends EnumItem with end
+declare extern type EnumRollOffMode extends EnumItem with
+	read EnumType: EnumRollOffMode_INTERNAL
+end
 declare extern type EnumRollOffMode_INTERNAL extends Enum with
 	Inverse: EnumRollOffMode
 	InverseTapered: EnumRollOffMode
@@ -5541,7 +6469,9 @@ declare extern type EnumRollOffMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRollOffMode?
 	function FromValue(self, Value: number): EnumRollOffMode?
 end
-declare extern type EnumRolloutState extends EnumItem with end
+declare extern type EnumRolloutState extends EnumItem with
+	read EnumType: EnumRolloutState_INTERNAL
+end
 declare extern type EnumRolloutState_INTERNAL extends Enum with
 	Default: EnumRolloutState
 	Disabled: EnumRolloutState
@@ -5550,7 +6480,9 @@ declare extern type EnumRolloutState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRolloutState?
 	function FromValue(self, Value: number): EnumRolloutState?
 end
-declare extern type EnumRotationOrder extends EnumItem with end
+declare extern type EnumRotationOrder extends EnumItem with
+	read EnumType: EnumRotationOrder_INTERNAL
+end
 declare extern type EnumRotationOrder_INTERNAL extends Enum with
 	XYZ: EnumRotationOrder
 	XZY: EnumRotationOrder
@@ -5562,7 +6494,9 @@ declare extern type EnumRotationOrder_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRotationOrder?
 	function FromValue(self, Value: number): EnumRotationOrder?
 end
-declare extern type EnumRotationType extends EnumItem with end
+declare extern type EnumRotationType extends EnumItem with
+	read EnumType: EnumRotationType_INTERNAL
+end
 declare extern type EnumRotationType_INTERNAL extends Enum with
 	CameraRelative: EnumRotationType
 	MovementRelative: EnumRotationType
@@ -5570,7 +6504,9 @@ declare extern type EnumRotationType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRotationType?
 	function FromValue(self, Value: number): EnumRotationType?
 end
-declare extern type EnumRsvpStatus extends EnumItem with end
+declare extern type EnumRsvpStatus extends EnumItem with
+	read EnumType: EnumRsvpStatus_INTERNAL
+end
 declare extern type EnumRsvpStatus_INTERNAL extends Enum with
 	Going: EnumRsvpStatus
 	None: EnumRsvpStatus
@@ -5579,7 +6515,9 @@ declare extern type EnumRsvpStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRsvpStatus?
 	function FromValue(self, Value: number): EnumRsvpStatus?
 end
-declare extern type EnumRtlTextSupport extends EnumItem with end
+declare extern type EnumRtlTextSupport extends EnumItem with
+	read EnumType: EnumRtlTextSupport_INTERNAL
+end
 declare extern type EnumRtlTextSupport_INTERNAL extends Enum with
 	Default: EnumRtlTextSupport
 	Disabled: EnumRtlTextSupport
@@ -5588,7 +6526,9 @@ declare extern type EnumRtlTextSupport_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRtlTextSupport?
 	function FromValue(self, Value: number): EnumRtlTextSupport?
 end
-declare extern type EnumRunContext extends EnumItem with end
+declare extern type EnumRunContext extends EnumItem with
+	read EnumType: EnumRunContext_INTERNAL
+end
 declare extern type EnumRunContext_INTERNAL extends Enum with
 	Client: EnumRunContext
 	Legacy: EnumRunContext
@@ -5598,7 +6538,9 @@ declare extern type EnumRunContext_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRunContext?
 	function FromValue(self, Value: number): EnumRunContext?
 end
-declare extern type EnumRunState extends EnumItem with end
+declare extern type EnumRunState extends EnumItem with
+	read EnumType: EnumRunState_INTERNAL
+end
 declare extern type EnumRunState_INTERNAL extends Enum with
 	Paused: EnumRunState
 	Running: EnumRunState
@@ -5607,7 +6549,9 @@ declare extern type EnumRunState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRunState?
 	function FromValue(self, Value: number): EnumRunState?
 end
-declare extern type EnumRuntimeUndoBehavior extends EnumItem with end
+declare extern type EnumRuntimeUndoBehavior extends EnumItem with
+	read EnumType: EnumRuntimeUndoBehavior_INTERNAL
+end
 declare extern type EnumRuntimeUndoBehavior_INTERNAL extends Enum with
 	Aggregate: EnumRuntimeUndoBehavior
 	Hybrid: EnumRuntimeUndoBehavior
@@ -5616,7 +6560,9 @@ declare extern type EnumRuntimeUndoBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumRuntimeUndoBehavior?
 	function FromValue(self, Value: number): EnumRuntimeUndoBehavior?
 end
-declare extern type EnumSafeAreaCompatibility extends EnumItem with end
+declare extern type EnumSafeAreaCompatibility extends EnumItem with
+	read EnumType: EnumSafeAreaCompatibility_INTERNAL
+end
 declare extern type EnumSafeAreaCompatibility_INTERNAL extends Enum with
 	FullscreenExtension: EnumSafeAreaCompatibility
 	None: EnumSafeAreaCompatibility
@@ -5624,7 +6570,9 @@ declare extern type EnumSafeAreaCompatibility_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSafeAreaCompatibility?
 	function FromValue(self, Value: number): EnumSafeAreaCompatibility?
 end
-declare extern type EnumSalesTypeFilter extends EnumItem with end
+declare extern type EnumSalesTypeFilter extends EnumItem with
+	read EnumType: EnumSalesTypeFilter_INTERNAL
+end
 declare extern type EnumSalesTypeFilter_INTERNAL extends Enum with
 	All: EnumSalesTypeFilter
 	Collectibles: EnumSalesTypeFilter
@@ -5634,7 +6582,9 @@ declare extern type EnumSalesTypeFilter_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSalesTypeFilter?
 	function FromValue(self, Value: number): EnumSalesTypeFilter?
 end
-declare extern type EnumSandboxedInstanceMode extends EnumItem with end
+declare extern type EnumSandboxedInstanceMode extends EnumItem with
+	read EnumType: EnumSandboxedInstanceMode_INTERNAL
+end
 declare extern type EnumSandboxedInstanceMode_INTERNAL extends Enum with
 	Default: EnumSandboxedInstanceMode
 	Experimental: EnumSandboxedInstanceMode
@@ -5642,7 +6592,9 @@ declare extern type EnumSandboxedInstanceMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSandboxedInstanceMode?
 	function FromValue(self, Value: number): EnumSandboxedInstanceMode?
 end
-declare extern type EnumSaveAvatarThumbnailCustomizationFailure extends EnumItem with end
+declare extern type EnumSaveAvatarThumbnailCustomizationFailure extends EnumItem with
+	read EnumType: EnumSaveAvatarThumbnailCustomizationFailure_INTERNAL
+end
 declare extern type EnumSaveAvatarThumbnailCustomizationFailure_INTERNAL extends Enum with
 	BadDistanceScale: EnumSaveAvatarThumbnailCustomizationFailure
 	BadFieldOfViewDeg: EnumSaveAvatarThumbnailCustomizationFailure
@@ -5654,7 +6606,9 @@ declare extern type EnumSaveAvatarThumbnailCustomizationFailure_INTERNAL extends
 	function FromName(self, Name: string): EnumSaveAvatarThumbnailCustomizationFailure?
 	function FromValue(self, Value: number): EnumSaveAvatarThumbnailCustomizationFailure?
 end
-declare extern type EnumSaveFilter extends EnumItem with end
+declare extern type EnumSaveFilter extends EnumItem with
+	read EnumType: EnumSaveFilter_INTERNAL
+end
 declare extern type EnumSaveFilter_INTERNAL extends Enum with
 	SaveAll: EnumSaveFilter
 	SaveGame: EnumSaveFilter
@@ -5663,7 +6617,9 @@ declare extern type EnumSaveFilter_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSaveFilter?
 	function FromValue(self, Value: number): EnumSaveFilter?
 end
-declare extern type EnumSavedQualitySetting extends EnumItem with end
+declare extern type EnumSavedQualitySetting extends EnumItem with
+	read EnumType: EnumSavedQualitySetting_INTERNAL
+end
 declare extern type EnumSavedQualitySetting_INTERNAL extends Enum with
 	Automatic: EnumSavedQualitySetting
 	QualityLevel1: EnumSavedQualitySetting
@@ -5680,7 +6636,9 @@ declare extern type EnumSavedQualitySetting_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSavedQualitySetting?
 	function FromValue(self, Value: number): EnumSavedQualitySetting?
 end
-declare extern type EnumScaleType extends EnumItem with end
+declare extern type EnumScaleType extends EnumItem with
+	read EnumType: EnumScaleType_INTERNAL
+end
 declare extern type EnumScaleType_INTERNAL extends Enum with
 	Crop: EnumScaleType
 	Fit: EnumScaleType
@@ -5691,7 +6649,9 @@ declare extern type EnumScaleType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScaleType?
 	function FromValue(self, Value: number): EnumScaleType?
 end
-declare extern type EnumScopeCheckResult extends EnumItem with end
+declare extern type EnumScopeCheckResult extends EnumItem with
+	read EnumType: EnumScopeCheckResult_INTERNAL
+end
 declare extern type EnumScopeCheckResult_INTERNAL extends Enum with
 	BackendError: EnumScopeCheckResult
 	ConsentAccepted: EnumScopeCheckResult
@@ -5705,7 +6665,9 @@ declare extern type EnumScopeCheckResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScopeCheckResult?
 	function FromValue(self, Value: number): EnumScopeCheckResult?
 end
-declare extern type EnumScreenInsets extends EnumItem with end
+declare extern type EnumScreenInsets extends EnumItem with
+	read EnumType: EnumScreenInsets_INTERNAL
+end
 declare extern type EnumScreenInsets_INTERNAL extends Enum with
 	CoreUISafeInsets: EnumScreenInsets
 	DeviceSafeInsets: EnumScreenInsets
@@ -5715,7 +6677,9 @@ declare extern type EnumScreenInsets_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScreenInsets?
 	function FromValue(self, Value: number): EnumScreenInsets?
 end
-declare extern type EnumScreenOrientation extends EnumItem with end
+declare extern type EnumScreenOrientation extends EnumItem with
+	read EnumType: EnumScreenOrientation_INTERNAL
+end
 declare extern type EnumScreenOrientation_INTERNAL extends Enum with
 	LandscapeLeft: EnumScreenOrientation
 	LandscapeRight: EnumScreenOrientation
@@ -5726,7 +6690,9 @@ declare extern type EnumScreenOrientation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScreenOrientation?
 	function FromValue(self, Value: number): EnumScreenOrientation?
 end
-declare extern type EnumScreenshotCaptureResult extends EnumItem with end
+declare extern type EnumScreenshotCaptureResult extends EnumItem with
+	read EnumType: EnumScreenshotCaptureResult_INTERNAL
+end
 declare extern type EnumScreenshotCaptureResult_INTERNAL extends Enum with
 	NoDeviceSupport: EnumScreenshotCaptureResult
 	NoSpaceOnDevice: EnumScreenshotCaptureResult
@@ -5736,7 +6702,9 @@ declare extern type EnumScreenshotCaptureResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScreenshotCaptureResult?
 	function FromValue(self, Value: number): EnumScreenshotCaptureResult?
 end
-declare extern type EnumScriptScannerUpdateType extends EnumItem with end
+declare extern type EnumScriptScannerUpdateType extends EnumItem with
+	read EnumType: EnumScriptScannerUpdateType_INTERNAL
+end
 declare extern type EnumScriptScannerUpdateType_INTERNAL extends Enum with
 	Added: EnumScriptScannerUpdateType
 	Init: EnumScriptScannerUpdateType
@@ -5745,7 +6713,9 @@ declare extern type EnumScriptScannerUpdateType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScriptScannerUpdateType?
 	function FromValue(self, Value: number): EnumScriptScannerUpdateType?
 end
-declare extern type EnumScriptStoppedReason extends EnumItem with end
+declare extern type EnumScriptStoppedReason extends EnumItem with
+	read EnumType: EnumScriptStoppedReason_INTERNAL
+end
 declare extern type EnumScriptStoppedReason_INTERNAL extends Enum with
 	Breakpoint: EnumScriptStoppedReason
 	Entry: EnumScriptStoppedReason
@@ -5756,7 +6726,9 @@ declare extern type EnumScriptStoppedReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScriptStoppedReason?
 	function FromValue(self, Value: number): EnumScriptStoppedReason?
 end
-declare extern type EnumScriptVariableScope extends EnumItem with end
+declare extern type EnumScriptVariableScope extends EnumItem with
+	read EnumType: EnumScriptVariableScope_INTERNAL
+end
 declare extern type EnumScriptVariableScope_INTERNAL extends Enum with
 	Global: EnumScriptVariableScope
 	Local: EnumScriptVariableScope
@@ -5765,7 +6737,9 @@ declare extern type EnumScriptVariableScope_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScriptVariableScope?
 	function FromValue(self, Value: number): EnumScriptVariableScope?
 end
-declare extern type EnumScrollBarInset extends EnumItem with end
+declare extern type EnumScrollBarInset extends EnumItem with
+	read EnumType: EnumScrollBarInset_INTERNAL
+end
 declare extern type EnumScrollBarInset_INTERNAL extends Enum with
 	Always: EnumScrollBarInset
 	None: EnumScrollBarInset
@@ -5774,7 +6748,9 @@ declare extern type EnumScrollBarInset_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScrollBarInset?
 	function FromValue(self, Value: number): EnumScrollBarInset?
 end
-declare extern type EnumScrollState extends EnumItem with end
+declare extern type EnumScrollState extends EnumItem with
+	read EnumType: EnumScrollState_INTERNAL
+end
 declare extern type EnumScrollState_INTERNAL extends Enum with
 	Idle: EnumScrollState
 	Scrolling: EnumScrollState
@@ -5782,7 +6758,9 @@ declare extern type EnumScrollState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScrollState?
 	function FromValue(self, Value: number): EnumScrollState?
 end
-declare extern type EnumScrollingDirection extends EnumItem with end
+declare extern type EnumScrollingDirection extends EnumItem with
+	read EnumType: EnumScrollingDirection_INTERNAL
+end
 declare extern type EnumScrollingDirection_INTERNAL extends Enum with
 	X: EnumScrollingDirection
 	XY: EnumScrollingDirection
@@ -5791,7 +6769,9 @@ declare extern type EnumScrollingDirection_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumScrollingDirection?
 	function FromValue(self, Value: number): EnumScrollingDirection?
 end
-declare extern type EnumSecurityCapability extends EnumItem with end
+declare extern type EnumSecurityCapability extends EnumItem with
+	read EnumType: EnumSecurityCapability_INTERNAL
+end
 declare extern type EnumSecurityCapability_INTERNAL extends Enum with
 	AccessOutsideWrite: EnumSecurityCapability
 	Animation: EnumSecurityCapability
@@ -5850,7 +6830,9 @@ declare extern type EnumSecurityCapability_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSecurityCapability?
 	function FromValue(self, Value: number): EnumSecurityCapability?
 end
-declare extern type EnumSelectionBehavior extends EnumItem with end
+declare extern type EnumSelectionBehavior extends EnumItem with
+	read EnumType: EnumSelectionBehavior_INTERNAL
+end
 declare extern type EnumSelectionBehavior_INTERNAL extends Enum with
 	Escape: EnumSelectionBehavior
 	Stop: EnumSelectionBehavior
@@ -5858,7 +6840,9 @@ declare extern type EnumSelectionBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSelectionBehavior?
 	function FromValue(self, Value: number): EnumSelectionBehavior?
 end
-declare extern type EnumSelectionRenderMode extends EnumItem with end
+declare extern type EnumSelectionRenderMode extends EnumItem with
+	read EnumType: EnumSelectionRenderMode_INTERNAL
+end
 declare extern type EnumSelectionRenderMode_INTERNAL extends Enum with
 	Both: EnumSelectionRenderMode
 	BoundingBoxes: EnumSelectionRenderMode
@@ -5867,7 +6851,9 @@ declare extern type EnumSelectionRenderMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSelectionRenderMode?
 	function FromValue(self, Value: number): EnumSelectionRenderMode?
 end
-declare extern type EnumSelfViewPosition extends EnumItem with end
+declare extern type EnumSelfViewPosition extends EnumItem with
+	read EnumType: EnumSelfViewPosition_INTERNAL
+end
 declare extern type EnumSelfViewPosition_INTERNAL extends Enum with
 	BottomLeft: EnumSelfViewPosition
 	BottomRight: EnumSelfViewPosition
@@ -5878,7 +6864,9 @@ declare extern type EnumSelfViewPosition_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSelfViewPosition?
 	function FromValue(self, Value: number): EnumSelfViewPosition?
 end
-declare extern type EnumSensorMode extends EnumItem with end
+declare extern type EnumSensorMode extends EnumItem with
+	read EnumType: EnumSensorMode_INTERNAL
+end
 declare extern type EnumSensorMode_INTERNAL extends Enum with
 	ClassicFloor: EnumSensorMode
 	ClassicLadder: EnumSensorMode
@@ -5888,7 +6876,9 @@ declare extern type EnumSensorMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSensorMode?
 	function FromValue(self, Value: number): EnumSensorMode?
 end
-declare extern type EnumSensorUpdateType extends EnumItem with end
+declare extern type EnumSensorUpdateType extends EnumItem with
+	read EnumType: EnumSensorUpdateType_INTERNAL
+end
 declare extern type EnumSensorUpdateType_INTERNAL extends Enum with
 	Manual: EnumSensorUpdateType
 	OnRead: EnumSensorUpdateType
@@ -5896,7 +6886,9 @@ declare extern type EnumSensorUpdateType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSensorUpdateType?
 	function FromValue(self, Value: number): EnumSensorUpdateType?
 end
-declare extern type EnumServerLiveEditingMode extends EnumItem with end
+declare extern type EnumServerLiveEditingMode extends EnumItem with
+	read EnumType: EnumServerLiveEditingMode_INTERNAL
+end
 declare extern type EnumServerLiveEditingMode_INTERNAL extends Enum with
 	Disabled: EnumServerLiveEditingMode
 	Enabled: EnumServerLiveEditingMode
@@ -5905,7 +6897,9 @@ declare extern type EnumServerLiveEditingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumServerLiveEditingMode?
 	function FromValue(self, Value: number): EnumServerLiveEditingMode?
 end
-declare extern type EnumServiceVisibility extends EnumItem with end
+declare extern type EnumServiceVisibility extends EnumItem with
+	read EnumType: EnumServiceVisibility_INTERNAL
+end
 declare extern type EnumServiceVisibility_INTERNAL extends Enum with
 	Always: EnumServiceVisibility
 	Off: EnumServiceVisibility
@@ -5914,7 +6908,9 @@ declare extern type EnumServiceVisibility_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumServiceVisibility?
 	function FromValue(self, Value: number): EnumServiceVisibility?
 end
-declare extern type EnumSeverity extends EnumItem with end
+declare extern type EnumSeverity extends EnumItem with
+	read EnumType: EnumSeverity_INTERNAL
+end
 declare extern type EnumSeverity_INTERNAL extends Enum with
 	Error: EnumSeverity
 	Hint: EnumSeverity
@@ -5924,7 +6920,9 @@ declare extern type EnumSeverity_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSeverity?
 	function FromValue(self, Value: number): EnumSeverity?
 end
-declare extern type EnumShowAdResult extends EnumItem with end
+declare extern type EnumShowAdResult extends EnumItem with
+	read EnumType: EnumShowAdResult_INTERNAL
+end
 declare extern type EnumShowAdResult_INTERNAL extends Enum with
 	AdAlreadyShowing: EnumShowAdResult
 	AdNotReady: EnumShowAdResult
@@ -5936,7 +6934,9 @@ declare extern type EnumShowAdResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumShowAdResult?
 	function FromValue(self, Value: number): EnumShowAdResult?
 end
-declare extern type EnumSignalBehavior extends EnumItem with end
+declare extern type EnumSignalBehavior extends EnumItem with
+	read EnumType: EnumSignalBehavior_INTERNAL
+end
 declare extern type EnumSignalBehavior_INTERNAL extends Enum with
 	AncestryDeferred: EnumSignalBehavior
 	Default: EnumSignalBehavior
@@ -5946,7 +6946,9 @@ declare extern type EnumSignalBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSignalBehavior?
 	function FromValue(self, Value: number): EnumSignalBehavior?
 end
-declare extern type EnumSimulationMode extends EnumItem with end
+declare extern type EnumSimulationMode extends EnumItem with
+	read EnumType: EnumSimulationMode_INTERNAL
+end
 declare extern type EnumSimulationMode_INTERNAL extends Enum with
 	Default: EnumSimulationMode
 	Disabled: EnumSimulationMode
@@ -5955,7 +6957,9 @@ declare extern type EnumSimulationMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSimulationMode?
 	function FromValue(self, Value: number): EnumSimulationMode?
 end
-declare extern type EnumSizeConstraint extends EnumItem with end
+declare extern type EnumSizeConstraint extends EnumItem with
+	read EnumType: EnumSizeConstraint_INTERNAL
+end
 declare extern type EnumSizeConstraint_INTERNAL extends Enum with
 	RelativeXX: EnumSizeConstraint
 	RelativeXY: EnumSizeConstraint
@@ -5964,7 +6968,9 @@ declare extern type EnumSizeConstraint_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSizeConstraint?
 	function FromValue(self, Value: number): EnumSizeConstraint?
 end
-declare extern type EnumSlimTintMode extends EnumItem with end
+declare extern type EnumSlimTintMode extends EnumItem with
+	read EnumType: EnumSlimTintMode_INTERNAL
+end
 declare extern type EnumSlimTintMode_INTERNAL extends Enum with
 	ContentId: EnumSlimTintMode
 	DataModelState: EnumSlimTintMode
@@ -5977,7 +6983,9 @@ declare extern type EnumSlimTintMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSlimTintMode?
 	function FromValue(self, Value: number): EnumSlimTintMode?
 end
-declare extern type EnumSlimTranscoderStatus extends EnumItem with end
+declare extern type EnumSlimTranscoderStatus extends EnumItem with
+	read EnumType: EnumSlimTranscoderStatus_INTERNAL
+end
 declare extern type EnumSlimTranscoderStatus_INTERNAL extends Enum with
 	Failed: EnumSlimTranscoderStatus
 	Succeeded: EnumSlimTranscoderStatus
@@ -5987,7 +6995,9 @@ declare extern type EnumSlimTranscoderStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSlimTranscoderStatus?
 	function FromValue(self, Value: number): EnumSlimTranscoderStatus?
 end
-declare extern type EnumSlimViewContext extends EnumItem with end
+declare extern type EnumSlimViewContext extends EnumItem with
+	read EnumType: EnumSlimViewContext_INTERNAL
+end
 declare extern type EnumSlimViewContext_INTERNAL extends Enum with
 	Editor: EnumSlimViewContext
 	ImGui: EnumSlimViewContext
@@ -5996,7 +7006,9 @@ declare extern type EnumSlimViewContext_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSlimViewContext?
 	function FromValue(self, Value: number): EnumSlimViewContext?
 end
-declare extern type EnumSolverConvergenceMetricType extends EnumItem with end
+declare extern type EnumSolverConvergenceMetricType extends EnumItem with
+	read EnumType: EnumSolverConvergenceMetricType_INTERNAL
+end
 declare extern type EnumSolverConvergenceMetricType_INTERNAL extends Enum with
 	AlgorithmAgnostic: EnumSolverConvergenceMetricType
 	IterationBased: EnumSolverConvergenceMetricType
@@ -6004,7 +7016,9 @@ declare extern type EnumSolverConvergenceMetricType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSolverConvergenceMetricType?
 	function FromValue(self, Value: number): EnumSolverConvergenceMetricType?
 end
-declare extern type EnumSolverConvergenceVisualizationMode extends EnumItem with end
+declare extern type EnumSolverConvergenceVisualizationMode extends EnumItem with
+	read EnumType: EnumSolverConvergenceVisualizationMode_INTERNAL
+end
 declare extern type EnumSolverConvergenceVisualizationMode_INTERNAL extends Enum with
 	Disabled: EnumSolverConvergenceVisualizationMode
 	PerEdge: EnumSolverConvergenceVisualizationMode
@@ -6013,7 +7027,9 @@ declare extern type EnumSolverConvergenceVisualizationMode_INTERNAL extends Enum
 	function FromName(self, Name: string): EnumSolverConvergenceVisualizationMode?
 	function FromValue(self, Value: number): EnumSolverConvergenceVisualizationMode?
 end
-declare extern type EnumSortDirection extends EnumItem with end
+declare extern type EnumSortDirection extends EnumItem with
+	read EnumType: EnumSortDirection_INTERNAL
+end
 declare extern type EnumSortDirection_INTERNAL extends Enum with
 	Ascending: EnumSortDirection
 	Descending: EnumSortDirection
@@ -6021,7 +7037,9 @@ declare extern type EnumSortDirection_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSortDirection?
 	function FromValue(self, Value: number): EnumSortDirection?
 end
-declare extern type EnumSortOrder extends EnumItem with end
+declare extern type EnumSortOrder extends EnumItem with
+	read EnumType: EnumSortOrder_INTERNAL
+end
 declare extern type EnumSortOrder_INTERNAL extends Enum with
 	Custom: EnumSortOrder
 	LayoutOrder: EnumSortOrder
@@ -6030,7 +7048,9 @@ declare extern type EnumSortOrder_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSortOrder?
 	function FromValue(self, Value: number): EnumSortOrder?
 end
-declare extern type EnumSpecialKey extends EnumItem with end
+declare extern type EnumSpecialKey extends EnumItem with
+	read EnumType: EnumSpecialKey_INTERNAL
+end
 declare extern type EnumSpecialKey_INTERNAL extends Enum with
 	ChatHotkey: EnumSpecialKey
 	End: EnumSpecialKey
@@ -6042,7 +7062,9 @@ declare extern type EnumSpecialKey_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSpecialKey?
 	function FromValue(self, Value: number): EnumSpecialKey?
 end
-declare extern type EnumStartCorner extends EnumItem with end
+declare extern type EnumStartCorner extends EnumItem with
+	read EnumType: EnumStartCorner_INTERNAL
+end
 declare extern type EnumStartCorner_INTERNAL extends Enum with
 	BottomLeft: EnumStartCorner
 	BottomRight: EnumStartCorner
@@ -6052,7 +7074,9 @@ declare extern type EnumStartCorner_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStartCorner?
 	function FromValue(self, Value: number): EnumStartCorner?
 end
-declare extern type EnumStateObjectFieldType extends EnumItem with end
+declare extern type EnumStateObjectFieldType extends EnumItem with
+	read EnumType: EnumStateObjectFieldType_INTERNAL
+end
 declare extern type EnumStateObjectFieldType_INTERNAL extends Enum with
 	Boolean: EnumStateObjectFieldType
 	CFrame: EnumStateObjectFieldType
@@ -6067,7 +7091,9 @@ declare extern type EnumStateObjectFieldType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStateObjectFieldType?
 	function FromValue(self, Value: number): EnumStateObjectFieldType?
 end
-declare extern type EnumStateReferenceFrame extends EnumItem with end
+declare extern type EnumStateReferenceFrame extends EnumItem with
+	read EnumType: EnumStateReferenceFrame_INTERNAL
+end
 declare extern type EnumStateReferenceFrame_INTERNAL extends Enum with
 	CurrentState: EnumStateReferenceFrame
 	LastObservedState: EnumStateReferenceFrame
@@ -6076,7 +7102,9 @@ declare extern type EnumStateReferenceFrame_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStateReferenceFrame?
 	function FromValue(self, Value: number): EnumStateReferenceFrame?
 end
-declare extern type EnumStatus extends EnumItem with end
+declare extern type EnumStatus extends EnumItem with
+	read EnumType: EnumStatus_INTERNAL
+end
 declare extern type EnumStatus_INTERNAL extends Enum with
 	Confusion: EnumStatus
 	Poison: EnumStatus
@@ -6084,7 +7112,9 @@ declare extern type EnumStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStatus?
 	function FromValue(self, Value: number): EnumStatus?
 end
-declare extern type EnumStepFrequency extends EnumItem with end
+declare extern type EnumStepFrequency extends EnumItem with
+	read EnumType: EnumStepFrequency_INTERNAL
+end
 declare extern type EnumStepFrequency_INTERNAL extends Enum with
 	Hz1: EnumStepFrequency
 	Hz10: EnumStepFrequency
@@ -6096,7 +7126,9 @@ declare extern type EnumStepFrequency_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStepFrequency?
 	function FromValue(self, Value: number): EnumStepFrequency?
 end
-declare extern type EnumStreamOutBehavior extends EnumItem with end
+declare extern type EnumStreamOutBehavior extends EnumItem with
+	read EnumType: EnumStreamOutBehavior_INTERNAL
+end
 declare extern type EnumStreamOutBehavior_INTERNAL extends Enum with
 	Default: EnumStreamOutBehavior
 	LowMemory: EnumStreamOutBehavior
@@ -6105,7 +7137,9 @@ declare extern type EnumStreamOutBehavior_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStreamOutBehavior?
 	function FromValue(self, Value: number): EnumStreamOutBehavior?
 end
-declare extern type EnumStreamingIntegrityMode extends EnumItem with end
+declare extern type EnumStreamingIntegrityMode extends EnumItem with
+	read EnumType: EnumStreamingIntegrityMode_INTERNAL
+end
 declare extern type EnumStreamingIntegrityMode_INTERNAL extends Enum with
 	Default: EnumStreamingIntegrityMode
 	Disabled: EnumStreamingIntegrityMode
@@ -6115,7 +7149,9 @@ declare extern type EnumStreamingIntegrityMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStreamingIntegrityMode?
 	function FromValue(self, Value: number): EnumStreamingIntegrityMode?
 end
-declare extern type EnumStreamingPauseMode extends EnumItem with end
+declare extern type EnumStreamingPauseMode extends EnumItem with
+	read EnumType: EnumStreamingPauseMode_INTERNAL
+end
 declare extern type EnumStreamingPauseMode_INTERNAL extends Enum with
 	ClientPhysicsPause: EnumStreamingPauseMode
 	Default: EnumStreamingPauseMode
@@ -6124,7 +7160,9 @@ declare extern type EnumStreamingPauseMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStreamingPauseMode?
 	function FromValue(self, Value: number): EnumStreamingPauseMode?
 end
-declare extern type EnumStrokeSizingMode extends EnumItem with end
+declare extern type EnumStrokeSizingMode extends EnumItem with
+	read EnumType: EnumStrokeSizingMode_INTERNAL
+end
 declare extern type EnumStrokeSizingMode_INTERNAL extends Enum with
 	FixedSize: EnumStrokeSizingMode
 	ScaledSize: EnumStrokeSizingMode
@@ -6132,7 +7170,9 @@ declare extern type EnumStrokeSizingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStrokeSizingMode?
 	function FromValue(self, Value: number): EnumStrokeSizingMode?
 end
-declare extern type EnumStudioAction extends EnumItem with end
+declare extern type EnumStudioAction extends EnumItem with
+	read EnumType: EnumStudioAction_INTERNAL
+end
 declare extern type EnumStudioAction_INTERNAL extends Enum with
 	ClearSelection: EnumStudioAction
 	Copy: EnumStudioAction
@@ -6148,7 +7188,9 @@ declare extern type EnumStudioAction_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStudioAction?
 	function FromValue(self, Value: number): EnumStudioAction?
 end
-declare extern type EnumStudioCaptureBufferStatus extends EnumItem with end
+declare extern type EnumStudioCaptureBufferStatus extends EnumItem with
+	read EnumType: EnumStudioCaptureBufferStatus_INTERNAL
+end
 declare extern type EnumStudioCaptureBufferStatus_INTERNAL extends Enum with
 	Error: EnumStudioCaptureBufferStatus
 	NotStarted: EnumStudioCaptureBufferStatus
@@ -6158,7 +7200,9 @@ declare extern type EnumStudioCaptureBufferStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStudioCaptureBufferStatus?
 	function FromValue(self, Value: number): EnumStudioCaptureBufferStatus?
 end
-declare extern type EnumStudioCaptureScreenshotFormat extends EnumItem with end
+declare extern type EnumStudioCaptureScreenshotFormat extends EnumItem with
+	read EnumType: EnumStudioCaptureScreenshotFormat_INTERNAL
+end
 declare extern type EnumStudioCaptureScreenshotFormat_INTERNAL extends Enum with
 	PNG: EnumStudioCaptureScreenshotFormat
 	RGBA8: EnumStudioCaptureScreenshotFormat
@@ -6166,7 +7210,9 @@ declare extern type EnumStudioCaptureScreenshotFormat_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStudioCaptureScreenshotFormat?
 	function FromValue(self, Value: number): EnumStudioCaptureScreenshotFormat?
 end
-declare extern type EnumStudioCloseMode extends EnumItem with end
+declare extern type EnumStudioCloseMode extends EnumItem with
+	read EnumType: EnumStudioCloseMode_INTERNAL
+end
 declare extern type EnumStudioCloseMode_INTERNAL extends Enum with
 	CloseDoc: EnumStudioCloseMode
 	CloseStudio: EnumStudioCloseMode
@@ -6176,7 +7222,9 @@ declare extern type EnumStudioCloseMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStudioCloseMode?
 	function FromValue(self, Value: number): EnumStudioCloseMode?
 end
-declare extern type EnumStudioDataModelType extends EnumItem with end
+declare extern type EnumStudioDataModelType extends EnumItem with
+	read EnumType: EnumStudioDataModelType_INTERNAL
+end
 declare extern type EnumStudioDataModelType_INTERNAL extends Enum with
 	Edit: EnumStudioDataModelType
 	None: EnumStudioDataModelType
@@ -6187,7 +7235,9 @@ declare extern type EnumStudioDataModelType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStudioDataModelType?
 	function FromValue(self, Value: number): EnumStudioDataModelType?
 end
-declare extern type EnumStudioPlaceUpdateFailureReason extends EnumItem with end
+declare extern type EnumStudioPlaceUpdateFailureReason extends EnumItem with
+	read EnumType: EnumStudioPlaceUpdateFailureReason_INTERNAL
+end
 declare extern type EnumStudioPlaceUpdateFailureReason_INTERNAL extends Enum with
 	Other: EnumStudioPlaceUpdateFailureReason
 	TeamCreateConflict: EnumStudioPlaceUpdateFailureReason
@@ -6195,7 +7245,9 @@ declare extern type EnumStudioPlaceUpdateFailureReason_INTERNAL extends Enum wit
 	function FromName(self, Name: string): EnumStudioPlaceUpdateFailureReason?
 	function FromValue(self, Value: number): EnumStudioPlaceUpdateFailureReason?
 end
-declare extern type EnumStudioScriptEditorColorCategories extends EnumItem with end
+declare extern type EnumStudioScriptEditorColorCategories extends EnumItem with
+	read EnumType: EnumStudioScriptEditorColorCategories_INTERNAL
+end
 declare extern type EnumStudioScriptEditorColorCategories_INTERNAL extends Enum with
 	AICOOverlayButtonBackground: EnumStudioScriptEditorColorCategories
 	AICOOverlayButtonBackgroundHover: EnumStudioScriptEditorColorCategories
@@ -6250,7 +7302,9 @@ declare extern type EnumStudioScriptEditorColorCategories_INTERNAL extends Enum 
 	function FromName(self, Name: string): EnumStudioScriptEditorColorCategories?
 	function FromValue(self, Value: number): EnumStudioScriptEditorColorCategories?
 end
-declare extern type EnumStudioScriptEditorColorPresets extends EnumItem with end
+declare extern type EnumStudioScriptEditorColorPresets extends EnumItem with
+	read EnumType: EnumStudioScriptEditorColorPresets_INTERNAL
+end
 declare extern type EnumStudioScriptEditorColorPresets_INTERNAL extends Enum with
 	Custom: EnumStudioScriptEditorColorPresets
 	Extra1: EnumStudioScriptEditorColorPresets
@@ -6260,7 +7314,9 @@ declare extern type EnumStudioScriptEditorColorPresets_INTERNAL extends Enum wit
 	function FromName(self, Name: string): EnumStudioScriptEditorColorPresets?
 	function FromValue(self, Value: number): EnumStudioScriptEditorColorPresets?
 end
-declare extern type EnumStudioStyleGuideColor extends EnumItem with end
+declare extern type EnumStudioStyleGuideColor extends EnumItem with
+	read EnumType: EnumStudioStyleGuideColor_INTERNAL
+end
 declare extern type EnumStudioStyleGuideColor_INTERNAL extends Enum with
 	AICOOverlayButtonBackground: EnumStudioStyleGuideColor
 	AICOOverlayButtonBackgroundHover: EnumStudioStyleGuideColor
@@ -6396,7 +7452,9 @@ declare extern type EnumStudioStyleGuideColor_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStudioStyleGuideColor?
 	function FromValue(self, Value: number): EnumStudioStyleGuideColor?
 end
-declare extern type EnumStudioStyleGuideModifier extends EnumItem with end
+declare extern type EnumStudioStyleGuideModifier extends EnumItem with
+	read EnumType: EnumStudioStyleGuideModifier_INTERNAL
+end
 declare extern type EnumStudioStyleGuideModifier_INTERNAL extends Enum with
 	Default: EnumStudioStyleGuideModifier
 	Disabled: EnumStudioStyleGuideModifier
@@ -6407,7 +7465,9 @@ declare extern type EnumStudioStyleGuideModifier_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStudioStyleGuideModifier?
 	function FromValue(self, Value: number): EnumStudioStyleGuideModifier?
 end
-declare extern type EnumStyle extends EnumItem with end
+declare extern type EnumStyle extends EnumItem with
+	read EnumType: EnumStyle_INTERNAL
+end
 declare extern type EnumStyle_INTERNAL extends Enum with
 	AlternatingSupports: EnumStyle
 	BridgeStyleSupports: EnumStyle
@@ -6416,7 +7476,9 @@ declare extern type EnumStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumStyle?
 	function FromValue(self, Value: number): EnumStyle?
 end
-declare extern type EnumSubscriptionExpirationReason extends EnumItem with end
+declare extern type EnumSubscriptionExpirationReason extends EnumItem with
+	read EnumType: EnumSubscriptionExpirationReason_INTERNAL
+end
 declare extern type EnumSubscriptionExpirationReason_INTERNAL extends Enum with
 	Lapsed: EnumSubscriptionExpirationReason
 	ProductDeleted: EnumSubscriptionExpirationReason
@@ -6427,7 +7489,9 @@ declare extern type EnumSubscriptionExpirationReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSubscriptionExpirationReason?
 	function FromValue(self, Value: number): EnumSubscriptionExpirationReason?
 end
-declare extern type EnumSubscriptionPaymentStatus extends EnumItem with end
+declare extern type EnumSubscriptionPaymentStatus extends EnumItem with
+	read EnumType: EnumSubscriptionPaymentStatus_INTERNAL
+end
 declare extern type EnumSubscriptionPaymentStatus_INTERNAL extends Enum with
 	Paid: EnumSubscriptionPaymentStatus
 	Refunded: EnumSubscriptionPaymentStatus
@@ -6435,14 +7499,18 @@ declare extern type EnumSubscriptionPaymentStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSubscriptionPaymentStatus?
 	function FromValue(self, Value: number): EnumSubscriptionPaymentStatus?
 end
-declare extern type EnumSubscriptionPeriod extends EnumItem with end
+declare extern type EnumSubscriptionPeriod extends EnumItem with
+	read EnumType: EnumSubscriptionPeriod_INTERNAL
+end
 declare extern type EnumSubscriptionPeriod_INTERNAL extends Enum with
 	Month: EnumSubscriptionPeriod
 	function GetEnumItems(self): { EnumSubscriptionPeriod }
 	function FromName(self, Name: string): EnumSubscriptionPeriod?
 	function FromValue(self, Value: number): EnumSubscriptionPeriod?
 end
-declare extern type EnumSubscriptionState extends EnumItem with end
+declare extern type EnumSubscriptionState extends EnumItem with
+	read EnumType: EnumSubscriptionState_INTERNAL
+end
 declare extern type EnumSubscriptionState_INTERNAL extends Enum with
 	Expired: EnumSubscriptionState
 	NeverSubscribed: EnumSubscriptionState
@@ -6453,7 +7521,9 @@ declare extern type EnumSubscriptionState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSubscriptionState?
 	function FromValue(self, Value: number): EnumSubscriptionState?
 end
-declare extern type EnumSurfaceConstraint extends EnumItem with end
+declare extern type EnumSurfaceConstraint extends EnumItem with
+	read EnumType: EnumSurfaceConstraint_INTERNAL
+end
 declare extern type EnumSurfaceConstraint_INTERNAL extends Enum with
 	Hinge: EnumSurfaceConstraint
 	Motor: EnumSurfaceConstraint
@@ -6463,7 +7533,9 @@ declare extern type EnumSurfaceConstraint_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSurfaceConstraint?
 	function FromValue(self, Value: number): EnumSurfaceConstraint?
 end
-declare extern type EnumSurfaceGuiShape extends EnumItem with end
+declare extern type EnumSurfaceGuiShape extends EnumItem with
+	read EnumType: EnumSurfaceGuiShape_INTERNAL
+end
 declare extern type EnumSurfaceGuiShape_INTERNAL extends Enum with
 	CurvedHorizontally: EnumSurfaceGuiShape
 	Flat: EnumSurfaceGuiShape
@@ -6471,7 +7543,9 @@ declare extern type EnumSurfaceGuiShape_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSurfaceGuiShape?
 	function FromValue(self, Value: number): EnumSurfaceGuiShape?
 end
-declare extern type EnumSurfaceGuiSizingMode extends EnumItem with end
+declare extern type EnumSurfaceGuiSizingMode extends EnumItem with
+	read EnumType: EnumSurfaceGuiSizingMode_INTERNAL
+end
 declare extern type EnumSurfaceGuiSizingMode_INTERNAL extends Enum with
 	FixedSize: EnumSurfaceGuiSizingMode
 	PixelsPerStud: EnumSurfaceGuiSizingMode
@@ -6479,7 +7553,9 @@ declare extern type EnumSurfaceGuiSizingMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSurfaceGuiSizingMode?
 	function FromValue(self, Value: number): EnumSurfaceGuiSizingMode?
 end
-declare extern type EnumSurfaceType extends EnumItem with end
+declare extern type EnumSurfaceType extends EnumItem with
+	read EnumType: EnumSurfaceType_INTERNAL
+end
 declare extern type EnumSurfaceType_INTERNAL extends Enum with
 	Glue: EnumSurfaceType
 	Hinge: EnumSurfaceType
@@ -6495,7 +7571,9 @@ declare extern type EnumSurfaceType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSurfaceType?
 	function FromValue(self, Value: number): EnumSurfaceType?
 end
-declare extern type EnumSwipeDirection extends EnumItem with end
+declare extern type EnumSwipeDirection extends EnumItem with
+	read EnumType: EnumSwipeDirection_INTERNAL
+end
 declare extern type EnumSwipeDirection_INTERNAL extends Enum with
 	Down: EnumSwipeDirection
 	Left: EnumSwipeDirection
@@ -6506,7 +7584,9 @@ declare extern type EnumSwipeDirection_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSwipeDirection?
 	function FromValue(self, Value: number): EnumSwipeDirection?
 end
-declare extern type EnumSystemThemeValue extends EnumItem with end
+declare extern type EnumSystemThemeValue extends EnumItem with
+	read EnumType: EnumSystemThemeValue_INTERNAL
+end
 declare extern type EnumSystemThemeValue_INTERNAL extends Enum with
 	dark: EnumSystemThemeValue
 	error: EnumSystemThemeValue
@@ -6517,7 +7597,9 @@ declare extern type EnumSystemThemeValue_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumSystemThemeValue?
 	function FromValue(self, Value: number): EnumSystemThemeValue?
 end
-declare extern type EnumTableMajorAxis extends EnumItem with end
+declare extern type EnumTableMajorAxis extends EnumItem with
+	read EnumType: EnumTableMajorAxis_INTERNAL
+end
 declare extern type EnumTableMajorAxis_INTERNAL extends Enum with
 	ColumnMajor: EnumTableMajorAxis
 	RowMajor: EnumTableMajorAxis
@@ -6525,7 +7607,9 @@ declare extern type EnumTableMajorAxis_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTableMajorAxis?
 	function FromValue(self, Value: number): EnumTableMajorAxis?
 end
-declare extern type EnumTeamCreateErrorState extends EnumItem with end
+declare extern type EnumTeamCreateErrorState extends EnumItem with
+	read EnumType: EnumTeamCreateErrorState_INTERNAL
+end
 declare extern type EnumTeamCreateErrorState_INTERNAL extends Enum with
 	NoError: EnumTeamCreateErrorState
 	PlaceSizeApproachingLimit: EnumTeamCreateErrorState
@@ -6535,7 +7619,9 @@ declare extern type EnumTeamCreateErrorState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTeamCreateErrorState?
 	function FromValue(self, Value: number): EnumTeamCreateErrorState?
 end
-declare extern type EnumTechnology extends EnumItem with end
+declare extern type EnumTechnology extends EnumItem with
+	read EnumType: EnumTechnology_INTERNAL
+end
 declare extern type EnumTechnology_INTERNAL extends Enum with
 	Compatibility: EnumTechnology
 	Future: EnumTechnology
@@ -6547,7 +7633,9 @@ declare extern type EnumTechnology_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTechnology?
 	function FromValue(self, Value: number): EnumTechnology?
 end
-declare extern type EnumTelemetryBackend extends EnumItem with end
+declare extern type EnumTelemetryBackend extends EnumItem with
+	read EnumType: EnumTelemetryBackend_INTERNAL
+end
 declare extern type EnumTelemetryBackend_INTERNAL extends Enum with
 	Counter: EnumTelemetryBackend
 	EphemeralCounter: EnumTelemetryBackend
@@ -6561,7 +7649,9 @@ declare extern type EnumTelemetryBackend_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTelemetryBackend?
 	function FromValue(self, Value: number): EnumTelemetryBackend?
 end
-declare extern type EnumTelemetryStandardizedField extends EnumItem with end
+declare extern type EnumTelemetryStandardizedField extends EnumItem with
+	read EnumType: EnumTelemetryStandardizedField_INTERNAL
+end
 declare extern type EnumTelemetryStandardizedField_INTERNAL extends Enum with
 	AddArchitectureInfo: EnumTelemetryStandardizedField
 	AddCpuInfo: EnumTelemetryStandardizedField
@@ -6578,7 +7668,9 @@ declare extern type EnumTelemetryStandardizedField_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTelemetryStandardizedField?
 	function FromValue(self, Value: number): EnumTelemetryStandardizedField?
 end
-declare extern type EnumTeleportMethod extends EnumItem with end
+declare extern type EnumTeleportMethod extends EnumItem with
+	read EnumType: EnumTeleportMethod_INTERNAL
+end
 declare extern type EnumTeleportMethod_INTERNAL extends Enum with
 	Teleport: EnumTeleportMethod
 	TeleportPartyAsync: EnumTeleportMethod
@@ -6593,7 +7685,9 @@ declare extern type EnumTeleportMethod_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTeleportMethod?
 	function FromValue(self, Value: number): EnumTeleportMethod?
 end
-declare extern type EnumTeleportResult extends EnumItem with end
+declare extern type EnumTeleportResult extends EnumItem with
+	read EnumType: EnumTeleportResult_INTERNAL
+end
 declare extern type EnumTeleportResult_INTERNAL extends Enum with
 	Failure: EnumTeleportResult
 	Flooded: EnumTeleportResult
@@ -6607,7 +7701,9 @@ declare extern type EnumTeleportResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTeleportResult?
 	function FromValue(self, Value: number): EnumTeleportResult?
 end
-declare extern type EnumTeleportState extends EnumItem with end
+declare extern type EnumTeleportState extends EnumItem with
+	read EnumType: EnumTeleportState_INTERNAL
+end
 declare extern type EnumTeleportState_INTERNAL extends Enum with
 	Failed: EnumTeleportState
 	InProgress: EnumTeleportState
@@ -6618,7 +7714,9 @@ declare extern type EnumTeleportState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTeleportState?
 	function FromValue(self, Value: number): EnumTeleportState?
 end
-declare extern type EnumTeleportType extends EnumItem with end
+declare extern type EnumTeleportType extends EnumItem with
+	read EnumType: EnumTeleportType_INTERNAL
+end
 declare extern type EnumTeleportType_INTERNAL extends Enum with
 	ToInstance: EnumTeleportType
 	ToInstanceBack: EnumTeleportType
@@ -6629,7 +7727,9 @@ declare extern type EnumTeleportType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTeleportType?
 	function FromValue(self, Value: number): EnumTeleportType?
 end
-declare extern type EnumTerrainAcquisitionMethod extends EnumItem with end
+declare extern type EnumTerrainAcquisitionMethod extends EnumItem with
+	read EnumType: EnumTerrainAcquisitionMethod_INTERNAL
+end
 declare extern type EnumTerrainAcquisitionMethod_INTERNAL extends Enum with
 	Convert: EnumTerrainAcquisitionMethod
 	EditAddTool: EnumTerrainAcquisitionMethod
@@ -6647,7 +7747,9 @@ declare extern type EnumTerrainAcquisitionMethod_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTerrainAcquisitionMethod?
 	function FromValue(self, Value: number): EnumTerrainAcquisitionMethod?
 end
-declare extern type EnumTerrainFace extends EnumItem with end
+declare extern type EnumTerrainFace extends EnumItem with
+	read EnumType: EnumTerrainFace_INTERNAL
+end
 declare extern type EnumTerrainFace_INTERNAL extends Enum with
 	Bottom: EnumTerrainFace
 	Side: EnumTerrainFace
@@ -6656,7 +7758,9 @@ declare extern type EnumTerrainFace_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTerrainFace?
 	function FromValue(self, Value: number): EnumTerrainFace?
 end
-declare extern type EnumTerrainLiquidMergeOperation extends EnumItem with end
+declare extern type EnumTerrainLiquidMergeOperation extends EnumItem with
+	read EnumType: EnumTerrainLiquidMergeOperation_INTERNAL
+end
 declare extern type EnumTerrainLiquidMergeOperation_INTERNAL extends Enum with
 	Difference: EnumTerrainLiquidMergeOperation
 	Intersect: EnumTerrainLiquidMergeOperation
@@ -6667,7 +7771,9 @@ declare extern type EnumTerrainLiquidMergeOperation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTerrainLiquidMergeOperation?
 	function FromValue(self, Value: number): EnumTerrainLiquidMergeOperation?
 end
-declare extern type EnumTerrainSolidMergeOperation extends EnumItem with end
+declare extern type EnumTerrainSolidMergeOperation extends EnumItem with
+	read EnumType: EnumTerrainSolidMergeOperation_INTERNAL
+end
 declare extern type EnumTerrainSolidMergeOperation_INTERNAL extends Enum with
 	Cut: EnumTerrainSolidMergeOperation
 	Difference: EnumTerrainSolidMergeOperation
@@ -6682,7 +7788,9 @@ declare extern type EnumTerrainSolidMergeOperation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTerrainSolidMergeOperation?
 	function FromValue(self, Value: number): EnumTerrainSolidMergeOperation?
 end
-declare extern type EnumTestCaseStatus extends EnumItem with end
+declare extern type EnumTestCaseStatus extends EnumItem with
+	read EnumType: EnumTestCaseStatus_INTERNAL
+end
 declare extern type EnumTestCaseStatus_INTERNAL extends Enum with
 	Fail: EnumTestCaseStatus
 	Pass: EnumTestCaseStatus
@@ -6692,7 +7800,9 @@ declare extern type EnumTestCaseStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTestCaseStatus?
 	function FromValue(self, Value: number): EnumTestCaseStatus?
 end
-declare extern type EnumTestRunStatus extends EnumItem with end
+declare extern type EnumTestRunStatus extends EnumItem with
+	read EnumType: EnumTestRunStatus_INTERNAL
+end
 declare extern type EnumTestRunStatus_INTERNAL extends Enum with
 	Fail: EnumTestRunStatus
 	NoTests: EnumTestRunStatus
@@ -6702,7 +7812,9 @@ declare extern type EnumTestRunStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTestRunStatus?
 	function FromValue(self, Value: number): EnumTestRunStatus?
 end
-declare extern type EnumTextChannelDisplayMode extends EnumItem with end
+declare extern type EnumTextChannelDisplayMode extends EnumItem with
+	read EnumType: EnumTextChannelDisplayMode_INTERNAL
+end
 declare extern type EnumTextChannelDisplayMode_INTERNAL extends Enum with
 	AllTextChannels: EnumTextChannelDisplayMode
 	DefaultTextChannels: EnumTextChannelDisplayMode
@@ -6710,7 +7822,9 @@ declare extern type EnumTextChannelDisplayMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextChannelDisplayMode?
 	function FromValue(self, Value: number): EnumTextChannelDisplayMode?
 end
-declare extern type EnumTextChatMessageStatus extends EnumItem with end
+declare extern type EnumTextChatMessageStatus extends EnumItem with
+	read EnumType: EnumTextChatMessageStatus_INTERNAL
+end
 declare extern type EnumTextChatMessageStatus_INTERNAL extends Enum with
 	Floodchecked: EnumTextChatMessageStatus
 	InvalidPrivacySettings: EnumTextChatMessageStatus
@@ -6725,7 +7839,9 @@ declare extern type EnumTextChatMessageStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextChatMessageStatus?
 	function FromValue(self, Value: number): EnumTextChatMessageStatus?
 end
-declare extern type EnumTextDirection extends EnumItem with end
+declare extern type EnumTextDirection extends EnumItem with
+	read EnumType: EnumTextDirection_INTERNAL
+end
 declare extern type EnumTextDirection_INTERNAL extends Enum with
 	Auto: EnumTextDirection
 	LeftToRight: EnumTextDirection
@@ -6734,7 +7850,9 @@ declare extern type EnumTextDirection_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextDirection?
 	function FromValue(self, Value: number): EnumTextDirection?
 end
-declare extern type EnumTextFilterContext extends EnumItem with end
+declare extern type EnumTextFilterContext extends EnumItem with
+	read EnumType: EnumTextFilterContext_INTERNAL
+end
 declare extern type EnumTextFilterContext_INTERNAL extends Enum with
 	PrivateChat: EnumTextFilterContext
 	PublicChat: EnumTextFilterContext
@@ -6742,7 +7860,9 @@ declare extern type EnumTextFilterContext_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextFilterContext?
 	function FromValue(self, Value: number): EnumTextFilterContext?
 end
-declare extern type EnumTextInputType extends EnumItem with end
+declare extern type EnumTextInputType extends EnumItem with
+	read EnumType: EnumTextInputType_INTERNAL
+end
 declare extern type EnumTextInputType_INTERNAL extends Enum with
 	Default: EnumTextInputType
 	Email: EnumTextInputType
@@ -6759,7 +7879,9 @@ declare extern type EnumTextInputType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextInputType?
 	function FromValue(self, Value: number): EnumTextInputType?
 end
-declare extern type EnumTextTruncate extends EnumItem with end
+declare extern type EnumTextTruncate extends EnumItem with
+	read EnumType: EnumTextTruncate_INTERNAL
+end
 declare extern type EnumTextTruncate_INTERNAL extends Enum with
 	AtEnd: EnumTextTruncate
 	None: EnumTextTruncate
@@ -6768,7 +7890,9 @@ declare extern type EnumTextTruncate_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextTruncate?
 	function FromValue(self, Value: number): EnumTextTruncate?
 end
-declare extern type EnumTextXAlignment extends EnumItem with end
+declare extern type EnumTextXAlignment extends EnumItem with
+	read EnumType: EnumTextXAlignment_INTERNAL
+end
 declare extern type EnumTextXAlignment_INTERNAL extends Enum with
 	Center: EnumTextXAlignment
 	Left: EnumTextXAlignment
@@ -6777,7 +7901,9 @@ declare extern type EnumTextXAlignment_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextXAlignment?
 	function FromValue(self, Value: number): EnumTextXAlignment?
 end
-declare extern type EnumTextYAlignment extends EnumItem with end
+declare extern type EnumTextYAlignment extends EnumItem with
+	read EnumType: EnumTextYAlignment_INTERNAL
+end
 declare extern type EnumTextYAlignment_INTERNAL extends Enum with
 	Bottom: EnumTextYAlignment
 	Center: EnumTextYAlignment
@@ -6786,7 +7912,9 @@ declare extern type EnumTextYAlignment_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextYAlignment?
 	function FromValue(self, Value: number): EnumTextYAlignment?
 end
-declare extern type EnumTextureMode extends EnumItem with end
+declare extern type EnumTextureMode extends EnumItem with
+	read EnumType: EnumTextureMode_INTERNAL
+end
 declare extern type EnumTextureMode_INTERNAL extends Enum with
 	Static: EnumTextureMode
 	Stretch: EnumTextureMode
@@ -6795,7 +7923,9 @@ declare extern type EnumTextureMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextureMode?
 	function FromValue(self, Value: number): EnumTextureMode?
 end
-declare extern type EnumTextureQueryType extends EnumItem with end
+declare extern type EnumTextureQueryType extends EnumItem with
+	read EnumType: EnumTextureQueryType_INTERNAL
+end
 declare extern type EnumTextureQueryType_INTERNAL extends Enum with
 	Humanoid: EnumTextureQueryType
 	HumanoidOrphaned: EnumTextureQueryType
@@ -6805,7 +7935,9 @@ declare extern type EnumTextureQueryType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTextureQueryType?
 	function FromValue(self, Value: number): EnumTextureQueryType?
 end
-declare extern type EnumThreadPoolConfig extends EnumItem with end
+declare extern type EnumThreadPoolConfig extends EnumItem with
+	read EnumType: EnumThreadPoolConfig_INTERNAL
+end
 declare extern type EnumThreadPoolConfig_INTERNAL extends Enum with
 	Auto: EnumThreadPoolConfig
 	PerCore1: EnumThreadPoolConfig
@@ -6822,7 +7954,9 @@ declare extern type EnumThreadPoolConfig_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumThreadPoolConfig?
 	function FromValue(self, Value: number): EnumThreadPoolConfig?
 end
-declare extern type EnumThrottlingPriority extends EnumItem with end
+declare extern type EnumThrottlingPriority extends EnumItem with
+	read EnumType: EnumThrottlingPriority_INTERNAL
+end
 declare extern type EnumThrottlingPriority_INTERNAL extends Enum with
 	Default: EnumThrottlingPriority
 	ElevatedOnServer: EnumThrottlingPriority
@@ -6831,7 +7965,9 @@ declare extern type EnumThrottlingPriority_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumThrottlingPriority?
 	function FromValue(self, Value: number): EnumThrottlingPriority?
 end
-declare extern type EnumThumbnailSize extends EnumItem with end
+declare extern type EnumThumbnailSize extends EnumItem with
+	read EnumType: EnumThumbnailSize_INTERNAL
+end
 declare extern type EnumThumbnailSize_INTERNAL extends Enum with
 	Size100x100: EnumThumbnailSize
 	Size150x150: EnumThumbnailSize
@@ -6844,7 +7980,9 @@ declare extern type EnumThumbnailSize_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumThumbnailSize?
 	function FromValue(self, Value: number): EnumThumbnailSize?
 end
-declare extern type EnumThumbnailType extends EnumItem with end
+declare extern type EnumThumbnailType extends EnumItem with
+	read EnumType: EnumThumbnailType_INTERNAL
+end
 declare extern type EnumThumbnailType_INTERNAL extends Enum with
 	AvatarBust: EnumThumbnailType
 	AvatarThumbnail: EnumThumbnailType
@@ -6853,7 +7991,9 @@ declare extern type EnumThumbnailType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumThumbnailType?
 	function FromValue(self, Value: number): EnumThumbnailType?
 end
-declare extern type EnumTickCountSampleMethod extends EnumItem with end
+declare extern type EnumTickCountSampleMethod extends EnumItem with
+	read EnumType: EnumTickCountSampleMethod_INTERNAL
+end
 declare extern type EnumTickCountSampleMethod_INTERNAL extends Enum with
 	Benchmark: EnumTickCountSampleMethod
 	Fast: EnumTickCountSampleMethod
@@ -6862,7 +8002,9 @@ declare extern type EnumTickCountSampleMethod_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTickCountSampleMethod?
 	function FromValue(self, Value: number): EnumTickCountSampleMethod?
 end
-declare extern type EnumTitleBarControlsPosition extends EnumItem with end
+declare extern type EnumTitleBarControlsPosition extends EnumItem with
+	read EnumType: EnumTitleBarControlsPosition_INTERNAL
+end
 declare extern type EnumTitleBarControlsPosition_INTERNAL extends Enum with
 	Left: EnumTitleBarControlsPosition
 	Right: EnumTitleBarControlsPosition
@@ -6871,7 +8013,9 @@ declare extern type EnumTitleBarControlsPosition_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTitleBarControlsPosition?
 	function FromValue(self, Value: number): EnumTitleBarControlsPosition?
 end
-declare extern type EnumTitleBarMode extends EnumItem with end
+declare extern type EnumTitleBarMode extends EnumItem with
+	read EnumType: EnumTitleBarMode_INTERNAL
+end
 declare extern type EnumTitleBarMode_INTERNAL extends Enum with
 	Custom: EnumTitleBarMode
 	Native: EnumTitleBarMode
@@ -6879,7 +8023,9 @@ declare extern type EnumTitleBarMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTitleBarMode?
 	function FromValue(self, Value: number): EnumTitleBarMode?
 end
-declare extern type EnumTonemapperPreset extends EnumItem with end
+declare extern type EnumTonemapperPreset extends EnumItem with
+	read EnumType: EnumTonemapperPreset_INTERNAL
+end
 declare extern type EnumTonemapperPreset_INTERNAL extends Enum with
 	Default: EnumTonemapperPreset
 	Retro: EnumTonemapperPreset
@@ -6887,7 +8033,9 @@ declare extern type EnumTonemapperPreset_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTonemapperPreset?
 	function FromValue(self, Value: number): EnumTonemapperPreset?
 end
-declare extern type EnumTopBottom extends EnumItem with end
+declare extern type EnumTopBottom extends EnumItem with
+	read EnumType: EnumTopBottom_INTERNAL
+end
 declare extern type EnumTopBottom_INTERNAL extends Enum with
 	Bottom: EnumTopBottom
 	Center: EnumTopBottom
@@ -6896,7 +8044,9 @@ declare extern type EnumTopBottom_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTopBottom?
 	function FromValue(self, Value: number): EnumTopBottom?
 end
-declare extern type EnumTouchCameraMovementMode extends EnumItem with end
+declare extern type EnumTouchCameraMovementMode extends EnumItem with
+	read EnumType: EnumTouchCameraMovementMode_INTERNAL
+end
 declare extern type EnumTouchCameraMovementMode_INTERNAL extends Enum with
 	Classic: EnumTouchCameraMovementMode
 	Default: EnumTouchCameraMovementMode
@@ -6906,7 +8056,9 @@ declare extern type EnumTouchCameraMovementMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTouchCameraMovementMode?
 	function FromValue(self, Value: number): EnumTouchCameraMovementMode?
 end
-declare extern type EnumTouchMovementMode extends EnumItem with end
+declare extern type EnumTouchMovementMode extends EnumItem with
+	read EnumType: EnumTouchMovementMode_INTERNAL
+end
 declare extern type EnumTouchMovementMode_INTERNAL extends Enum with
 	ClickToMove: EnumTouchMovementMode
 	DPad: EnumTouchMovementMode
@@ -6918,7 +8070,9 @@ declare extern type EnumTouchMovementMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTouchMovementMode?
 	function FromValue(self, Value: number): EnumTouchMovementMode?
 end
-declare extern type EnumTrackerError extends EnumItem with end
+declare extern type EnumTrackerError extends EnumItem with
+	read EnumType: EnumTrackerError_INTERNAL
+end
 declare extern type EnumTrackerError_INTERNAL extends Enum with
 	AudioError: EnumTrackerError
 	AudioNoPermission: EnumTrackerError
@@ -6935,7 +8089,9 @@ declare extern type EnumTrackerError_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTrackerError?
 	function FromValue(self, Value: number): EnumTrackerError?
 end
-declare extern type EnumTrackerExtrapolationFlagMode extends EnumItem with end
+declare extern type EnumTrackerExtrapolationFlagMode extends EnumItem with
+	read EnumType: EnumTrackerExtrapolationFlagMode_INTERNAL
+end
 declare extern type EnumTrackerExtrapolationFlagMode_INTERNAL extends Enum with
 	Auto: EnumTrackerExtrapolationFlagMode
 	ExtrapolateFacsAndPose: EnumTrackerExtrapolationFlagMode
@@ -6945,7 +8101,9 @@ declare extern type EnumTrackerExtrapolationFlagMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTrackerExtrapolationFlagMode?
 	function FromValue(self, Value: number): EnumTrackerExtrapolationFlagMode?
 end
-declare extern type EnumTrackerFaceTrackingStatus extends EnumItem with end
+declare extern type EnumTrackerFaceTrackingStatus extends EnumItem with
+	read EnumType: EnumTrackerFaceTrackingStatus_INTERNAL
+end
 declare extern type EnumTrackerFaceTrackingStatus_INTERNAL extends Enum with
 	FaceTrackingHasTrackingError: EnumTrackerFaceTrackingStatus
 	FaceTrackingIsOccluded: EnumTrackerFaceTrackingStatus
@@ -6958,7 +8116,9 @@ declare extern type EnumTrackerFaceTrackingStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTrackerFaceTrackingStatus?
 	function FromValue(self, Value: number): EnumTrackerFaceTrackingStatus?
 end
-declare extern type EnumTrackerLodFlagMode extends EnumItem with end
+declare extern type EnumTrackerLodFlagMode extends EnumItem with
+	read EnumType: EnumTrackerLodFlagMode_INTERNAL
+end
 declare extern type EnumTrackerLodFlagMode_INTERNAL extends Enum with
 	Auto: EnumTrackerLodFlagMode
 	ForceFalse: EnumTrackerLodFlagMode
@@ -6967,7 +8127,9 @@ declare extern type EnumTrackerLodFlagMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTrackerLodFlagMode?
 	function FromValue(self, Value: number): EnumTrackerLodFlagMode?
 end
-declare extern type EnumTrackerLodValueMode extends EnumItem with end
+declare extern type EnumTrackerLodValueMode extends EnumItem with
+	read EnumType: EnumTrackerLodValueMode_INTERNAL
+end
 declare extern type EnumTrackerLodValueMode_INTERNAL extends Enum with
 	Auto: EnumTrackerLodValueMode
 	Force0: EnumTrackerLodValueMode
@@ -6976,7 +8138,9 @@ declare extern type EnumTrackerLodValueMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTrackerLodValueMode?
 	function FromValue(self, Value: number): EnumTrackerLodValueMode?
 end
-declare extern type EnumTrackerMode extends EnumItem with end
+declare extern type EnumTrackerMode extends EnumItem with
+	read EnumType: EnumTrackerMode_INTERNAL
+end
 declare extern type EnumTrackerMode_INTERNAL extends Enum with
 	Audio: EnumTrackerMode
 	AudioVideo: EnumTrackerMode
@@ -6986,14 +8150,18 @@ declare extern type EnumTrackerMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTrackerMode?
 	function FromValue(self, Value: number): EnumTrackerMode?
 end
-declare extern type EnumTrackerPromptEvent extends EnumItem with end
+declare extern type EnumTrackerPromptEvent extends EnumItem with
+	read EnumType: EnumTrackerPromptEvent_INTERNAL
+end
 declare extern type EnumTrackerPromptEvent_INTERNAL extends Enum with
 	LODCameraRecommendDisable: EnumTrackerPromptEvent
 	function GetEnumItems(self): { EnumTrackerPromptEvent }
 	function FromName(self, Name: string): EnumTrackerPromptEvent?
 	function FromValue(self, Value: number): EnumTrackerPromptEvent?
 end
-declare extern type EnumTrackerType extends EnumItem with end
+declare extern type EnumTrackerType extends EnumItem with
+	read EnumType: EnumTrackerType_INTERNAL
+end
 declare extern type EnumTrackerType_INTERNAL extends Enum with
 	Face: EnumTrackerType
 	None: EnumTrackerType
@@ -7002,7 +8170,9 @@ declare extern type EnumTrackerType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTrackerType?
 	function FromValue(self, Value: number): EnumTrackerType?
 end
-declare extern type EnumTriStateBoolean extends EnumItem with end
+declare extern type EnumTriStateBoolean extends EnumItem with
+	read EnumType: EnumTriStateBoolean_INTERNAL
+end
 declare extern type EnumTriStateBoolean_INTERNAL extends Enum with
 	False: EnumTriStateBoolean
 	True: EnumTriStateBoolean
@@ -7011,7 +8181,9 @@ declare extern type EnumTriStateBoolean_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTriStateBoolean?
 	function FromValue(self, Value: number): EnumTriStateBoolean?
 end
-declare extern type EnumTweenStatus extends EnumItem with end
+declare extern type EnumTweenStatus extends EnumItem with
+	read EnumType: EnumTweenStatus_INTERNAL
+end
 declare extern type EnumTweenStatus_INTERNAL extends Enum with
 	Canceled: EnumTweenStatus
 	Completed: EnumTweenStatus
@@ -7019,7 +8191,9 @@ declare extern type EnumTweenStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTweenStatus?
 	function FromValue(self, Value: number): EnumTweenStatus?
 end
-declare extern type EnumUIBlurStrength extends EnumItem with end
+declare extern type EnumUIBlurStrength extends EnumItem with
+	read EnumType: EnumUIBlurStrength_INTERNAL
+end
 declare extern type EnumUIBlurStrength_INTERNAL extends Enum with
 	Heavy: EnumUIBlurStrength
 	Light: EnumUIBlurStrength
@@ -7028,7 +8202,9 @@ declare extern type EnumUIBlurStrength_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUIBlurStrength?
 	function FromValue(self, Value: number): EnumUIBlurStrength?
 end
-declare extern type EnumUICaptureMode extends EnumItem with end
+declare extern type EnumUICaptureMode extends EnumItem with
+	read EnumType: EnumUICaptureMode_INTERNAL
+end
 declare extern type EnumUICaptureMode_INTERNAL extends Enum with
 	All: EnumUICaptureMode
 	None: EnumUICaptureMode
@@ -7036,7 +8212,9 @@ declare extern type EnumUICaptureMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUICaptureMode?
 	function FromValue(self, Value: number): EnumUICaptureMode?
 end
-declare extern type EnumUIDragDetectorBoundingBehavior extends EnumItem with end
+declare extern type EnumUIDragDetectorBoundingBehavior extends EnumItem with
+	read EnumType: EnumUIDragDetectorBoundingBehavior_INTERNAL
+end
 declare extern type EnumUIDragDetectorBoundingBehavior_INTERNAL extends Enum with
 	Automatic: EnumUIDragDetectorBoundingBehavior
 	EntireObject: EnumUIDragDetectorBoundingBehavior
@@ -7045,7 +8223,9 @@ declare extern type EnumUIDragDetectorBoundingBehavior_INTERNAL extends Enum wit
 	function FromName(self, Name: string): EnumUIDragDetectorBoundingBehavior?
 	function FromValue(self, Value: number): EnumUIDragDetectorBoundingBehavior?
 end
-declare extern type EnumUIDragDetectorDragRelativity extends EnumItem with end
+declare extern type EnumUIDragDetectorDragRelativity extends EnumItem with
+	read EnumType: EnumUIDragDetectorDragRelativity_INTERNAL
+end
 declare extern type EnumUIDragDetectorDragRelativity_INTERNAL extends Enum with
 	Absolute: EnumUIDragDetectorDragRelativity
 	Relative: EnumUIDragDetectorDragRelativity
@@ -7053,7 +8233,9 @@ declare extern type EnumUIDragDetectorDragRelativity_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUIDragDetectorDragRelativity?
 	function FromValue(self, Value: number): EnumUIDragDetectorDragRelativity?
 end
-declare extern type EnumUIDragDetectorDragSpace extends EnumItem with end
+declare extern type EnumUIDragDetectorDragSpace extends EnumItem with
+	read EnumType: EnumUIDragDetectorDragSpace_INTERNAL
+end
 declare extern type EnumUIDragDetectorDragSpace_INTERNAL extends Enum with
 	LayerCollector: EnumUIDragDetectorDragSpace
 	Parent: EnumUIDragDetectorDragSpace
@@ -7062,7 +8244,9 @@ declare extern type EnumUIDragDetectorDragSpace_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUIDragDetectorDragSpace?
 	function FromValue(self, Value: number): EnumUIDragDetectorDragSpace?
 end
-declare extern type EnumUIDragDetectorDragStyle extends EnumItem with end
+declare extern type EnumUIDragDetectorDragStyle extends EnumItem with
+	read EnumType: EnumUIDragDetectorDragStyle_INTERNAL
+end
 declare extern type EnumUIDragDetectorDragStyle_INTERNAL extends Enum with
 	Rotate: EnumUIDragDetectorDragStyle
 	Scriptable: EnumUIDragDetectorDragStyle
@@ -7072,7 +8256,9 @@ declare extern type EnumUIDragDetectorDragStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUIDragDetectorDragStyle?
 	function FromValue(self, Value: number): EnumUIDragDetectorDragStyle?
 end
-declare extern type EnumUIDragDetectorResponseStyle extends EnumItem with end
+declare extern type EnumUIDragDetectorResponseStyle extends EnumItem with
+	read EnumType: EnumUIDragDetectorResponseStyle_INTERNAL
+end
 declare extern type EnumUIDragDetectorResponseStyle_INTERNAL extends Enum with
 	CustomOffset: EnumUIDragDetectorResponseStyle
 	CustomScale: EnumUIDragDetectorResponseStyle
@@ -7082,7 +8268,9 @@ declare extern type EnumUIDragDetectorResponseStyle_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUIDragDetectorResponseStyle?
 	function FromValue(self, Value: number): EnumUIDragDetectorResponseStyle?
 end
-declare extern type EnumUIDragSpeedAxisMapping extends EnumItem with end
+declare extern type EnumUIDragSpeedAxisMapping extends EnumItem with
+	read EnumType: EnumUIDragSpeedAxisMapping_INTERNAL
+end
 declare extern type EnumUIDragSpeedAxisMapping_INTERNAL extends Enum with
 	XX: EnumUIDragSpeedAxisMapping
 	XY: EnumUIDragSpeedAxisMapping
@@ -7091,7 +8279,9 @@ declare extern type EnumUIDragSpeedAxisMapping_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUIDragSpeedAxisMapping?
 	function FromValue(self, Value: number): EnumUIDragSpeedAxisMapping?
 end
-declare extern type EnumUIFlexAlignment extends EnumItem with end
+declare extern type EnumUIFlexAlignment extends EnumItem with
+	read EnumType: EnumUIFlexAlignment_INTERNAL
+end
 declare extern type EnumUIFlexAlignment_INTERNAL extends Enum with
 	Fill: EnumUIFlexAlignment
 	None: EnumUIFlexAlignment
@@ -7102,7 +8292,9 @@ declare extern type EnumUIFlexAlignment_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUIFlexAlignment?
 	function FromValue(self, Value: number): EnumUIFlexAlignment?
 end
-declare extern type EnumUIFlexMode extends EnumItem with end
+declare extern type EnumUIFlexMode extends EnumItem with
+	read EnumType: EnumUIFlexMode_INTERNAL
+end
 declare extern type EnumUIFlexMode_INTERNAL extends Enum with
 	Custom: EnumUIFlexMode
 	Fill: EnumUIFlexMode
@@ -7113,7 +8305,9 @@ declare extern type EnumUIFlexMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUIFlexMode?
 	function FromValue(self, Value: number): EnumUIFlexMode?
 end
-declare extern type EnumUITheme extends EnumItem with end
+declare extern type EnumUITheme extends EnumItem with
+	read EnumType: EnumUITheme_INTERNAL
+end
 declare extern type EnumUITheme_INTERNAL extends Enum with
 	Dark: EnumUITheme
 	Light: EnumUITheme
@@ -7121,7 +8315,9 @@ declare extern type EnumUITheme_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUITheme?
 	function FromValue(self, Value: number): EnumUITheme?
 end
-declare extern type EnumUiMessageType extends EnumItem with end
+declare extern type EnumUiMessageType extends EnumItem with
+	read EnumType: EnumUiMessageType_INTERNAL
+end
 declare extern type EnumUiMessageType_INTERNAL extends Enum with
 	UiMessageError: EnumUiMessageType
 	UiMessageInfo: EnumUiMessageType
@@ -7129,7 +8325,9 @@ declare extern type EnumUiMessageType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUiMessageType?
 	function FromValue(self, Value: number): EnumUiMessageType?
 end
-declare extern type EnumUpdateState extends EnumItem with end
+declare extern type EnumUpdateState extends EnumItem with
+	read EnumType: EnumUpdateState_INTERNAL
+end
 declare extern type EnumUpdateState_INTERNAL extends Enum with
 	UpdateAvailable: EnumUpdateState
 	UpdateFailed: EnumUpdateState
@@ -7140,7 +8338,9 @@ declare extern type EnumUpdateState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUpdateState?
 	function FromValue(self, Value: number): EnumUpdateState?
 end
-declare extern type EnumUploadCaptureResult extends EnumItem with end
+declare extern type EnumUploadCaptureResult extends EnumItem with
+	read EnumType: EnumUploadCaptureResult_INTERNAL
+end
 declare extern type EnumUploadCaptureResult_INTERNAL extends Enum with
 	CaptureModerated: EnumUploadCaptureResult
 	CaptureNotInGallery: EnumUploadCaptureResult
@@ -7154,7 +8354,9 @@ declare extern type EnumUploadCaptureResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUploadCaptureResult?
 	function FromValue(self, Value: number): EnumUploadCaptureResult?
 end
-declare extern type EnumUsageContext extends EnumItem with end
+declare extern type EnumUsageContext extends EnumItem with
+	read EnumType: EnumUsageContext_INTERNAL
+end
 declare extern type EnumUsageContext_INTERNAL extends Enum with
 	Default: EnumUsageContext
 	Preview: EnumUsageContext
@@ -7162,7 +8364,9 @@ declare extern type EnumUsageContext_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUsageContext?
 	function FromValue(self, Value: number): EnumUsageContext?
 end
-declare extern type EnumUserAcquisitionSource extends EnumItem with end
+declare extern type EnumUserAcquisitionSource extends EnumItem with
+	read EnumType: EnumUserAcquisitionSource_INTERNAL
+end
 declare extern type EnumUserAcquisitionSource_INTERNAL extends Enum with
 	Ads: EnumUserAcquisitionSource
 	ContinueToPlay: EnumUserAcquisitionSource
@@ -7179,7 +8383,9 @@ declare extern type EnumUserAcquisitionSource_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUserAcquisitionSource?
 	function FromValue(self, Value: number): EnumUserAcquisitionSource?
 end
-declare extern type EnumUserCFrame extends EnumItem with end
+declare extern type EnumUserCFrame extends EnumItem with
+	read EnumType: EnumUserCFrame_INTERNAL
+end
 declare extern type EnumUserCFrame_INTERNAL extends Enum with
 	Floor: EnumUserCFrame
 	Head: EnumUserCFrame
@@ -7189,7 +8395,9 @@ declare extern type EnumUserCFrame_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUserCFrame?
 	function FromValue(self, Value: number): EnumUserCFrame?
 end
-declare extern type EnumUserIdMode extends EnumItem with end
+declare extern type EnumUserIdMode extends EnumItem with
+	read EnumType: EnumUserIdMode_INTERNAL
+end
 declare extern type EnumUserIdMode_INTERNAL extends Enum with
 	Domain: EnumUserIdMode
 	Global: EnumUserIdMode
@@ -7198,7 +8406,9 @@ declare extern type EnumUserIdMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUserIdMode?
 	function FromValue(self, Value: number): EnumUserIdMode?
 end
-declare extern type EnumUserInputState extends EnumItem with end
+declare extern type EnumUserInputState extends EnumItem with
+	read EnumType: EnumUserInputState_INTERNAL
+end
 declare extern type EnumUserInputState_INTERNAL extends Enum with
 	Begin: EnumUserInputState
 	Cancel: EnumUserInputState
@@ -7209,7 +8419,9 @@ declare extern type EnumUserInputState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUserInputState?
 	function FromValue(self, Value: number): EnumUserInputState?
 end
-declare extern type EnumUserInputType extends EnumItem with end
+declare extern type EnumUserInputType extends EnumItem with
+	read EnumType: EnumUserInputType_INTERNAL
+end
 declare extern type EnumUserInputType_INTERNAL extends Enum with
 	Accelerometer: EnumUserInputType
 	Focus: EnumUserInputType
@@ -7236,7 +8448,9 @@ declare extern type EnumUserInputType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUserInputType?
 	function FromValue(self, Value: number): EnumUserInputType?
 end
-declare extern type EnumUserNewReturningStatus extends EnumItem with end
+declare extern type EnumUserNewReturningStatus extends EnumItem with
+	read EnumType: EnumUserNewReturningStatus_INTERNAL
+end
 declare extern type EnumUserNewReturningStatus_INTERNAL extends Enum with
 	New: EnumUserNewReturningStatus
 	Returning: EnumUserNewReturningStatus
@@ -7245,7 +8459,9 @@ declare extern type EnumUserNewReturningStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUserNewReturningStatus?
 	function FromValue(self, Value: number): EnumUserNewReturningStatus?
 end
-declare extern type EnumUserReturnStatus extends EnumItem with end
+declare extern type EnumUserReturnStatus extends EnumItem with
+	read EnumType: EnumUserReturnStatus_INTERNAL
+end
 declare extern type EnumUserReturnStatus_INTERNAL extends Enum with
 	New: EnumUserReturnStatus
 	Returning: EnumUserReturnStatus
@@ -7254,7 +8470,9 @@ declare extern type EnumUserReturnStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumUserReturnStatus?
 	function FromValue(self, Value: number): EnumUserReturnStatus?
 end
-declare extern type EnumVRComfortSetting extends EnumItem with end
+declare extern type EnumVRComfortSetting extends EnumItem with
+	read EnumType: EnumVRComfortSetting_INTERNAL
+end
 declare extern type EnumVRComfortSetting_INTERNAL extends Enum with
 	Comfort: EnumVRComfortSetting
 	Custom: EnumVRComfortSetting
@@ -7264,7 +8482,9 @@ declare extern type EnumVRComfortSetting_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRComfortSetting?
 	function FromValue(self, Value: number): EnumVRComfortSetting?
 end
-declare extern type EnumVRControllerModelMode extends EnumItem with end
+declare extern type EnumVRControllerModelMode extends EnumItem with
+	read EnumType: EnumVRControllerModelMode_INTERNAL
+end
 declare extern type EnumVRControllerModelMode_INTERNAL extends Enum with
 	Disabled: EnumVRControllerModelMode
 	Transparent: EnumVRControllerModelMode
@@ -7272,7 +8492,9 @@ declare extern type EnumVRControllerModelMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRControllerModelMode?
 	function FromValue(self, Value: number): EnumVRControllerModelMode?
 end
-declare extern type EnumVRDeviceType extends EnumItem with end
+declare extern type EnumVRDeviceType extends EnumItem with
+	read EnumType: EnumVRDeviceType_INTERNAL
+end
 declare extern type EnumVRDeviceType_INTERNAL extends Enum with
 	HTCVive: EnumVRDeviceType
 	OculusQuest: EnumVRDeviceType
@@ -7283,7 +8505,9 @@ declare extern type EnumVRDeviceType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRDeviceType?
 	function FromValue(self, Value: number): EnumVRDeviceType?
 end
-declare extern type EnumVRLaserPointerMode extends EnumItem with end
+declare extern type EnumVRLaserPointerMode extends EnumItem with
+	read EnumType: EnumVRLaserPointerMode_INTERNAL
+end
 declare extern type EnumVRLaserPointerMode_INTERNAL extends Enum with
 	Disabled: EnumVRLaserPointerMode
 	DualPointer: EnumVRLaserPointerMode
@@ -7292,7 +8516,9 @@ declare extern type EnumVRLaserPointerMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRLaserPointerMode?
 	function FromValue(self, Value: number): EnumVRLaserPointerMode?
 end
-declare extern type EnumVRPresentationMode extends EnumItem with end
+declare extern type EnumVRPresentationMode extends EnumItem with
+	read EnumType: EnumVRPresentationMode_INTERNAL
+end
 declare extern type EnumVRPresentationMode_INTERNAL extends Enum with
 	Flat: EnumVRPresentationMode
 	Stereo: EnumVRPresentationMode
@@ -7300,7 +8526,9 @@ declare extern type EnumVRPresentationMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRPresentationMode?
 	function FromValue(self, Value: number): EnumVRPresentationMode?
 end
-declare extern type EnumVRSafetyBubbleMode extends EnumItem with end
+declare extern type EnumVRSafetyBubbleMode extends EnumItem with
+	read EnumType: EnumVRSafetyBubbleMode_INTERNAL
+end
 declare extern type EnumVRSafetyBubbleMode_INTERNAL extends Enum with
 	Anyone: EnumVRSafetyBubbleMode
 	NoOne: EnumVRSafetyBubbleMode
@@ -7309,7 +8537,9 @@ declare extern type EnumVRSafetyBubbleMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRSafetyBubbleMode?
 	function FromValue(self, Value: number): EnumVRSafetyBubbleMode?
 end
-declare extern type EnumVRScaling extends EnumItem with end
+declare extern type EnumVRScaling extends EnumItem with
+	read EnumType: EnumVRScaling_INTERNAL
+end
 declare extern type EnumVRScaling_INTERNAL extends Enum with
 	Off: EnumVRScaling
 	World: EnumVRScaling
@@ -7317,7 +8547,9 @@ declare extern type EnumVRScaling_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRScaling?
 	function FromValue(self, Value: number): EnumVRScaling?
 end
-declare extern type EnumVRSessionState extends EnumItem with end
+declare extern type EnumVRSessionState extends EnumItem with
+	read EnumType: EnumVRSessionState_INTERNAL
+end
 declare extern type EnumVRSessionState_INTERNAL extends Enum with
 	Focused: EnumVRSessionState
 	Idle: EnumVRSessionState
@@ -7328,7 +8560,9 @@ declare extern type EnumVRSessionState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRSessionState?
 	function FromValue(self, Value: number): EnumVRSessionState?
 end
-declare extern type EnumVRTouchpad extends EnumItem with end
+declare extern type EnumVRTouchpad extends EnumItem with
+	read EnumType: EnumVRTouchpad_INTERNAL
+end
 declare extern type EnumVRTouchpad_INTERNAL extends Enum with
 	Left: EnumVRTouchpad
 	Right: EnumVRTouchpad
@@ -7336,7 +8570,9 @@ declare extern type EnumVRTouchpad_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRTouchpad?
 	function FromValue(self, Value: number): EnumVRTouchpad?
 end
-declare extern type EnumVRTouchpadMode extends EnumItem with end
+declare extern type EnumVRTouchpadMode extends EnumItem with
+	read EnumType: EnumVRTouchpadMode_INTERNAL
+end
 declare extern type EnumVRTouchpadMode_INTERNAL extends Enum with
 	ABXY: EnumVRTouchpadMode
 	Touch: EnumVRTouchpadMode
@@ -7345,7 +8581,9 @@ declare extern type EnumVRTouchpadMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVRTouchpadMode?
 	function FromValue(self, Value: number): EnumVRTouchpadMode?
 end
-declare extern type EnumVelocityConstraintMode extends EnumItem with end
+declare extern type EnumVelocityConstraintMode extends EnumItem with
+	read EnumType: EnumVelocityConstraintMode_INTERNAL
+end
 declare extern type EnumVelocityConstraintMode_INTERNAL extends Enum with
 	Line: EnumVelocityConstraintMode
 	Plane: EnumVelocityConstraintMode
@@ -7354,7 +8592,9 @@ declare extern type EnumVelocityConstraintMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVelocityConstraintMode?
 	function FromValue(self, Value: number): EnumVelocityConstraintMode?
 end
-declare extern type EnumVerifiedLevel extends EnumItem with end
+declare extern type EnumVerifiedLevel extends EnumItem with
+	read EnumType: EnumVerifiedLevel_INTERNAL
+end
 declare extern type EnumVerifiedLevel_INTERNAL extends Enum with
 	High: EnumVerifiedLevel
 	Low: EnumVerifiedLevel
@@ -7362,7 +8602,9 @@ declare extern type EnumVerifiedLevel_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVerifiedLevel?
 	function FromValue(self, Value: number): EnumVerifiedLevel?
 end
-declare extern type EnumVerticalAlignment extends EnumItem with end
+declare extern type EnumVerticalAlignment extends EnumItem with
+	read EnumType: EnumVerticalAlignment_INTERNAL
+end
 declare extern type EnumVerticalAlignment_INTERNAL extends Enum with
 	Bottom: EnumVerticalAlignment
 	Center: EnumVerticalAlignment
@@ -7371,7 +8613,9 @@ declare extern type EnumVerticalAlignment_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVerticalAlignment?
 	function FromValue(self, Value: number): EnumVerticalAlignment?
 end
-declare extern type EnumVerticalScrollBarPosition extends EnumItem with end
+declare extern type EnumVerticalScrollBarPosition extends EnumItem with
+	read EnumType: EnumVerticalScrollBarPosition_INTERNAL
+end
 declare extern type EnumVerticalScrollBarPosition_INTERNAL extends Enum with
 	Left: EnumVerticalScrollBarPosition
 	Right: EnumVerticalScrollBarPosition
@@ -7379,7 +8623,9 @@ declare extern type EnumVerticalScrollBarPosition_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVerticalScrollBarPosition?
 	function FromValue(self, Value: number): EnumVerticalScrollBarPosition?
 end
-declare extern type EnumVibrationMotor extends EnumItem with end
+declare extern type EnumVibrationMotor extends EnumItem with
+	read EnumType: EnumVibrationMotor_INTERNAL
+end
 declare extern type EnumVibrationMotor_INTERNAL extends Enum with
 	Large: EnumVibrationMotor
 	LeftHand: EnumVibrationMotor
@@ -7391,7 +8637,9 @@ declare extern type EnumVibrationMotor_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVibrationMotor?
 	function FromValue(self, Value: number): EnumVibrationMotor?
 end
-declare extern type EnumVideoCaptureResult extends EnumItem with end
+declare extern type EnumVideoCaptureResult extends EnumItem with
+	read EnumType: EnumVideoCaptureResult_INTERNAL
+end
 declare extern type EnumVideoCaptureResult_INTERNAL extends Enum with
 	OtherError: EnumVideoCaptureResult
 	ScreenSizeChanged: EnumVideoCaptureResult
@@ -7401,7 +8649,9 @@ declare extern type EnumVideoCaptureResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVideoCaptureResult?
 	function FromValue(self, Value: number): EnumVideoCaptureResult?
 end
-declare extern type EnumVideoCaptureStartedResult extends EnumItem with end
+declare extern type EnumVideoCaptureStartedResult extends EnumItem with
+	read EnumType: EnumVideoCaptureStartedResult_INTERNAL
+end
 declare extern type EnumVideoCaptureStartedResult_INTERNAL extends Enum with
 	CapturingAlready: EnumVideoCaptureStartedResult
 	NoDeviceSupport: EnumVideoCaptureStartedResult
@@ -7412,7 +8662,9 @@ declare extern type EnumVideoCaptureStartedResult_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVideoCaptureStartedResult?
 	function FromValue(self, Value: number): EnumVideoCaptureStartedResult?
 end
-declare extern type EnumVideoDeviceCaptureQuality extends EnumItem with end
+declare extern type EnumVideoDeviceCaptureQuality extends EnumItem with
+	read EnumType: EnumVideoDeviceCaptureQuality_INTERNAL
+end
 declare extern type EnumVideoDeviceCaptureQuality_INTERNAL extends Enum with
 	Default: EnumVideoDeviceCaptureQuality
 	High: EnumVideoDeviceCaptureQuality
@@ -7422,7 +8674,9 @@ declare extern type EnumVideoDeviceCaptureQuality_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVideoDeviceCaptureQuality?
 	function FromValue(self, Value: number): EnumVideoDeviceCaptureQuality?
 end
-declare extern type EnumVideoError extends EnumItem with end
+declare extern type EnumVideoError extends EnumItem with
+	read EnumType: EnumVideoError_INTERNAL
+end
 declare extern type EnumVideoError_INTERNAL extends Enum with
 	AllocFailed: EnumVideoError
 	BadParameter: EnumVideoError
@@ -7447,7 +8701,9 @@ declare extern type EnumVideoError_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVideoError?
 	function FromValue(self, Value: number): EnumVideoError?
 end
-declare extern type EnumVideoSampleSize extends EnumItem with end
+declare extern type EnumVideoSampleSize extends EnumItem with
+	read EnumType: EnumVideoSampleSize_INTERNAL
+end
 declare extern type EnumVideoSampleSize_INTERNAL extends Enum with
 	Full: EnumVideoSampleSize
 	Large: EnumVideoSampleSize
@@ -7457,7 +8713,9 @@ declare extern type EnumVideoSampleSize_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVideoSampleSize?
 	function FromValue(self, Value: number): EnumVideoSampleSize?
 end
-declare extern type EnumViewMode extends EnumItem with end
+declare extern type EnumViewMode extends EnumItem with
+	read EnumType: EnumViewMode_INTERNAL
+end
 declare extern type EnumViewMode_INTERNAL extends Enum with
 	Decal: EnumViewMode
 	GeometryComplexity: EnumViewMode
@@ -7467,7 +8725,9 @@ declare extern type EnumViewMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumViewMode?
 	function FromValue(self, Value: number): EnumViewMode?
 end
-declare extern type EnumVirtualCursorMode extends EnumItem with end
+declare extern type EnumVirtualCursorMode extends EnumItem with
+	read EnumType: EnumVirtualCursorMode_INTERNAL
+end
 declare extern type EnumVirtualCursorMode_INTERNAL extends Enum with
 	Default: EnumVirtualCursorMode
 	Disabled: EnumVirtualCursorMode
@@ -7476,7 +8736,9 @@ declare extern type EnumVirtualCursorMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVirtualCursorMode?
 	function FromValue(self, Value: number): EnumVirtualCursorMode?
 end
-declare extern type EnumVirtualInputMode extends EnumItem with end
+declare extern type EnumVirtualInputMode extends EnumItem with
+	read EnumType: EnumVirtualInputMode_INTERNAL
+end
 declare extern type EnumVirtualInputMode_INTERNAL extends Enum with
 	None: EnumVirtualInputMode
 	Playing: EnumVirtualInputMode
@@ -7485,7 +8747,9 @@ declare extern type EnumVirtualInputMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVirtualInputMode?
 	function FromValue(self, Value: number): EnumVirtualInputMode?
 end
-declare extern type EnumVoiceChatDistanceAttenuationType extends EnumItem with end
+declare extern type EnumVoiceChatDistanceAttenuationType extends EnumItem with
+	read EnumType: EnumVoiceChatDistanceAttenuationType_INTERNAL
+end
 declare extern type EnumVoiceChatDistanceAttenuationType_INTERNAL extends Enum with
 	Inverse: EnumVoiceChatDistanceAttenuationType
 	Legacy: EnumVoiceChatDistanceAttenuationType
@@ -7493,7 +8757,9 @@ declare extern type EnumVoiceChatDistanceAttenuationType_INTERNAL extends Enum w
 	function FromName(self, Name: string): EnumVoiceChatDistanceAttenuationType?
 	function FromValue(self, Value: number): EnumVoiceChatDistanceAttenuationType?
 end
-declare extern type EnumVoiceChatState extends EnumItem with end
+declare extern type EnumVoiceChatState extends EnumItem with
+	read EnumType: EnumVoiceChatState_INTERNAL
+end
 declare extern type EnumVoiceChatState_INTERNAL extends Enum with
 	Ended: EnumVoiceChatState
 	Failed: EnumVoiceChatState
@@ -7506,7 +8772,9 @@ declare extern type EnumVoiceChatState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVoiceChatState?
 	function FromValue(self, Value: number): EnumVoiceChatState?
 end
-declare extern type EnumVoiceClientLeaveReasons extends EnumItem with end
+declare extern type EnumVoiceClientLeaveReasons extends EnumItem with
+	read EnumType: EnumVoiceClientLeaveReasons_INTERNAL
+end
 declare extern type EnumVoiceClientLeaveReasons_INTERNAL extends Enum with
 	ClientNetworkDisconnected: EnumVoiceClientLeaveReasons
 	ClientShutdown: EnumVoiceClientLeaveReasons
@@ -7521,7 +8789,9 @@ declare extern type EnumVoiceClientLeaveReasons_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVoiceClientLeaveReasons?
 	function FromValue(self, Value: number): EnumVoiceClientLeaveReasons?
 end
-declare extern type EnumVoiceControlPath extends EnumItem with end
+declare extern type EnumVoiceControlPath extends EnumItem with
+	read EnumType: EnumVoiceControlPath_INTERNAL
+end
 declare extern type EnumVoiceControlPath_INTERNAL extends Enum with
 	Join: EnumVoiceControlPath
 	Publish: EnumVoiceControlPath
@@ -7530,7 +8800,9 @@ declare extern type EnumVoiceControlPath_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVoiceControlPath?
 	function FromValue(self, Value: number): EnumVoiceControlPath?
 end
-declare extern type EnumVoiceRccReconnectReason extends EnumItem with end
+declare extern type EnumVoiceRccReconnectReason extends EnumItem with
+	read EnumType: EnumVoiceRccReconnectReason_INTERNAL
+end
 declare extern type EnumVoiceRccReconnectReason_INTERNAL extends Enum with
 	BlockListChanged: EnumVoiceRccReconnectReason
 	CloseRoom: EnumVoiceRccReconnectReason
@@ -7541,7 +8813,9 @@ declare extern type EnumVoiceRccReconnectReason_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVoiceRccReconnectReason?
 	function FromValue(self, Value: number): EnumVoiceRccReconnectReason?
 end
-declare extern type EnumVolumetricAudio extends EnumItem with end
+declare extern type EnumVolumetricAudio extends EnumItem with
+	read EnumType: EnumVolumetricAudio_INTERNAL
+end
 declare extern type EnumVolumetricAudio_INTERNAL extends Enum with
 	Automatic: EnumVolumetricAudio
 	Disabled: EnumVolumetricAudio
@@ -7550,7 +8824,9 @@ declare extern type EnumVolumetricAudio_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumVolumetricAudio?
 	function FromValue(self, Value: number): EnumVolumetricAudio?
 end
-declare extern type EnumWaterDirection extends EnumItem with end
+declare extern type EnumWaterDirection extends EnumItem with
+	read EnumType: EnumWaterDirection_INTERNAL
+end
 declare extern type EnumWaterDirection_INTERNAL extends Enum with
 	NegX: EnumWaterDirection
 	NegY: EnumWaterDirection
@@ -7562,7 +8838,9 @@ declare extern type EnumWaterDirection_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWaterDirection?
 	function FromValue(self, Value: number): EnumWaterDirection?
 end
-declare extern type EnumWaterForce extends EnumItem with end
+declare extern type EnumWaterForce extends EnumItem with
+	read EnumType: EnumWaterForce_INTERNAL
+end
 declare extern type EnumWaterForce_INTERNAL extends Enum with
 	Max: EnumWaterForce
 	Medium: EnumWaterForce
@@ -7573,7 +8851,9 @@ declare extern type EnumWaterForce_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWaterForce?
 	function FromValue(self, Value: number): EnumWaterForce?
 end
-declare extern type EnumWebSocketState extends EnumItem with end
+declare extern type EnumWebSocketState extends EnumItem with
+	read EnumType: EnumWebSocketState_INTERNAL
+end
 declare extern type EnumWebSocketState_INTERNAL extends Enum with
 	Closed: EnumWebSocketState
 	Closing: EnumWebSocketState
@@ -7583,7 +8863,9 @@ declare extern type EnumWebSocketState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWebSocketState?
 	function FromValue(self, Value: number): EnumWebSocketState?
 end
-declare extern type EnumWebStreamClientState extends EnumItem with end
+declare extern type EnumWebStreamClientState extends EnumItem with
+	read EnumType: EnumWebStreamClientState_INTERNAL
+end
 declare extern type EnumWebStreamClientState_INTERNAL extends Enum with
 	Closed: EnumWebStreamClientState
 	Connecting: EnumWebStreamClientState
@@ -7593,7 +8875,9 @@ declare extern type EnumWebStreamClientState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWebStreamClientState?
 	function FromValue(self, Value: number): EnumWebStreamClientState?
 end
-declare extern type EnumWebStreamClientType extends EnumItem with end
+declare extern type EnumWebStreamClientType extends EnumItem with
+	read EnumType: EnumWebStreamClientType_INTERNAL
+end
 declare extern type EnumWebStreamClientType_INTERNAL extends Enum with
 	RawStream: EnumWebStreamClientType
 	SSE: EnumWebStreamClientType
@@ -7602,7 +8886,9 @@ declare extern type EnumWebStreamClientType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWebStreamClientType?
 	function FromValue(self, Value: number): EnumWebStreamClientType?
 end
-declare extern type EnumWeldConstraintPreserve extends EnumItem with end
+declare extern type EnumWeldConstraintPreserve extends EnumItem with
+	read EnumType: EnumWeldConstraintPreserve_INTERNAL
+end
 declare extern type EnumWeldConstraintPreserve_INTERNAL extends Enum with
 	All: EnumWeldConstraintPreserve
 	None: EnumWeldConstraintPreserve
@@ -7611,7 +8897,9 @@ declare extern type EnumWeldConstraintPreserve_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWeldConstraintPreserve?
 	function FromValue(self, Value: number): EnumWeldConstraintPreserve?
 end
-declare extern type EnumWhenUserFirstPlayed extends EnumItem with end
+declare extern type EnumWhenUserFirstPlayed extends EnumItem with
+	read EnumType: EnumWhenUserFirstPlayed_INTERNAL
+end
 declare extern type EnumWhenUserFirstPlayed_INTERNAL extends Enum with
 	Days0To30: EnumWhenUserFirstPlayed
 	Days181To365: EnumWhenUserFirstPlayed
@@ -7623,7 +8911,9 @@ declare extern type EnumWhenUserFirstPlayed_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWhenUserFirstPlayed?
 	function FromValue(self, Value: number): EnumWhenUserFirstPlayed?
 end
-declare extern type EnumWhisperChatPrivacyMode extends EnumItem with end
+declare extern type EnumWhisperChatPrivacyMode extends EnumItem with
+	read EnumType: EnumWhisperChatPrivacyMode_INTERNAL
+end
 declare extern type EnumWhisperChatPrivacyMode_INTERNAL extends Enum with
 	AllUsers: EnumWhisperChatPrivacyMode
 	NoOne: EnumWhisperChatPrivacyMode
@@ -7631,7 +8921,9 @@ declare extern type EnumWhisperChatPrivacyMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWhisperChatPrivacyMode?
 	function FromValue(self, Value: number): EnumWhisperChatPrivacyMode?
 end
-declare extern type EnumWindSoundProfile extends EnumItem with end
+declare extern type EnumWindSoundProfile extends EnumItem with
+	read EnumType: EnumWindSoundProfile_INTERNAL
+end
 declare extern type EnumWindSoundProfile_INTERNAL extends Enum with
 	Foliage: EnumWindSoundProfile
 	Turbulence: EnumWindSoundProfile
@@ -7640,7 +8932,9 @@ declare extern type EnumWindSoundProfile_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWindSoundProfile?
 	function FromValue(self, Value: number): EnumWindSoundProfile?
 end
-declare extern type EnumWindowState extends EnumItem with end
+declare extern type EnumWindowState extends EnumItem with
+	read EnumType: EnumWindowState_INTERNAL
+end
 declare extern type EnumWindowState_INTERNAL extends Enum with
 	Maximized: EnumWindowState
 	Minimized: EnumWindowState
@@ -7649,7 +8943,9 @@ declare extern type EnumWindowState_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWindowState?
 	function FromValue(self, Value: number): EnumWindowState?
 end
-declare extern type EnumWrapLayerAutoSkin extends EnumItem with end
+declare extern type EnumWrapLayerAutoSkin extends EnumItem with
+	read EnumType: EnumWrapLayerAutoSkin_INTERNAL
+end
 declare extern type EnumWrapLayerAutoSkin_INTERNAL extends Enum with
 	Disabled: EnumWrapLayerAutoSkin
 	EnabledOverride: EnumWrapLayerAutoSkin
@@ -7658,7 +8954,9 @@ declare extern type EnumWrapLayerAutoSkin_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWrapLayerAutoSkin?
 	function FromValue(self, Value: number): EnumWrapLayerAutoSkin?
 end
-declare extern type EnumWrapLayerDebugMode extends EnumItem with end
+declare extern type EnumWrapLayerDebugMode extends EnumItem with
+	read EnumType: EnumWrapLayerDebugMode_INTERNAL
+end
 declare extern type EnumWrapLayerDebugMode_INTERNAL extends Enum with
 	BoundCage: EnumWrapLayerDebugMode
 	BoundCageAndLinks: EnumWrapLayerDebugMode
@@ -7680,7 +8978,9 @@ declare extern type EnumWrapLayerDebugMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWrapLayerDebugMode?
 	function FromValue(self, Value: number): EnumWrapLayerDebugMode?
 end
-declare extern type EnumWrapTargetDebugMode extends EnumItem with end
+declare extern type EnumWrapTargetDebugMode extends EnumItem with
+	read EnumType: EnumWrapTargetDebugMode_INTERNAL
+end
 declare extern type EnumWrapTargetDebugMode_INTERNAL extends Enum with
 	None: EnumWrapTargetDebugMode
 	OuterCageDetail: EnumWrapTargetDebugMode
@@ -7696,7 +8996,9 @@ declare extern type EnumWrapTargetDebugMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumWrapTargetDebugMode?
 	function FromValue(self, Value: number): EnumWrapTargetDebugMode?
 end
-declare extern type EnumZIndexBehavior extends EnumItem with end
+declare extern type EnumZIndexBehavior extends EnumItem with
+	read EnumType: EnumZIndexBehavior_INTERNAL
+end
 declare extern type EnumZIndexBehavior_INTERNAL extends Enum with
 	Global: EnumZIndexBehavior
 	Sibling: EnumZIndexBehavior
