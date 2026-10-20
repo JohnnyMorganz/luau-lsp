@@ -205,13 +205,25 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params,
     }
     else if (auto expr = exprOrLocal.getExpr())
     {
+        auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
+        auto parentNode = ancestry.size() >= 2 ? ancestry.at(ancestry.size() - 2) : nullptr;
+
+        // Choose the correct overload (if there is one), and fit any known generic types
+        if (auto call = parentNode ? parentNode->as<Luau::AstExprCall>() : nullptr; call && call->func == expr)
+        {
+            if (auto it = module->astOverloadResolvedTypes.find(call))
+            {
+                auto resolvedType = Luau::follow(*it);
+                if (Luau::get<Luau::FunctionType>(resolvedType))
+                    type = resolvedType;
+            }
+        }
+
         // Special case, we want to check if there is a parent in the ancestry, and if it is an AstTable
         // If so, and we are hovering over a prop, we want to give type info for the assigned expression to the prop
         // rather than just "string"
-        auto ancestry = Luau::findAstAncestryOfPosition(*sourceModule, position);
-        if (ancestry.size() >= 2 && ancestry.at(ancestry.size() - 2)->is<Luau::AstExprTable>())
+        if (auto parent = parentNode ? parentNode->as<Luau::AstExprTable>() : nullptr)
         {
-            auto parent = ancestry.at(ancestry.size() - 2)->as<Luau::AstExprTable>();
             for (const auto& [kind, key, value] : parent->items)
             {
                 if (key && key->location.contains(position))
@@ -236,7 +248,7 @@ std::optional<lsp::Hover> WorkspaceFolder::hover(const lsp::HoverParams& params,
                 if (auto propInformation = lookupProp(parentType, indexName); !propInformation.empty())
                 {
                     auto [baseTy, prop] = propInformation[0];
-                    if (propInformation.size() == 1 && prop.readTy)
+                    if (!type && propInformation.size() == 1 && prop.readTy)
                         type = prop.readTy;
                     if (auto definitionModuleName = Luau::getDefinitionModuleName(baseTy))
                     {
