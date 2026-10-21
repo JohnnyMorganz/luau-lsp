@@ -145,6 +145,21 @@ void WorkspaceFolder::onDidSaveTextDocument(const lsp::DocumentUri& uri, const l
     }
 }
 
+// The frontend erases a module whose source is gone, which destroys its types. The retained type graph of
+// an already-checked dependent may reference those types, and marking the dependents dirty is not enough:
+// fragment autocomplete deliberately reads the stale type graph of a dirty module. Flag the dependents as
+// having invalid dependencies so that their stale type graphs are not used until they have been rechecked
+static void invalidateDependents(Luau::Frontend& frontend, const Luau::ModuleName& moduleName)
+{
+    frontend.traverseDependents(moduleName,
+        [](Luau::SourceNode& sourceNode)
+        {
+            sourceNode.setInvalidModuleDependency(true, /* forAutocomplete= */ false);
+            sourceNode.setInvalidModuleDependency(true, /* forAutocomplete= */ true);
+            return true;
+        });
+}
+
 void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
 {
     fileResolver.managedFiles.erase(uri);
@@ -152,6 +167,8 @@ void WorkspaceFolder::closeTextDocument(const lsp::DocumentUri& uri)
     // Mark the module as dirty as we no longer track its changes
     auto config = client->getConfiguration(rootUri);
     auto moduleName = fileResolver.getModuleName(uri);
+    if (!uri.exists())
+        invalidateDependents(frontend, moduleName);
     frontend.markDirty(moduleName);
 
     // Refresh workspace diagnostics to clear diagnostics on ignored files
@@ -239,6 +256,7 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
                 // Fully erase the module from the frontend's caches (including `sourceNodes`, which
                 // is what drives string require auto-import suggestions) so a renamed/deleted file
                 // stops being suggested. This also marks any dependents dirty so they get rechecked.
+                invalidateDependents(frontend, moduleName);
                 deletedModules.push_back(moduleName);
                 deletedFiles.push_back(change.uri);
             }
