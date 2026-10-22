@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.742
 
+### Fixed
+
+- Fixed `luau-lsp analyze` erroring with `server not yet received configuration for diagnostics` when a sourcemap is enabled with other settings that enable workspace diagnostics.
+
 ## [1.70.1] - 2026-09-27
 
 ### Added

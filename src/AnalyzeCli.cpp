@@ -308,6 +308,9 @@ int startAnalyze(const argparse::ArgumentParser& program)
 
     client.globalConfig.index.enabled = false;
 
+    // Workspace diagnostics are an editor feature. CLI only reports given files
+    client.globalConfig.diagnostics.workspace = false;
+
     std::optional<Luau::Config> defaultConfig;
     if (baseLuaurc)
     {

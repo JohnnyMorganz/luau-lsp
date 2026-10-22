@@ -9,6 +9,8 @@
 #include "Luau/TypeAttach.h"
 #include "Luau/PrettyPrinter.h"
 
+#include <filesystem>
+
 TEST_SUITE_BEGIN("AnalyzeCli");
 
 namespace std
@@ -277,6 +279,87 @@ TEST_CASE("sourcemap_loaded_through_workspace_configuration")
     auto* robloxPlatform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
     REQUIRE(robloxPlatform);
     CHECK(robloxPlatform->rootSourceNode != nullptr);
+}
+
+TEST_CASE("analyze_with_settings_definitions_and_sourcemap_reports_type_errors")
+{
+    TempDir t("analyze_cli_configured_sourcemap");
+    const std::string definitionsPath = (std::filesystem::current_path() / "tests/testdata/standard_definitions.d.luau").generic_string();
+
+    t.write_child("settings.json", R"({
+        "luau-lsp.diagnostics.strictDatamodelTypes": true,
+        "luau-lsp.diagnostics.workspace": true,
+        "luau-lsp.platform.type": "roblox",
+        "luau-lsp.sourcemap.enabled": true,
+        "luau-lsp.sourcemap.sourcemapFile": "sourcemap.json"
+    })");
+    t.write_child("sourcemap.json", R"({
+        "name": "Game",
+        "className": "DataModel",
+        "children": [
+            {
+                "name": "ReplicatedStorage",
+                "className": "ReplicatedStorage",
+                "children": [
+                    {
+                        "name": "Module",
+                        "className": "ModuleScript",
+                        "filePaths": ["src/Module.luau"]
+                    }
+                ]
+            }
+        ]
+    })");
+    t.write_child("src/Module.luau", "return {}");
+    // Not passed to analyze, so its error must not be reported
+    t.write_child("src/Unanalyzed.luau", R"(
+        --!strict
+        local unanalyzed: number = "not analyzed"
+        return unanalyzed
+    )");
+    t.write_child("src/Main.luau", R"(
+        --!strict
+        local mapped: Instance = game.ReplicatedStorage.Module
+        return mapped
+    )");
+
+    argparse::ArgumentParser program("analyze");
+    program.set_assign_chars(":=");
+    program.add_argument("--annotate").default_value(false).implicit_value(true);
+    program.add_argument("--timetrace").default_value(false).implicit_value(true);
+    program.add_argument("--formatter").default_value(std::string("default")).choices("default", "plain", "gnu");
+    program.add_argument("--no-strict-dm-types").default_value(false).implicit_value(true);
+    program.add_argument("--sourcemap");
+    program.add_argument("--definitions").default_value<std::vector<std::string>>({}).append();
+    program.add_argument("--ignore").default_value<std::vector<std::string>>({}).append();
+    program.add_argument("--base-luaurc");
+    program.add_argument("--platform").choices("standard", "roblox");
+    program.add_argument("--settings");
+    program.add_argument("files").remaining();
+    program.parse_args({"analyze", "--settings", "settings.json", "--sourcemap", "sourcemap.json", "--platform", "roblox",
+        "--definitions:@roblox=" + definitionsPath, "src/Main.luau"});
+
+    struct RestoreCurrentPath
+    {
+        std::filesystem::path path;
+
+        ~RestoreCurrentPath()
+        {
+            std::error_code error;
+            std::filesystem::current_path(path, error);
+        }
+    } restoreCurrentPath{std::filesystem::current_path()};
+    std::filesystem::current_path(t.path());
+
+    CHECK_EQ(startAnalyze(program), 0);
+
+    t.write_child("src/Main.luau", R"(
+        --!strict
+        local mapped: Instance = game.ReplicatedStorage.Module
+        local bad: number = "not a number"
+        return mapped, bad
+    )");
+    CHECK_EQ(startAnalyze(program), 1);
 }
 
 TEST_CASE("annotate_retains_type_graphs")
