@@ -47,6 +47,34 @@ function ServerEndpoints.full(address: string, tree: types.EncodedInstance): typ
 	return wrapHttpResult(success, result)
 end
 
+--- Sends incremental changes to the DataModel tree last sent to the language server.
+--- The server responds with 409 if it does not have the DataModel tree of the session (e.g. it restarted),
+--- or 404 if it does not support incremental changes. In both cases, the full DataModel should be sent instead.
+--- @param address -- The full server address (e.g., "http://localhost:3667").
+--- @param session -- The session of the DataModel tree the changes apply to.
+--- @param changes -- The changes to apply, in order.
+--- @return types.Result<types.HttpResponse, string> -- Success with response or failure with error message.
+function ServerEndpoints.changes(
+	address: string,
+	session: string,
+	changes: { types.Change }
+): types.Result<types.HttpResponse, string>
+	local success, result = pcall(HttpService.RequestAsync, HttpService, {
+		Method = "POST" :: "POST",
+		Url = `{address}/changes`,
+		Headers = {
+			["Content-Type"] = "application/json",
+		},
+		Body = HttpService:JSONEncode({
+			session = session,
+			changes = changes,
+		}),
+		Compress = Enum.HttpCompression.Gzip,
+	})
+
+	return wrapHttpResult(success, result)
+end
+
 --- Clears the DataModel information from the language server.
 --- @param address -- The full server address (e.g., "http://localhost:3667").
 --- @return types.Result<types.HttpResponse, string> -- Success with response or failure with error message.

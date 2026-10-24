@@ -58,7 +58,7 @@ By default, the plugin tracks these services:
 src/
 ├── init.server.luau      # Main entry point and UI setup
 ├── LSPManager.luau       # Connection lifecycle and server communication
-├── InstanceTracker.luau  # DataModel change detection and encoding
+├── InstanceTracker.luau  # DataModel change tracking and encoding
 ├── ServerEndpoints.luau  # HTTP request handling
 ├── types.luau            # Type definitions
 ├── Assets.luau           # Toolbar icon asset IDs
@@ -67,6 +67,20 @@ src/
 │   └── DefaultSettings.luau  # Default configuration values
 └── Utils/
     ├── Debounce.luau     # Rate-limiting utility
+    ├── FrameBudget.luau  # Spreads long-running work over multiple frames
     ├── Log.luau          # Leveled logging system
     └── Signal.luau       # Event/callback management
+```
+
+After sending the full DataModel tree when connecting, the plugin only sends what changed. `InstanceTracker` keeps a
+mirror of the tracked instances: instance events mark instances as dirty, and the dirty instances are later reconciled
+against the DataModel to produce the changes to send.
+
+## Testing
+
+The instance tracking is tested against a mock DataModel with [Lune](https://github.com/lune-org/lune). From the `plugin`
+directory, run:
+
+```sh
+lune run tests/run.luau
 ```

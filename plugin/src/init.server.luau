@@ -45,7 +45,7 @@ settings.onChanged:connect(function()
 
 	lspManager:setAddress(settings:get("host"), settings:get("port"))
 
-	if lspManager:isConnected() then
+	if lspManager:isConnected() or lspManager:isConnecting() then
 		-- Silently reload with the new settings
 		Log.setLevel(Log.Level.WARN)
 
@@ -98,7 +98,7 @@ local function toggleConnection()
 		return
 	end
 
-	if lspManager:isConnected() then
+	if lspManager:isConnected() or lspManager:isConnecting() then
 		lspManager:disconnect()
 	else
 		lspManager:connect()

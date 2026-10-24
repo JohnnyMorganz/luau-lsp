@@ -6,9 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Studio Plugin: DataModel changes are now sent to the language server incrementally. The plugin keeps track of the instances it last sent and only sends what changed, instead of traversing and resending the whole DataModel after every change. This removes the Studio freezes after renaming, reparenting, adding or removing instances in large places. Tracking the DataModel when connecting is also spread over multiple frames. Language clients implementing the companion plugin HTTP server should support the new `POST /changes` endpoint and `$/plugin/changes` request, see the [editor documentation](https://github.com/JohnnyMorganz/luau-lsp/blob/main/editors/README.md#optional-roblox-studio-plugin). The plugin falls back to sending the full DataModel to language clients which do not support it
+
 ### Changed
 
 - Sync to upstream Luau 0.742
+- Studio Plugin: invalid UTF-8 in instance names is now replaced with U+FFFD (with a warning) rather than skipping the instance, so that its descendants remain available
+
+### Fixed
+
+- Studio Plugin: instances moved into an included instance from a non-included instance (e.g. from `CoreGui` into `Workspace`) are now synced
+- VSCode extension: Studio Plugin requests are now forwarded to the language server after it restarts, rather than being dropped until VSCode is restarted. The DataModel is resent to the restarted language server on the next change in Studio ([#1324](https://github.com/JohnnyMorganz/luau-lsp/issues/1324))
 
 ## [1.70.1] - 2026-09-27
 
