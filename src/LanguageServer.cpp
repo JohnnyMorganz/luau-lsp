@@ -405,7 +405,18 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
     }
     else
     {
-        throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);
+        std::optional<json> platformResponse = std::nullopt;
+        for (auto& workspace : workspaceFolders)
+        {
+            if (workspace->platform)
+                if (auto result = workspace->platform->handleRequest(method, baseParams))
+                    platformResponse = std::move(result);
+        }
+
+        if (!platformResponse)
+            throw JsonRpcException(lsp::ErrorCode::MethodNotFound, "method not found / supported: " + method);
+
+        response = std::move(*platformResponse);
     }
 
     client->sendResponse(id, response);
