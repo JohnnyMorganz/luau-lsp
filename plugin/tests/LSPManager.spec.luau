@@ -50,6 +50,10 @@ local function newServer(world)
 		overrides = {},
 		files = {},
 		syncedInstances = {},
+		-- Number of InstanceFileSyncService:GetSyncedInstance calls
+		lookups = 0,
+		-- Fires InstanceFileSyncService.StatusChanged
+		statusChanged = nil,
 		model = nil,
 		session = nil,
 	}
@@ -132,7 +136,8 @@ local function setup(context)
 		HttpService = HttpService,
 		InstanceFileSyncService = {
 			StatusChanged = {
-				Connect = function()
+				Connect = function(_, callback)
+					server.statusChanged = callback
 					return { Disconnect = function() end }
 				end,
 			},
@@ -140,6 +145,7 @@ local function setup(context)
 				return {}
 			end,
 			GetSyncedInstance = function(_, filePath)
+				server.lookups += 1
 				return server.syncedInstances[filePath]
 			end,
 		},
@@ -153,7 +159,7 @@ local function setup(context)
 				return services[name]
 			end,
 		},
-		Enum = { HttpCompression = { Gzip = "Gzip" } },
+		Enum = { HttpCompression = { Gzip = "Gzip", None = "None" } },
 	})
 
 	local tracker = require("InstanceTracker").new(function()
@@ -336,6 +342,122 @@ test("reconnecting while resending the full DataModel stays connected", function
 	task.wait(0.6)
 
 	assert(manager:isConnected(), "disconnected after reconnecting")
+	server.assertSynced()
+	manager:unload()
+end)
+
+test("synced instances are only looked up again when their file paths may have changed", function(context)
+	local world, server, manager = setup(context)
+	local other = MockDataModel.new("ModuleScript", "Other", world.module.Parent)
+	MockDataModel.flush()
+	server.files = { "Module.luau", "Other.luau", "NotSynced.luau" }
+	server.syncedInstances["Module.luau"] = world.module
+	server.syncedInstances["Other.luau"] = other
+	assert(manager:connect(), "failed to connect")
+	server.assertSynced()
+	assertEqual(server.lookups, 3)
+
+	-- Unrelated changes reuse the previous lookups
+	world.workspace.Model1.Name = "Renamed"
+	manager:sync()
+	server.assertSynced()
+	assertEqual(server.lookups, 3)
+
+	-- Renaming a synced instance renames its file
+	world.module.Name = "Renamed"
+	server.files = { "Renamed.luau", "Other.luau", "NotSynced.luau" }
+	server.syncedInstances = { ["Renamed.luau"] = world.module, ["Other.luau"] = other }
+	manager:sync()
+	server.assertSynced()
+	assertEqual(server.lookups, 4)
+
+	-- Swapping names keeps the same file paths, synced to different instances
+	world.module.Name = "Other"
+	other.Name = "Renamed"
+	server.syncedInstances = { ["Renamed.luau"] = other, ["Other.luau"] = world.module }
+	manager:sync()
+	server.assertSynced()
+	assertEqual(server.lookups, 6)
+
+	-- Files which were not synced are looked up again when the Script Sync status of an instance changes
+	local added = MockDataModel.new("ModuleScript", "NotSynced", world.module.Parent)
+	MockDataModel.flush()
+	server.syncedInstances["NotSynced.luau"] = added
+	server.statusChanged(added)
+	manager:sync()
+	server.assertSynced()
+	assertEqual(server.lookups, 7)
+
+	-- Destroyed instances are looked up again
+	added:Destroy()
+	MockDataModel.flush()
+	server.syncedInstances["NotSynced.luau"] = nil
+	manager:sync()
+	server.assertSynced()
+	assertEqual(server.lookups, 8)
+
+	-- Reconnecting reuses the previous lookups
+	manager:disconnect()
+	assert(manager:connect(), "failed to reconnect")
+	server.assertSynced()
+	assertEqual(server.lookups, 8)
+	manager:unload()
+end)
+
+test("connecting sends the DataModel before looking up file paths", function(context)
+	local world, server, manager = setup(context)
+	server.files = { "Module.luau" }
+	server.syncedInstances["Module.luau"] = world.module
+	local fullHadFilePaths = nil
+	server.overrides.full = function(request)
+		server.overrides.full = nil
+		fullHadFilePaths = string.find(request.Body, "FilePaths", 1, true) ~= nil
+		assertEqual(server.lookups, 0, "looked up file paths before sending the DataModel")
+		return server.handle(request)
+	end
+
+	assert(manager:connect(), "failed to connect")
+	assertEqual(fullHadFilePaths, false)
+	-- The file paths are sent as changes once connected
+	server.assertSynced()
+	assertEqual(server.count("changes"), 1)
+	manager:unload()
+end)
+
+test("the Script Sync status changing while disconnected is handled when reconnecting", function(context)
+	local world, server, manager = setup(context)
+	server.files = { "Module.luau" }
+	assert(manager:connect(), "failed to connect")
+	server.assertSynced()
+	manager:disconnect()
+
+	server.syncedInstances["Module.luau"] = world.module
+	server.statusChanged(world.module)
+	assert(manager:connect(), "failed to reconnect")
+	server.assertSynced()
+	manager:unload()
+end)
+
+test("changes made while looking up synced instances are sent", function(context)
+	local world, server, manager = setup(context)
+	server.files = { "Module.luau" }
+	server.syncedInstances["Module.luau"] = world.module
+	assert(manager:connect(), "failed to connect")
+
+	local changed = false
+	context.budget.yieldChance = 1
+	context.budget.onYield = function()
+		if not changed then
+			changed = true
+			world.workspace.Model2.Name = "RenamedWhileLookingUp"
+		end
+	end
+	server.statusChanged(world.module)
+	manager:sync()
+	context.budget.yieldChance = 0
+	assert(changed, "did not yield while looking up synced instances")
+
+	manager:sync()
 	server.assertSynced()
 	manager:unload()
 end)
