@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.742
 - Studio Plugin: invalid UTF-8 in instance names is now replaced with U+FFFD (with a warning) rather than skipping the instance, so that its descendants remain available
+- Studio Plugin: requests to a language server on the same machine are no longer compressed, as compressing a large DataModel blocked Studio (183ms for a 10MB DataModel)
+- Studio Plugin: the toolbar button is highlighted while connecting, and connecting is logged in the output
 
 ### Fixed
 
