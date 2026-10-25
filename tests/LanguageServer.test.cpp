@@ -1,5 +1,6 @@
 #include "doctest.h"
 #include "LSP/LanguageServer.hpp"
+#include "Platform/RobloxPlatform.hpp"
 #include "Protocol/Lifecycle.hpp"
 #include "TestClient.h"
 
@@ -57,6 +58,45 @@ TEST_CASE("language_server_lazily_initializes_workspace_folders")
     server.onNotification("textDocument/didOpen", std::make_optional(openParams));
 
     CHECK(workspaceFolder->isReady);
+
+    server.shutdown();
+}
+
+TEST_CASE("language_server_initializes_workspace_folders_for_studio_plugin_messages")
+{
+    TestClient client;
+    LanguageServer server(&client, std::nullopt);
+
+    // Indexing throws errors as the workspace doesn't exist
+    client.globalConfig.index.enabled = false;
+
+    auto workspaceUri = Uri::file("project");
+
+    lsp::InitializeParams initializeParams;
+    std::vector<lsp::WorkspaceFolder> workspaceFolders;
+    workspaceFolders.emplace_back(lsp::WorkspaceFolder{workspaceUri, "project"});
+    initializeParams.workspaceFolders = workspaceFolders;
+
+    server.onRequest(0, "initialize", initializeParams);
+    server.onNotification("initialized", std::make_optional(lsp::InitializedParams{}));
+
+    auto workspaceFolder = server.findWorkspace(workspaceUri.resolvePath("example.luau"), /* shouldInitialize= */ false);
+    REQUIRE(workspaceFolder);
+    CHECK_FALSE(workspaceFolder->isReady);
+
+    // The Studio plugin can send the DataModel before any file in the workspace is opened
+    server.onNotification("$/plugin/full", json::parse(R"({
+        "Id": 1, "Session": "session-1", "Name": "game", "ClassName": "DataModel", "Children": [
+            { "Id": 2, "Name": "ReplicatedStorage", "ClassName": "ReplicatedStorage", "Children": [
+                { "Id": 3, "Name": "Assets", "ClassName": "Folder" }
+            ] }
+        ]
+    })"));
+
+    CHECK(workspaceFolder->isReady);
+    auto platform = dynamic_cast<RobloxPlatform*>(workspaceFolder->platform.get());
+    REQUIRE(platform);
+    CHECK(platform->rootSourceNode->walkPath("ReplicatedStorage/Assets"));
 
     server.shutdown();
 }

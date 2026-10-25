@@ -27,6 +27,13 @@ LUAU_FASTFLAG(LuauSolverV2)
     if (!params) \
         throw json_rpc::JsonRpcException(lsp::ErrorCode::InvalidParams, "params not provided for " method);
 
+/// Studio plugin messages apply to every workspace, including workspaces which have not been initialized yet
+/// because none of their files have been opened
+static bool isStudioPluginMethod(std::string_view method)
+{
+    return Luau::startsWith(method, "$/plugin/");
+}
+
 LanguageServer::LanguageServer(LSPClient* aClient, std::optional<Luau::Config> aDefaultConfig)
     : client(aClient)
     , defaultConfig(std::move(aDefaultConfig))
@@ -408,6 +415,9 @@ void LanguageServer::onRequest(const id_type& id, const std::string& method, std
         std::optional<json> platformResponse = std::nullopt;
         for (auto& workspace : workspaceFolders)
         {
+            if (isStudioPluginMethod(method))
+                workspace->lazyInitialize();
+
             if (workspace->platform)
                 if (auto result = workspace->platform->handleRequest(method, baseParams))
                     platformResponse = std::move(result);
@@ -489,6 +499,9 @@ void LanguageServer::onNotification(const std::string& method, std::optional<jso
         bool handled = false;
         for (auto& workspace : workspaceFolders)
         {
+            if (isStudioPluginMethod(method))
+                workspace->lazyInitialize();
+
             if (workspace->platform && workspace->platform->handleNotification(method, params))
                 handled = true;
         }
@@ -521,7 +534,7 @@ void LanguageServer::clearCancellationToken(const json_rpc::JsonRpcMessage& msg)
 
 static bool notificationRequiresWorkspace(std::string_view method)
 {
-    return Luau::startsWith(method, "textDocument/") || Luau::startsWith(method, "workspace/");
+    return Luau::startsWith(method, "textDocument/") || Luau::startsWith(method, "workspace/") || isStudioPluginMethod(method);
 }
 
 static std::string id_to_string(const json_rpc::id_type& id)

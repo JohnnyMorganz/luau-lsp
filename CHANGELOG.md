@@ -18,6 +18,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Studio Plugin: instances moved into an included instance from a non-included instance (e.g. from `CoreGui` into `Workspace`) are now synced
+- The DataModel sent by the Studio Plugin is no longer ignored when no file of the workspace has been opened yet
 - VSCode extension: Studio Plugin requests are now forwarded to the language server after it restarts, rather than being dropped until VSCode is restarted. The DataModel is resent to the restarted language server on the next change in Studio ([#1324](https://github.com/JohnnyMorganz/luau-lsp/issues/1324))
 
 ## [1.70.1] - 2026-09-27
