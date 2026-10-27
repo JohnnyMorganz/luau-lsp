@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include <unordered_map>
 #include <vector>
 #include "nlohmann/json.hpp"
 
@@ -38,12 +40,14 @@ struct ClientTypesConfiguration
     std::unordered_map<std::string, std::string> definitionFiles{};
     /// A list of globals to remove from the global scope. Accepts full libraries or particular functions (e.g., `table` or `table.clone`)
     std::vector<std::string> disabledGlobals{};
+    /// Data files matching these globs will infer matching string literals as string singletons when imported
+    std::unordered_map<std::string, std::vector<std::string>> dataFilesForceStringletons{};
 };
 
 // TODO: ser/de defined manually to retain backwards compatibility of 'definitionsFiles' being an array
 inline void to_json(nlohmann::json& nlohmann_json_j, const ClientTypesConfiguration& nlohmann_json_t)
 {
-    NLOHMANN_JSON_EXPAND(NLOHMANN_JSON_PASTE(NLOHMANN_JSON_TO, roblox, definitionFiles, disabledGlobals))
+    NLOHMANN_JSON_EXPAND(NLOHMANN_JSON_PASTE(NLOHMANN_JSON_TO, roblox, definitionFiles, disabledGlobals, dataFilesForceStringletons))
 }
 inline void from_json(const nlohmann::json& json, ClientTypesConfiguration& object)
 {
@@ -51,6 +55,8 @@ inline void from_json(const nlohmann::json& json, ClientTypesConfiguration& obje
         json["roblox"].get_to(object.roblox);
     if (json.contains("disabledGlobals"))
         json["disabledGlobals"].get_to(object.disabledGlobals);
+    if (json.contains("dataFilesForceStringletons"))
+        json["dataFilesForceStringletons"].get_to(object.dataFilesForceStringletons);
     if (json.contains("definitionFiles"))
     {
         if (json["definitionFiles"].is_object())
