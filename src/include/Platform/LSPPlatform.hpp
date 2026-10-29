@@ -137,6 +137,13 @@ public:
         return false;
     }
 
+    /// Handles a platform-specific request. Returns std::nullopt if the request is not handled by this platform,
+    /// otherwise the response result. Throw a JsonRpcException to respond with an error
+    virtual std::optional<json> handleRequest(const std::string& method, std::optional<json> params)
+    {
+        return std::nullopt;
+    }
+
     static std::unique_ptr<LSPPlatform> getPlatform(
         const ClientConfiguration& config, WorkspaceFileResolver* fileResolver, WorkspaceFolder* workspaceFolder = nullptr);
 

@@ -88,6 +88,9 @@ struct PluginNode
     std::string className = "";
     std::vector<std::string> filePaths{};
     std::vector<PluginNode*> children{};
+    // Identifier assigned by the Studio plugin, used to address this node in `$/plugin/changes`. 0 if not provided
+    uint64_t id = 0;
+    PluginNode* parent = nullptr;
 
     static PluginNode* fromJson(const json& j, Luau::TypedAllocator<PluginNode>& allocator);
 };
@@ -102,6 +105,18 @@ class RobloxPlatform : public LSPPlatform
 private:
     // Plugin-provided DataModel information
     PluginNode* pluginInfo = nullptr;
+    // Session of the last full DataModel received from the plugin. Incremental changes are only applied if they
+    // belong to this session, otherwise the plugin is asked to resend the full DataModel
+    std::optional<std::string> pluginSession = std::nullopt;
+    // Plugin nodes indexed by their plugin-assigned id, used to apply incremental changes
+    std::unordered_map<uint64_t, PluginNode*> pluginNodesById{};
+
+    void indexPluginNodes(PluginNode* node);
+    void unindexPluginNodes(const PluginNode* node);
+    PluginNode* getPluginNode(const json& id) const;
+    void applyPluginChange(const json& change);
+    void compactPluginNodes();
+    void onPluginInfoChanged();
 
     mutable std::unordered_map<Uri, const SourceNode*, UriHash> realPathsToSourceNodes{};
 
@@ -132,6 +147,8 @@ public:
     void setPluginInfo(PluginNode* info)
     {
         pluginInfo = info;
+        pluginSession = std::nullopt;
+        pluginNodesById.clear();
     }
     bool updateSourceMap();
     bool updateSourceMapFromContents(const std::string& sourceMapContents);
@@ -199,8 +216,12 @@ public:
     lsp::ColorPresentationResult colorPresentation(const lsp::ColorPresentationParams& params) override;
 
     void onStudioPluginFullChange(const json& dataModel);
+    /// Applies incremental DataModel changes from the plugin. Returns false if they could not be applied (e.g. the
+    /// language server restarted since the last full DataModel), in which case the plugin must resend the full DataModel
+    bool onStudioPluginChanges(const json& params);
     void onStudioPluginClear();
     bool handleNotification(const std::string& method, std::optional<json> params) override;
+    std::optional<json> handleRequest(const std::string& method, std::optional<json> params) override;
 
 
     using LSPPlatform::LSPPlatform;

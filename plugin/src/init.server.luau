@@ -45,7 +45,7 @@ settings.onChanged:connect(function()
 
 	lspManager:setAddress(settings:get("host"), settings:get("port"))
 
-	if lspManager:isConnected() then
+	if lspManager:isConnected() or lspManager:isConnecting() then
 		-- Silently reload with the new settings
 		Log.setLevel(Log.Level.WARN)
 
@@ -90,6 +90,8 @@ end)
 
 --#region User Interface
 
+local ConnectButton: PluginToolbarButton
+
 --- Toggles the connection to the language server.
 --- Guards against toggling when settings aren't loaded.
 local function toggleConnection()
@@ -98,15 +100,19 @@ local function toggleConnection()
 		return
 	end
 
-	if lspManager:isConnected() then
+	if lspManager:isConnected() or lspManager:isConnecting() then
 		lspManager:disconnect()
 	else
+		-- Connecting large DataModels can take a few seconds, so show that it is in progress
+		Log.info("Connecting to the language server...")
+		ConnectButton:SetActive(true)
 		lspManager:connect()
+		ConnectButton:SetActive(false)
 	end
 end
 
 --- Main toolbar button for toggling the language server connection.
-local ConnectButton = toolbar:CreateButton(
+ConnectButton = toolbar:CreateButton(
 	"Luau Language Server Setup",
 	"Toggle Menu",
 	if lspManager:isConnected() then Assets.ConnectedIcon else Assets.Icon,
@@ -118,6 +124,7 @@ ConnectButton.Click:Connect(toggleConnection)
 --- Update the toolbar icon based on connection state.
 lspManager.onConnectionChanged:connect(function(isConnected: boolean)
 	ConnectButton.Icon = if isConnected then Assets.ConnectedIcon else Assets.Icon
+	ConnectButton:SetActive(false)
 end)
 
 --- Plugin action for keyboard shortcut support.
