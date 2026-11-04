@@ -27,7 +27,7 @@ struct FilePathInformation
 
 FilePathInformation getFilePath(const WorkspaceFileResolver* fileResolver, const std::string& moduleName);
 
-bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportFormat format, bool annotate);
+bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportFormat format, bool annotate, bool failOnWarnings);
 std::vector<std::string> getFilesToAnalyze(const std::vector<std::string>& paths, WorkspaceFolder* workspace = nullptr);
 void applySettings(const std::string& settingsContents, CliClient& client);
 int startAnalyze(const argparse::ArgumentParser& program);

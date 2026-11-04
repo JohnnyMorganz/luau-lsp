@@ -225,6 +225,10 @@ int main(int argc, char** argv)
         .help("output the source file with type annotations after typechecking")
         .default_value(false)
         .implicit_value(true);
+    analyze_command.add_argument("--fail-on-warnings")
+        .help("exit with a failure code on warnings (by default, only errors count)")
+        .default_value(false)
+        .implicit_value(true);
     analyze_command.add_argument("--timetrace")
         .help("record compiler time tracing information into trace.json")
         .default_value(false)

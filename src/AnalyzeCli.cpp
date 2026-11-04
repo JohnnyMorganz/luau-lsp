@@ -78,7 +78,7 @@ static void reportWarning(ReportFormat format, const char* name, const Luau::Lin
     report(format, name, warning.location, Luau::LintWarning::getName(warning.code), warning.text.c_str());
 }
 
-bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportFormat format, bool annotate)
+bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportFormat format, bool annotate, bool failOnWarnings)
 {
     Luau::ModuleName name = workspace.fileResolver.getModuleName(Uri::file(path));
 
@@ -115,7 +115,7 @@ bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportForm
         printf("%s", annotated.c_str());
     }
 
-    return reportedErrors == 0 && cr.lintResult.errors.empty();
+    return reportedErrors == 0 && cr.lintResult.errors.empty() && (!failOnWarnings || cr.lintResult.warnings.empty());
 }
 
 std::vector<std::string> getFilesToAnalyze(const std::vector<std::string>& paths, WorkspaceFolder* workspace)
@@ -213,6 +213,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
 {
     ReportFormat format = ReportFormat::Default;
     bool annotate = program.is_used("--annotate");
+    auto failOnWarnings = program.is_used("--fail-on-warnings");
     auto sourcemapPath = program.present<std::string>("--sourcemap");
     auto baseLuaurc = program.present<std::string>("--base-luaurc");
     auto settingsPath = program.present<std::string>("--settings");
@@ -345,7 +346,7 @@ int startAnalyze(const argparse::ArgumentParser& program)
     int failed = 0;
 
     for (const auto& path : files)
-        failed += !analyzeFile(workspace, path, format, annotate);
+        failed += !analyzeFile(workspace, path, format, annotate, failOnWarnings);
 
     if (!client.diagnostics.empty())
     {
