@@ -2412,6 +2412,7 @@
                             },
                             {
                                 "Name": "Interpolation",
+                                "Default": "Cubic",
                                 "Type": {
                                     "Category": "Enum",
                                     "Name": "KeyInterpolationMode"
@@ -2445,6 +2446,7 @@
                             },
                             {
                                 "Name": "Interpolation",
+                                "Default": "Cubic",
                                 "Type": {
                                     "Category": "Enum",
                                     "Name": "KeyInterpolationMode"
