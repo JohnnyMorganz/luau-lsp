@@ -16506,7 +16506,7 @@ declare extern type Player extends Instance with
 	SimulationRadiusChanged: RBXScriptSignal<number>
 	StatsAvailable: RBXScriptSignal<string>
 	StreamingPinComplete: RBXScriptSignal<Instance>
-	Team: Team
+	Team: Team?
 	TeamColor: BrickColor
 	Teleported: boolean
 	TeleportedIn: boolean
@@ -20564,11 +20564,11 @@ declare Font: {
 }
 
 declare FloatCurveKey: {
-	new: ((time: number, value: number, Interpolation: EnumKeyInterpolationMode) -> FloatCurveKey),
+	new: ((time: number, value: number, Interpolation: EnumKeyInterpolationMode?) -> FloatCurveKey),
 }
 
 declare RotationCurveKey: {
-	new: ((time: number, value: CFrame, Interpolation: EnumKeyInterpolationMode) -> RotationCurveKey),
+	new: ((time: number, value: CFrame, Interpolation: EnumKeyInterpolationMode?) -> RotationCurveKey),
 }
 
 declare Secret: {

@@ -15039,7 +15039,7 @@ declare extern type Player extends Instance with
 	SimulationRadius: number
 	SimulationRadiusChanged: RBXScriptSignal<number>
 	StatsAvailable: RBXScriptSignal<string>
-	Team: Team
+	Team: Team?
 	TeamColor: BrickColor
 	User: User
 	UserId: number
@@ -18063,11 +18063,11 @@ declare Font: {
 }
 
 declare FloatCurveKey: {
-	new: ((time: number, value: number, Interpolation: EnumKeyInterpolationMode) -> FloatCurveKey),
+	new: ((time: number, value: number, Interpolation: EnumKeyInterpolationMode?) -> FloatCurveKey),
 }
 
 declare RotationCurveKey: {
-	new: ((time: number, value: CFrame, Interpolation: EnumKeyInterpolationMode) -> RotationCurveKey),
+	new: ((time: number, value: CFrame, Interpolation: EnumKeyInterpolationMode?) -> RotationCurveKey),
 }
 
 declare Secret: {
