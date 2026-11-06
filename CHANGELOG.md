@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- Added `--fail-on-warnings` flag which produces a failing exit code on warnings in addition to errors ([#1461](https://github.com/JohnnyMorganz/luau-lsp/issues/1461))
+
 ### Changed
 
 - Sync to upstream Luau 0.742
