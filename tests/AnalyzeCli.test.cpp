@@ -9,6 +9,9 @@
 #include "Luau/TypeAttach.h"
 #include "Luau/PrettyPrinter.h"
 
+#include <iostream>
+#include <sstream>
+
 TEST_SUITE_BEGIN("AnalyzeCli");
 
 namespace std
@@ -428,6 +431,117 @@ TEST_CASE("analyze_resolves_game_requires_from_file_outside_sourcemap")
 
     auto mainPath = Uri::file(t.path() + "/dist/main.luau").fsPath();
     CHECK(analyzeFile(workspace, mainPath, ReportFormat::Default, false));
+}
+
+namespace
+{
+/// Records client-facing messages and dynamic registrations so tests can assert on
+/// severity and registration without a JSON-RPC transport
+struct RecordingClient : Client
+{
+    mutable std::string log{};
+    mutable int registrations = 0;
+
+    ClientConfiguration getConfiguration(const lsp::DocumentUri&) override
+    {
+        return globalConfig;
+    }
+
+    void sendLogMessage(const lsp::MessageType& type, const std::string& message) const override
+    {
+        const char* label = "LOG";
+        switch (type)
+        {
+        case lsp::MessageType::Error:
+            label = "ERROR";
+            break;
+        case lsp::MessageType::Warning:
+            label = "WARN";
+            break;
+        case lsp::MessageType::Info:
+            label = "INFO";
+            break;
+        case lsp::MessageType::Log:
+            break;
+        }
+        log += std::string("[") + label + "] " + message + "\n";
+    }
+
+    void publishDiagnostics(const lsp::PublishDiagnosticsParams&) override {}
+
+    void registerCapability(const std::string&, const std::string&, const json&) override
+    {
+        registrations += 1;
+    }
+};
+
+void configureRobloxSourcemap(Client& client)
+{
+    client.globalConfig = Luau::LanguageServer::defaultTestClientConfiguration();
+    client.definitionsFiles.emplace("@roblox", "./tests/testdata/standard_definitions.d.luau");
+    client.globalConfig.platform.type = LSPPlatformConfig::Roblox;
+    client.globalConfig.sourcemap.enabled = true;
+    client.globalConfig.sourcemap.sourcemapFile = "sourcemap.json";
+}
+} // namespace
+
+TEST_CASE("one_shot_cli_analysis_does_not_warn_about_sourcemap_watching")
+{
+    // The CLI analyzes once and exits, so it cannot receive dynamic watcher registrations.
+    // Emitting a WARN made warning-gated CLI usage fail for a diagnostic that cannot be acted on.
+    TempDir t("analyze_cli_no_watch_warning");
+    t.write_child("sourcemap.json", R"({ "name": "Game", "className": "DataModel", "children": [] })");
+    t.write_child("src/init.luau", "return {}");
+
+    CliClient client;
+    initRobloxCliClient(client);
+    REQUIRE_FALSE(client.hasLiveSession());
+
+    std::ostringstream captured;
+    auto* previous = std::cerr.rdbuf(captured.rdbuf());
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
+    std::cerr.rdbuf(previous);
+
+    const std::string output = captured.str();
+    CHECK(output.find("didChangeWatchedFiles") == std::string::npos);
+    CHECK(output.find("[WARN]") == std::string::npos);
+}
+
+TEST_CASE("live_client_without_dynamic_registration_still_warns_about_sourcemap_watching")
+{
+    TempDir t("analyze_cli_watch_warning_control");
+    t.write_child("sourcemap.json", R"({ "name": "Game", "className": "DataModel", "children": [] })");
+
+    RecordingClient client;
+    configureRobloxSourcemap(client);
+    REQUIRE(client.hasLiveSession());
+
+    WorkspaceFolder workspace(&client, "Test", Uri::file(t.path()), std::nullopt);
+    workspace.setupWithConfiguration(client.globalConfig);
+    workspace.isReady = true;
+
+    CHECK(client.log.find("[WARN] client does not allow didChangeWatchedFiles registration") != std::string::npos);
+    CHECK_EQ(client.registrations, 0);
+}
+
+TEST_CASE("live_client_with_dynamic_registration_registers_sourcemap_watcher")
+{
+    TempDir t("analyze_cli_watch_registration_control");
+    t.write_child("sourcemap.json", R"({ "name": "Game", "className": "DataModel", "children": [] })");
+
+    RecordingClient client;
+    configureRobloxSourcemap(client);
+    client.capabilities.workspace.emplace();
+    client.capabilities.workspace->didChangeWatchedFiles.emplace();
+    client.capabilities.workspace->didChangeWatchedFiles->dynamicRegistration = true;
+
+    WorkspaceFolder workspace(&client, "Test", Uri::file(t.path()), std::nullopt);
+    workspace.setupWithConfiguration(client.globalConfig);
+    workspace.isReady = true;
+
+    CHECK(client.log.find("[WARN]") == std::string::npos);
+    CHECK_EQ(client.registrations, 1);
 }
 
 TEST_SUITE_END();

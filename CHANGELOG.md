@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- The `analyze` CLI no longer logs `[WARN] client does not allow didChangeWatchedFiles registration - automatic updating on sourcemap changes disabled` when a Roblox sourcemap is enabled. One-shot CLI analysis has no session that could receive dynamic watcher registrations, so it now skips the registration instead of warning; language server clients without dynamic registration still warn.
+
 ### Changed
 
 - Sync to upstream Luau 0.742

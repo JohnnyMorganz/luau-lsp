@@ -32,6 +32,14 @@ struct Client
     /// Global configuration. These are the default settings that we will use if we don't have the workspace stored in configStore
     ClientConfiguration globalConfig{};
 
+    /// Whether the client keeps a live LSP session with the server for the lifetime of the process.
+    /// One-shot tools such as the CLI analyze command have no session, so capability registration
+    /// and change notifications are not applicable to them.
+    virtual bool hasLiveSession() const
+    {
+        return true;
+    }
+
     virtual ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) = 0;
 
     virtual std::optional<lsp::ProgressToken> getWorkspaceDiagnosticsToken() const
