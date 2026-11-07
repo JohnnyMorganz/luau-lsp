@@ -35,8 +35,13 @@ void RobloxPlatform::setupWithConfiguration(const ClientConfiguration& config)
                                                                    "'. You can use the Studio Plugin for DataModel info instead");
         }
 
-        if (client->capabilities.workspace && client->capabilities.workspace->didChangeWatchedFiles &&
-            client->capabilities.workspace->didChangeWatchedFiles->dynamicRegistration)
+        if (!client->hasLiveSession())
+        {
+            // One-shot tools analyze once and exit, so there is no session to receive watcher registrations
+            client->sendTrace("workspace: sourcemap watching is not applicable without a live client session");
+        }
+        else if (client->capabilities.workspace && client->capabilities.workspace->didChangeWatchedFiles &&
+                 client->capabilities.workspace->didChangeWatchedFiles->dynamicRegistration)
         {
             client->sendLogMessage(lsp::MessageType::Info, "registering didChangedWatchedFiles capability");
 

@@ -22,6 +22,12 @@ struct CliClient : public Client
 {
     mutable std::vector<std::pair<Uri, std::string>> diagnostics{};
 
+    // The CLI analyzes once and exits, so there is no session to register watchers with
+    bool hasLiveSession() const override
+    {
+        return false;
+    }
+
     ClientConfiguration getConfiguration(const lsp::DocumentUri& uri) override
     {
         return globalConfig;
