@@ -9,6 +9,7 @@
 #include "Luau/TimeTrace.h"
 
 #include <unordered_set>
+#include "glob/match.h"
 #include "LuauFileUtils.hpp"
 
 std::optional<Luau::ModuleName> RobloxPlatform::resolveToVirtualPath(const Uri& uri) const
@@ -54,6 +55,25 @@ Luau::SourceCode::Type RobloxPlatform::sourceCodeTypeFromPath(const Uri& path) c
     return Luau::SourceCode::Type::Module;
 }
 
+static std::vector<std::string> getForceStringletonGlobsForDataFile(const WorkspaceFileResolver* fileResolver, const Uri& path)
+{
+    if (!fileResolver->client)
+        return {};
+
+    auto relativePathString = path.lexicallyRelative(fileResolver->rootUri);
+    auto filename = path.filename();
+    auto config = fileResolver->client->getConfiguration(fileResolver->rootUri);
+    std::vector<std::string> result;
+
+    for (const auto& [filePattern, stringPatterns] : config.types.dataFilesForceStringletons)
+    {
+        if (glob::gitignore_glob_match(relativePathString, filePattern) || glob::gitignore_glob_match(filename, filePattern))
+            result.insert(result.end(), stringPatterns.begin(), stringPatterns.end());
+    }
+
+    return result;
+}
+
 std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName& name, const Uri& path) const
 {
     LUAU_TIMETRACE_SCOPE("RobloxPlatform::readSourceCode", "LSP");
@@ -64,11 +84,22 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
     if (!source)
         return std::nullopt;
 
+    auto forceStringletonGlobs = getForceStringletonGlobsForDataFile(fileResolver, path);
+    DataFileToLuauOptions options;
+    options.shouldUseStringSingleton = [forceStringletonGlobs = std::move(forceStringletonGlobs)](const std::string& value)
+    {
+        for (const auto& pattern : forceStringletonGlobs)
+            if (glob::glob_match(value, pattern))
+                return true;
+
+        return false;
+    };
+
     if (path.extension() == ".json")
     {
         try
         {
-            source = "--!strict\nreturn " + jsonValueToLuau(json::parse(*source));
+            source = "--!strict\nreturn " + jsonValueToLuau(json::parse(*source), options);
         }
         catch (const std::exception& e)
         {
@@ -83,7 +114,7 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
         {
             std::string tomlSource(*source);
             std::istringstream tomlSourceStream(tomlSource, std::ios_base::binary | std::ios_base::in);
-            source = "--!strict\nreturn " + tomlValueToLuau(toml::parse(tomlSourceStream, path.fsPath()));
+            source = "--!strict\nreturn " + tomlValueToLuau(toml::parse(tomlSourceStream, path.fsPath()), options);
         }
         catch (const std::exception& e)
         {
@@ -97,7 +128,7 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
         try
         {
             ryml::Tree tree = ryml::parse_in_arena(ryml::to_csubstr(*source));
-            source = "--!strict\nreturn " + yamlValueToLuau(tree.rootref());
+            source = "--!strict\nreturn " + yamlValueToLuau(tree.rootref(), options);
         }
         catch (const std::exception& e)
         {

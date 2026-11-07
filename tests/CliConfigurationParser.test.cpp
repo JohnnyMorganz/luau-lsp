@@ -23,4 +23,20 @@ TEST_CASE("convert dotted dictionary")
     CHECK_EQ(output["bar"], "testing");
 }
 
+TEST_CASE("convert data file force stringletons")
+{
+    auto config = dottedToClientConfiguration(R"DOTTED_CONFIG(
+        {
+            "luau-lsp.types.dataFilesForceStringletons": {
+                "*.json": ["*"],
+                "data/**": ["admin-*"]
+            }
+        }
+    )DOTTED_CONFIG");
+
+    REQUIRE_EQ(config.types.dataFilesForceStringletons.size(), 2);
+    CHECK_EQ(config.types.dataFilesForceStringletons["*.json"], std::vector<std::string>{"*"});
+    CHECK_EQ(config.types.dataFilesForceStringletons["data/**"], std::vector<std::string>{"admin-*"});
+}
+
 TEST_SUITE_END();
