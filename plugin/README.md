@@ -19,7 +19,8 @@ This plugin acts as a bridge between Roblox Studio and an external Luau Language
 
 1. Click the **Connect** button in the Plugin ribbon to toggle the connection
 2. Alternatively, use the keyboard shortcut via the plugin action
-3. The toolbar icon will show a green indicator when connected
+3. The button is highlighted while connecting, which can take a couple of seconds in large places
+4. The toolbar icon will show a green indicator when connected
 
 ### Configuring Settings
 
@@ -58,7 +59,7 @@ By default, the plugin tracks these services:
 src/
 ├── init.server.luau      # Main entry point and UI setup
 ├── LSPManager.luau       # Connection lifecycle and server communication
-├── InstanceTracker.luau  # DataModel change detection and encoding
+├── InstanceTracker.luau  # DataModel change tracking and encoding
 ├── ServerEndpoints.luau  # HTTP request handling
 ├── types.luau            # Type definitions
 ├── Assets.luau           # Toolbar icon asset IDs
@@ -67,6 +68,24 @@ src/
 │   └── DefaultSettings.luau  # Default configuration values
 └── Utils/
     ├── Debounce.luau     # Rate-limiting utility
+    ├── FrameBudget.luau  # Spreads long-running work over multiple frames
     ├── Log.luau          # Leveled logging system
     └── Signal.luau       # Event/callback management
+```
+
+After sending the full DataModel tree when connecting, the plugin only sends what changed. `InstanceTracker` keeps a
+mirror of the tracked instances: instance events mark instances as dirty, and the dirty instances are later reconciled
+against the DataModel to produce the changes to send.
+
+The file paths of instances synced with Script Sync are looked up with `InstanceFileSyncService:GetSyncedInstance`,
+which is slow (around 0.6ms per file). `LSPManager` reuses the instance found for a file path while it keeps the same
+full name, and when connecting, sends the DataModel before looking up the file paths it has not looked up yet.
+
+## Testing
+
+The instance tracking is tested against a mock DataModel with [Lune](https://github.com/lune-org/lune). From the `plugin`
+directory, run:
+
+```sh
+lune run tests/run.luau
 ```

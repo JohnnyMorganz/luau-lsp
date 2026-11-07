@@ -153,31 +153,58 @@ The companion plugin sends HTTP requests to the following endpoints on localhost
 
 - `GET /get-file-paths`
 - `POST /full`
+- `POST /changes`
 - `POST /clear`
 
-The Language Server listens to the following notifications from a language client:
+The Language Server listens to the following notifications and requests from a language client:
 
-- `$/plugin/full`
-- `$/plugin/clear`
+- `$/plugin/full` (notification)
+- `$/plugin/changes` (request)
+- `$/plugin/clear` (notification)
 
 It is optional to implement support for the companion plugin. This involves creating a HTTP listener on your language
-client, which then sends the corresponding LSP notification to the server.
+client, which then sends the corresponding LSP notification or request to the server.
 
 The `POST /full` request receives a full DataModel tree with the following body:
 
 ```json
 {
     "tree": {
+        "Id": 1,
+        "Session": "string",
         "Name": "string",
         "ClassName": "string",
-        "Children": {
+        "FilePaths": ["string"],
+        "Children": [
             ...
-        }
+        ]
     }
 }
 ```
 
 The `$/plugin/full` LSP notification expects the `tree` property directly sent (i.e., you should send `request.body.tree`).
+
+`FilePaths` and `Children` are omitted when empty.
+
+After sending the full tree, the plugin sends incremental changes to it with `POST /changes`. `Id` identifies an instance,
+and `Session` (only set on the root) identifies the full tree that changes apply to. The request has the following body,
+and the changes are applied in order:
+
+```json
+{
+    "session": "string",
+    "changes": [
+        { "Type": "Add", "Parent": 1, "Instance": { "Id": 2, "Name": "string", "ClassName": "string", "Children": [] } },
+        { "Type": "Update", "Id": 2, "Name": "string?", "Parent": 1, "FilePaths": ["string"] },
+        { "Type": "Remove", "Id": 2 }
+    ]
+}
+```
+
+`Update` only contains the properties that changed. The body should be sent directly as the `$/plugin/changes` LSP
+request. Respond with `200` if the request succeeds. If the request fails (for example, because the language server
+restarted and no longer has the full tree), respond with `409`: the plugin then sends the full tree again. If the
+endpoint is not implemented, the plugin sends the full tree on every change instead.
 
 Further Reference:
 

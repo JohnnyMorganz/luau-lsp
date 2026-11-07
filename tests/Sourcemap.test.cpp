@@ -5,6 +5,8 @@
 #include "Protocol/Workspace.hpp"
 #include "LuauFileUtils.hpp"
 
+#include <random>
+
 TEST_SUITE_BEGIN("SourcemapTests");
 
 TEST_CASE("getScriptFilePath")
@@ -1929,6 +1931,388 @@ TEST_CASE_FIXTURE(Fixture, "script_context_resolution_respects_file_path_suffixe
     auto sharedModule = (*replicatedStorage)->findChild("SharedModule");
     REQUIRE(sharedModule);
     CHECK_EQ((*sharedModule)->scriptContext, ScriptContext::Shared);
+}
+
+static json pluginChanges(const std::string& session, const json& changes)
+{
+    return json{{"session", session}, {"changes", changes}};
+}
+
+static const json kPluginDataModelWithIds = json::parse(R"(
+    {
+        "Id": 1,
+        "Session": "session-1",
+        "Name": "game",
+        "ClassName": "DataModel",
+        "Children": [
+            {
+                "Id": 2,
+                "Name": "ReplicatedStorage",
+                "ClassName": "ReplicatedStorage",
+                "Children": [
+                    { "Id": 3, "Name": "Assets", "ClassName": "Folder", "Children": [{ "Id": 4, "Name": "Sword", "ClassName": "Tool" }] }
+                ]
+            },
+            { "Id": 5, "Name": "Workspace", "ClassName": "Workspace" }
+        ]
+    }
+)");
+
+TEST_CASE_FIXTURE(Fixture, "plugin_changes_add_rename_reparent_and_remove_instances")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+
+    auto findPath = [&](const std::string& path) -> const SourceNode*
+    {
+        return platform->rootSourceNode->walkPath(path);
+    };
+    REQUIRE(findPath("ReplicatedStorage/Assets/Sword"));
+
+    // Add a subtree
+    REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([
+        {
+            "Type": "Add",
+            "Parent": 5,
+            "Instance": { "Id": 6, "Name": "Map", "ClassName": "Model", "Children": [{ "Id": 7, "Name": "Spawn", "ClassName": "SpawnLocation" }] }
+        }
+    ])"))));
+    REQUIRE(findPath("Workspace/Map/Spawn"));
+    CHECK(platform->virtualPathsToSourceNodes.count("game/Workspace/Map/Spawn") == 1);
+
+    // Rename an instance
+    REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Update", "Id": 4, "Name": "Katana" }])"))));
+    CHECK_FALSE(findPath("ReplicatedStorage/Assets/Sword"));
+    REQUIRE(findPath("ReplicatedStorage/Assets/Katana"));
+    CHECK(platform->virtualPathsToSourceNodes.count("game/ReplicatedStorage/Assets/Sword") == 0);
+
+    // Reparent a subtree
+    REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Update", "Id": 3, "Parent": 6 }])"))));
+    CHECK_FALSE(findPath("ReplicatedStorage/Assets"));
+    REQUIRE(findPath("Workspace/Map/Assets/Katana"));
+
+    // Remove a subtree
+    REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Remove", "Id": 6 }])"))));
+    CHECK_FALSE(findPath("Workspace/Map"));
+    CHECK(platform->virtualPathsToSourceNodes.count("game/Workspace/Map/Assets/Katana") == 0);
+    REQUIRE(findPath("Workspace"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_changes_update_file_paths")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+
+    REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([
+        { "Type": "Add", "Parent": 3, "Instance": { "Id": 6, "Name": "Module", "ClassName": "ModuleScript" } },
+        { "Type": "Update", "Id": 6, "FilePaths": ["src/Module.luau"] }
+    ])"))));
+
+    auto uri = workspace.rootUri.resolvePath("src/Module.luau");
+    CHECK_EQ(platform->resolveToVirtualPath(uri), "game/ReplicatedStorage/Assets/Module");
+
+    REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Update", "Id": 6, "FilePaths": [] }])"))));
+    CHECK_FALSE(platform->resolveToVirtualPath(uri));
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_changes_provide_datamodel_types")
+{
+    client->globalConfig.diagnostics.strictDatamodelTypes = true;
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+
+    REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([
+        { "Type": "Add", "Parent": 5, "Instance": { "Id": 6, "Name": "Baseplate", "ClassName": "Part" } }
+    ])"))));
+
+    auto result = check(R"(
+        --!strict
+        local part = game:GetService("Workspace").Baseplate
+        local tool = game:GetService("ReplicatedStorage").Assets.Sword
+    )");
+    LUAU_LSP_REQUIRE_NO_ERRORS(result);
+
+    REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Update", "Id": 6, "Name": "Floor" }])"))));
+
+    auto result2 = check(R"(
+        --!strict
+        local part = game:GetService("Workspace").Baseplate
+    )");
+    REQUIRE_EQ(result2.errors.size(), 1);
+    CHECK_EQ(Luau::get<Luau::UnknownProperty>(result2.errors[0])->key, "Baseplate");
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_changes_require_a_matching_session")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    auto rename = json::parse(R"([{ "Type": "Update", "Id": 4, "Name": "Katana" }])");
+
+    // No DataModel has been received yet (e.g. the language server restarted)
+    CHECK_FALSE(platform->onStudioPluginChanges(pluginChanges("session-1", rename)));
+
+    // DataModel from a plugin that does not support incremental changes
+    auto legacyDataModel = kPluginDataModelWithIds;
+    legacyDataModel.erase("Session");
+    platform->onStudioPluginFullChange(legacyDataModel);
+    CHECK_FALSE(platform->onStudioPluginChanges(pluginChanges("session-1", rename)));
+
+    platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+    CHECK_FALSE(platform->onStudioPluginChanges(pluginChanges("session-2", rename)));
+    CHECK_FALSE(platform->onStudioPluginChanges(json{{"changes", rename}}));
+    CHECK(platform->onStudioPluginChanges(pluginChanges("session-1", rename)));
+
+    // Clearing the DataModel invalidates the session
+    platform->onStudioPluginClear();
+    CHECK_FALSE(platform->onStudioPluginChanges(pluginChanges("session-1", rename)));
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_changes_that_cannot_be_applied_require_a_full_resync")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+
+    CHECK_FALSE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Remove", "Id": 999 }])"))));
+
+    // The session is discarded, even for changes that would otherwise be valid
+    CHECK_FALSE(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Update", "Id": 4, "Name": "Katana" }])"))));
+
+    platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+    CHECK(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Update", "Id": 4, "Name": "Katana" }])"))));
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_changes_reject_invalid_changes")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    for (const auto& invalidChange : {
+             R"({ "Type": "Update", "Id": 2, "Parent": 3 })",                                                   // parent to own descendant
+             R"({ "Type": "Update", "Id": 3, "Parent": 3 })",                                                   // parent to itself
+             R"({ "Type": "Remove", "Id": 1 })",                                                                // remove the root
+             R"({ "Type": "Add", "Parent": 5, "Instance": { "Id": 4, "Name": "Dupe", "ClassName": "Part" } })", // duplicate id
+             R"({ "Type": "Add", "Parent": 5, "Instance": { "Name": "NoId", "ClassName": "Part" } })",          // missing id
+             R"({ "Type": "Unknown", "Id": 2 })",
+         })
+    {
+        platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+        CHECK_FALSE(platform->onStudioPluginChanges(pluginChanges("session-1", json::array({json::parse(invalidChange)}))));
+    }
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_malformed_full_datamodel_keeps_the_previous_datamodel")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+
+    auto malformed = kPluginDataModelWithIds;
+    malformed["Children"][0]["FilePaths"] = json::array({1});
+    CHECK_THROWS(platform->onStudioPluginFullChange(malformed));
+
+    CHECK(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Update", "Id": 4, "Name": "Katana" }])"))));
+    CHECK(platform->rootSourceNode->walkPath("ReplicatedStorage/Assets/Katana"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "handle_request_routes_plugin_changes_request")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+
+    auto result =
+        platform->handleRequest("$/plugin/changes", pluginChanges("session-1", json::parse(R"([{ "Type": "Update", "Id": 4, "Name": "Katana" }])")));
+    REQUIRE(result);
+    CHECK(result->is_null());
+    CHECK(platform->rootSourceNode->walkPath("ReplicatedStorage/Assets/Katana"));
+
+    CHECK_THROWS_AS(platform->handleRequest("$/plugin/changes", pluginChanges("session-2", json::array())), JsonRpcException);
+    CHECK_FALSE(platform->handleRequest("$/plugin/unknown", std::nullopt));
+}
+
+TEST_CASE_FIXTURE(Fixture, "plugin_changes_compact_removed_instances")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+    platform->onStudioPluginFullChange(kPluginDataModelWithIds);
+
+    uint64_t nextId = 100;
+    for (int i = 0; i < 100; i++)
+    {
+        json children = json::array();
+        for (int j = 0; j < 100; j++)
+            children.push_back({{"Id", nextId++}, {"Name", "Part" + std::to_string(j)}, {"ClassName", "Part"}});
+        uint64_t folderId = nextId++;
+        json changes = json::array({
+            {{"Type", "Add"}, {"Parent", 5}, {"Instance", {{"Id", folderId}, {"Name", "Folder"}, {"ClassName", "Folder"}, {"Children", children}}}},
+        });
+        REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", changes)));
+        REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-1", json::array({{{"Type", "Remove"}, {"Id", folderId}}}))));
+    }
+
+    // 10,000 instances were added and removed, but only the 5 live instances should remain allocated after compaction
+    CHECK_LT(platform->pluginNodeAllocator.size(), 4096);
+    CHECK(platform->onStudioPluginChanges(pluginChanges("session-1", json::parse(R"([{ "Type": "Update", "Id": 4, "Name": "Katana" }])"))));
+    CHECK(platform->rootSourceNode->walkPath("ReplicatedStorage/Assets/Katana"));
+}
+
+namespace
+{
+/// A model of the Studio DataModel, used to verify that incremental changes produce the same result as a full DataModel
+struct PluginModelNode
+{
+    uint64_t id;
+    std::string name;
+    std::string className;
+    std::vector<std::string> filePaths{};
+    std::vector<std::unique_ptr<PluginModelNode>> children{};
+    PluginModelNode* parent = nullptr;
+
+    json toJson() const
+    {
+        json childrenJson = json::array();
+        for (const auto& child : children)
+            childrenJson.push_back(child->toJson());
+        return {{"Id", id}, {"Name", name}, {"ClassName", className}, {"FilePaths", filePaths}, {"Children", childrenJson}};
+    }
+
+    void collect(std::vector<PluginModelNode*>& nodes)
+    {
+        nodes.push_back(this);
+        for (auto& child : children)
+            child->collect(nodes);
+    }
+
+    bool isAncestorOf(const PluginModelNode* other) const
+    {
+        for (auto node = other->parent; node; node = node->parent)
+            if (node == this)
+                return true;
+        return false;
+    }
+
+    std::unique_ptr<PluginModelNode> detach()
+    {
+        auto& siblings = parent->children;
+        auto it = std::find_if(siblings.begin(), siblings.end(),
+            [this](const auto& child)
+            {
+                return child.get() == this;
+            });
+        auto self = std::move(*it);
+        siblings.erase(it);
+        parent = nullptr;
+        return self;
+    }
+
+    void append(std::unique_ptr<PluginModelNode> child)
+    {
+        child->parent = this;
+        children.push_back(std::move(child));
+    }
+};
+} // namespace
+
+TEST_CASE_FIXTURE(Fixture, "plugin_changes_are_equivalent_to_sending_the_full_datamodel")
+{
+    auto platform = dynamic_cast<RobloxPlatform*>(workspace.platform.get());
+
+    std::mt19937 rng(1234);
+    auto randomInt = [&](size_t max) -> size_t
+    {
+        return std::uniform_int_distribution<size_t>(0, max - 1)(rng);
+    };
+    // A small pool of names, so that duplicate sibling names are exercised
+    const std::vector<std::string> names{"A", "B", "C", "Part", "Folder"};
+    const std::vector<std::string> classNames{"Folder", "Model", "Part", "ModuleScript"};
+    uint64_t nextId = 1;
+
+    auto makeNode = [&]()
+    {
+        auto node =
+            std::make_unique<PluginModelNode>(PluginModelNode{nextId++, names[randomInt(names.size())], classNames[randomInt(classNames.size())]});
+        if (node->className == "ModuleScript" && randomInt(2) == 0)
+            node->filePaths = {"src/" + std::to_string(node->id) + ".luau"};
+        return node;
+    };
+
+    PluginModelNode root{nextId++, "game", "DataModel"};
+    for (int i = 0; i < 20; i++)
+    {
+        std::vector<PluginModelNode*> nodes;
+        root.collect(nodes);
+        nodes[randomInt(nodes.size())]->append(makeNode());
+    }
+
+    int sessionNumber = 0;
+    auto sendFullDataModel = [&]()
+    {
+        auto dataModel = root.toJson();
+        dataModel["Session"] = "session-" + std::to_string(++sessionNumber);
+        platform->onStudioPluginFullChange(dataModel);
+    };
+    sendFullDataModel();
+
+    for (int batch = 0; batch < 300; batch++)
+    {
+        json changes = json::array();
+        size_t changeCount = 1 + randomInt(8);
+        for (size_t i = 0; i < changeCount; i++)
+        {
+            std::vector<PluginModelNode*> nodes;
+            root.collect(nodes);
+            auto node = nodes[randomInt(nodes.size())];
+            auto changeType = randomInt(5);
+            if (node == &root && changeType != 0)
+                continue; // Only children can be added to the root
+            switch (changeType)
+            {
+            case 0:
+            {
+                auto child = makeNode();
+                for (size_t j = randomInt(3); j > 0; j--)
+                    child->append(makeNode());
+                changes.push_back({{"Type", "Add"}, {"Parent", node->id}, {"Instance", child->toJson()}});
+                node->append(std::move(child));
+                break;
+            }
+            case 1:
+                if (nodes.size() > 10)
+                {
+                    changes.push_back({{"Type", "Remove"}, {"Id", node->id}});
+                    node->detach();
+                }
+                break;
+            case 2:
+                node->name = names[randomInt(names.size())];
+                changes.push_back({{"Type", "Update"}, {"Id", node->id}, {"Name", node->name}});
+                break;
+            case 3:
+            {
+                auto newParent = nodes[randomInt(nodes.size())];
+                if (newParent == node || node->isAncestorOf(newParent))
+                    break;
+                json change{{"Type", "Update"}, {"Id", node->id}, {"Parent", newParent->id}};
+                if (randomInt(2) == 0)
+                {
+                    node->name = names[randomInt(names.size())];
+                    change["Name"] = node->name;
+                }
+                changes.push_back(change);
+                newParent->append(node->detach());
+                break;
+            }
+            case 4:
+                node->filePaths =
+                    randomInt(2) == 0 ? std::vector<std::string>{} : std::vector<std::string>{"src/moved" + std::to_string(batch) + ".luau"};
+                changes.push_back({{"Type", "Update"}, {"Id", node->id}, {"FilePaths", node->filePaths}});
+                break;
+            }
+        }
+
+        REQUIRE(platform->onStudioPluginChanges(pluginChanges("session-" + std::to_string(sessionNumber), changes)));
+        auto incremental = platform->rootSourceNode->toJson();
+        auto incrementalPaths = platform->virtualPathsToSourceNodes.size();
+
+        // Hydrating with the full DataModel must not change anything
+        sendFullDataModel();
+        CHECK_EQ(incremental, platform->rootSourceNode->toJson());
+        CHECK_EQ(incrementalPaths, platform->virtualPathsToSourceNodes.size());
+    }
 }
 
 TEST_SUITE_END();
