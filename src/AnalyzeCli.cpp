@@ -12,6 +12,7 @@
 #include "LSP/LuauExt.hpp"
 #include <iostream>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 LUAU_FASTFLAG(DebugLuauTimeTracing)
@@ -78,7 +79,8 @@ static void reportWarning(ReportFormat format, const char* name, const Luau::Lin
     report(format, name, warning.location, Luau::LintWarning::getName(warning.code), warning.text.c_str());
 }
 
-bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportFormat format, bool annotate)
+bool analyzeFile(
+    WorkspaceFolder& workspace, const std::string& path, ReportFormat format, bool annotate, std::unordered_set<std::string>& reportedModules)
 {
     Luau::ModuleName name = workspace.fileResolver.getModuleName(Uri::file(path));
 
@@ -92,9 +94,19 @@ bool analyzeFile(WorkspaceFolder& workspace, const std::string& path, ReportForm
         return false;
     }
 
+    // The check result holds the errors of every module checked for this file. For a module that was already checked, it holds
+    // the module's errors again, along with those of every module it requires. Only report the errors of modules no previous file reported.
+    std::unordered_set<std::string> modulesInResult;
     unsigned int reportedErrors = 0;
     for (auto& error : cr.errors)
+    {
+        if (reportedModules.find(error.moduleName) != reportedModules.end())
+            continue;
+
+        modulesInResult.insert(error.moduleName);
         reportedErrors += reportError(workspace, format, error);
+    }
+    reportedModules.insert(modulesInResult.begin(), modulesInResult.end());
 
     // For the human readable module name, we use a relative version
     auto [_, relativePath] = getFilePath(&workspace.fileResolver, path);
@@ -343,9 +355,10 @@ int startAnalyze(const argparse::ArgumentParser& program)
     }
 
     int failed = 0;
+    std::unordered_set<std::string> reportedModules;
 
     for (const auto& path : files)
-        failed += !analyzeFile(workspace, path, format, annotate);
+        failed += !analyzeFile(workspace, path, format, annotate, reportedModules);
 
     if (!client.diagnostics.empty())
     {
