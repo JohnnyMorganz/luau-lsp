@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.742
 
+### Fixed
+
+- Hovering over an overloaded function at its call site only shows the matched overload
+- Hovering over a function at its call site now shows the resolved type signature for that call. For example, `function ClassData:Get<T>(self: ClassData<T>): T` is shown as `function ClassData:Get(self: ClassData<string>): string` when `T` is `string`
+
 ## [1.70.1] - 2026-09-27
 
 ### Added
