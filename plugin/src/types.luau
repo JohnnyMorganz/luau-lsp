@@ -16,11 +16,24 @@ export type Result<T, E> = Ok<T> | Err<E>
 --- Represents a serialized Instance for transmission to the language server.
 --- Contains the instance's name, class, and recursively encoded children.
 export type EncodedInstance = {
+	--- Identifies the instance in incremental changes.
+	Id: number,
+	--- Identifies the full DataModel that incremental changes apply to. Only set on the root instance.
+	Session: string?,
 	Name: string,
 	ClassName: string,
-	FilePaths: { string },
-	Children: { EncodedInstance },
+	--- Omitted if empty.
+	FilePaths: { string }?,
+	--- Omitted if empty.
+	Children: { EncodedInstance }?,
 }
+
+--- An incremental change to the DataModel previously sent to the language server.
+--- Instances are referred to by their `Id`.
+export type Change =
+	{ Type: "Add", Parent: number, Instance: EncodedInstance }
+	| { Type: "Remove", Id: number }
+	| { Type: "Update", Id: number, Name: string?, Parent: number?, FilePaths: { string }? }
 
 --- Valid log levels for the plugin's logging system.
 export type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR"

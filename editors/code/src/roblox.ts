@@ -4,12 +4,18 @@ import express, { ErrorRequestHandler } from "express";
 import { format as bytesFormat } from "bytes";
 import { fetch } from "undici";
 import { spawn } from "child_process";
-import { LanguageClient } from "vscode-languageclient/node";
+import {
+  ErrorCodes,
+  LanguageClient,
+  ResponseError,
+} from "vscode-languageclient/node";
 import { AddArgCallback, PlatformContext } from "./extension";
 
 import * as utils from "./utils";
 
 let pluginServer: Server | undefined = undefined;
+// The language client is recreated when the server restarts, so the plugin server reads it on every request
+let pluginPlatformContext: PlatformContext | undefined = undefined;
 
 const getStudioPluginValue = <T>(key: string, defaultValue: T): T => {
   const newInspect = vscode.workspace
@@ -45,12 +51,12 @@ const LUAU_API_DOCS = "https://luau-lsp.pages.dev/api-docs/luau-en-us.json";
 const STUDIO_PLUGIN_URL =
   "https://www.roblox.com/library/10913122509/Luau-Language-Server-Companion";
 
-const setupStudioPlugin = async (client: LanguageClient | undefined) => {
+const setupStudioPlugin = async () => {
   // Enable the plugin server
   await vscode.workspace
     .getConfiguration("luau-lsp.studioPlugin")
     .update("enabled", true);
-  startPluginServer(client);
+  startPluginServer();
   // Open the studio plugin in the browser for the user to install
   vscode.env.openExternal(vscode.Uri.parse(STUDIO_PLUGIN_URL));
 };
@@ -119,7 +125,7 @@ const getRojoProjectFile = async (
       )
       .then((value) => {
         if (value === "Setup Plugin") {
-          setupStudioPlugin(client);
+          setupStudioPlugin();
         } else if (value === "Configure Settings") {
           vscode.commands.executeCommand(
             "workbench.action.openWorkspaceSettings",
@@ -315,7 +321,7 @@ const startSourcemapGeneration = async (
           if (value === "Retry") {
             startSourcemapGeneration(client, workspaceFolder);
           } else if (value === "Setup Plugin") {
-            setupStudioPlugin(client);
+            setupStudioPlugin();
           } else if (value === "Configure Settings") {
             vscode.commands.executeCommand(
               "workbench.action.openWorkspaceSettings",
@@ -388,7 +394,7 @@ const startSourcemapGeneration = async (
   }
 };
 
-const startPluginServer = async (client: LanguageClient | undefined) => {
+const startPluginServer = async () => {
   if (pluginServer) {
     return;
   }
@@ -401,6 +407,7 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
   );
 
   app.post("/full", (req, res) => {
+    const client = pluginPlatformContext?.client;
     if (!client) {
       return res.sendStatus(500);
     }
@@ -413,7 +420,38 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
     }
   });
 
+  app.post("/changes", async (req, res) => {
+    const client = pluginPlatformContext?.client;
+    if (!client) {
+      return res.sendStatus(500);
+    }
+
+    if (
+      typeof req.body.session !== "string" ||
+      !Array.isArray(req.body.changes)
+    ) {
+      return res.sendStatus(400);
+    }
+
+    try {
+      await client.sendRequest("$/plugin/changes", req.body);
+      res.sendStatus(200);
+    } catch (err) {
+      if (
+        err instanceof ResponseError &&
+        err.code === ErrorCodes.MethodNotFound
+      ) {
+        // The language server does not support incremental changes, the plugin falls back to sending full DataModels
+        res.sendStatus(404);
+      } else {
+        // The changes could not be applied (e.g. the language server restarted), the plugin resends the full DataModel
+        res.status(409).send(err instanceof Error ? err.message : String(err));
+      }
+    }
+  });
+
   app.post("/clear", (_req, res) => {
+    const client = pluginPlatformContext?.client;
     if (!client) {
       return res.sendStatus(500);
     }
@@ -469,7 +507,7 @@ const startPluginServer = async (client: LanguageClient | undefined) => {
           .then((value) => {
             if (value === "Reconnect") {
               stopPluginServer(true);
-              startPluginServer(client);
+              startPluginServer();
             } else if (value === "Change Port Configuration") {
               vscode.commands.executeCommand(
                 "workbench.action.openWorkspaceSettings",
@@ -502,6 +540,8 @@ export const onActivate = async (
   platformContext: PlatformContext,
   context: vscode.ExtensionContext,
 ) => {
+  pluginPlatformContext = platformContext;
+
   const startSourcemapGenerationForAllFolders = () => {
     if (vscode.workspace.workspaceFolders) {
       for (const folder of vscode.workspace.workspaceFolders) {
@@ -519,7 +559,7 @@ export const onActivate = async (
 
   context.subscriptions.push(
     vscode.commands.registerCommand("luau-lsp.setupStudioPlugin", () =>
-      setupStudioPlugin(platformContext.client),
+      setupStudioPlugin(),
     ),
   );
 
@@ -553,7 +593,7 @@ export const onActivate = async (
       ) {
         if (getStudioPluginValue("enabled", false)) {
           stopPluginServer(true);
-          startPluginServer(platformContext.client);
+          startPluginServer();
         } else {
           stopPluginServer();
         }
@@ -604,7 +644,7 @@ export const postLanguageServerStart = async (
   _: vscode.ExtensionContext,
 ) => {
   if (getStudioPluginValue("enabled", false)) {
-    startPluginServer(platformContext.client);
+    startPluginServer();
   }
 };
 

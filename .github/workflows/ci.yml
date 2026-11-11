@@ -189,6 +189,10 @@ jobs:
         run: ../build/luau-lsp analyze --sourcemap=sourcemap.json --definitions=../scripts/globalTypes.d.luau src
         working-directory: plugin
 
+      - name: Run Plugin Tests
+        run: lune run tests/run.luau
+        working-directory: plugin
+
       - name: Run Luau Analyze (Cloud Scripts)
         run: |
           lune setup

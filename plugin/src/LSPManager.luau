@@ -6,6 +6,7 @@ local InstanceFileSyncService = game:GetService("InstanceFileSyncService")
 --- Handles connecting, disconnecting, and sending DataModel updates.
 
 local Debounce = require(script.Parent.Utils.Debounce)
+local FrameBudget = require(script.Parent.Utils.FrameBudget)
 local InstanceTracker = require(script.Parent.InstanceTracker)
 local Log = require(script.Parent.Utils.Log)
 local ServerEndpoints = require(script.Parent.ServerEndpoints)
@@ -15,10 +16,26 @@ local Signal = require(script.Parent.Utils.Signal)
 local LSPManager = {}
 LSPManager.__index = LSPManager
 
+--- How long looking up synced instances may run each frame before yielding to Studio.
+local FRAME_BUDGET_SECONDS = 0.008
+
+--- The instance synced to a file path, as last looked up with InstanceFileSyncService.
+type SyncedInstance = {
+	--- The synced instance, or nil if the file is not synced.
+	instance: Instance?,
+	--- The full name of the instance when it was looked up.
+	fullName: string?,
+}
+
 --- Internal data structure for an LSPManager instance.
 type LSPManagerData = {
 	--- Whether the plugin is currently connected to the language server.
 	_connected: boolean,
+	--- Whether the plugin is currently connecting to the language server.
+	_connecting: boolean,
+	--- Incremented when connecting and disconnecting. Work which yields stops when this changes, as it belongs to a
+	--- previous connection.
+	_generation: number,
 	--- The full address of the language server (e.g., "http://localhost:3667").
 	_address: string?,
 	--- Debounce controller for batching DataModel updates.
@@ -33,6 +50,23 @@ type LSPManagerData = {
 	_silenceServerNotFoundWarning: boolean,
 	--- The connection to the InstanceFileSyncService's StatusChanged event
 	_statusChangedConnection: RBXScriptConnection?,
+	--- The session of the full DataModel last sent to the language server, which changes are sent relative to.
+	_session: string?,
+	--- Whether the language server accepts incremental changes. Otherwise, the full DataModel is sent on every change.
+	_supportsChanges: boolean,
+	--- The generation of the connection DataModel changes are currently being sent for, if any.
+	_syncing: number?,
+	--- Whether changes were made while syncing, which need to be sent once the current sync completes.
+	_syncRequested: boolean,
+	--- Whether the Script Sync status of an instance changed, so file paths need to be refreshed.
+	_filePathsChanged: boolean,
+	--- Whether any instances are synced with Script Sync, in which case file paths are refreshed on every sync.
+	_hasSyncedInstances: boolean,
+	--- The instances synced to file paths, as looking up every file path is slow (around 0.6ms per file). Kept when
+	--- disconnecting, so that reconnecting does not look up every file path again.
+	_syncedInstances: { [string]: SyncedInstance },
+	--- Whether some file paths have not been looked up yet: connecting sends the DataModel before looking them up.
+	_lookupsPending: boolean,
 	--- Signal fired when connection state changes.
 	onConnectionChanged: Signal.Signal<boolean>,
 }
@@ -47,6 +81,8 @@ export type LSPManager = typeof(setmetatable({} :: LSPManagerData, LSPManager))
 function LSPManager.new(settings: Settings.Settings, instanceTracker: InstanceTracker.InstanceTracker): LSPManager
 	local self = {
 		_connected = false,
+		_connecting = false,
+		_generation = 0,
 		_address = nil,
 		_sendDebounce = nil,
 		_autoConnectDebounce = nil,
@@ -54,6 +90,14 @@ function LSPManager.new(settings: Settings.Settings, instanceTracker: InstanceTr
 		_instanceTracker = instanceTracker,
 		_silenceServerNotFoundWarning = false,
 		_statusChangedConnection = nil,
+		_session = nil,
+		_supportsChanges = true,
+		_syncing = nil,
+		_syncRequested = false,
+		_filePathsChanged = false,
+		_hasSyncedInstances = false,
+		_syncedInstances = {},
+		_lookupsPending = false,
 		onConnectionChanged = Signal.new() :: Signal.Signal<boolean>,
 	}
 	return setmetatable(self, LSPManager)
@@ -65,10 +109,7 @@ end
 function LSPManager.init(self: LSPManager): ()
 	self:setAddress(self._settings:get("host"), self._settings:get("port"))
 	self._sendDebounce = Debounce.new(0.5, function()
-		if not self._connected then
-			return
-		end
-		self:sendFullDMInfo()
+		self:sync()
 	end)
 	self._autoConnectDebounce = Debounce.new(1, function()
 		if self._connected then
@@ -80,9 +121,8 @@ function LSPManager.init(self: LSPManager): ()
 		self._silenceServerNotFoundWarning = false
 	end)
 
-	self._instanceTracker.onChanged:connect(function(_instance: Instance): ()
-		-- TODO: Send a delta for this instance instead of resending the full tree
-		self:deferredSendFullDMInfo()
+	self._instanceTracker.onChanged:connect(function(): ()
+		self:deferredSync()
 	end)
 
 	self._statusChangedConnection = InstanceFileSyncService.StatusChanged:Connect(function(instance: Instance): ()
@@ -90,8 +130,10 @@ function LSPManager.init(self: LSPManager): ()
 			return
 		end
 
+		self:_forgetSyncedInstance(instance)
 		if self._connected then
-			self:deferredSendFullDMInfo()
+			self._filePathsChanged = true
+			self:deferredSync()
 		else
 			local success, instances = pcall(InstanceFileSyncService.GetAllInstances, InstanceFileSyncService)
 			if success and #instances > 0 then
@@ -107,6 +149,13 @@ end
 --- @return boolean -- True if connected.
 function LSPManager.isConnected(self: LSPManager): boolean
 	return self._connected
+end
+
+--- Returns whether the plugin is currently connecting to the language server.
+--- @param self -- The LSPManager instance.
+--- @return boolean -- True if connecting.
+function LSPManager.isConnecting(self: LSPManager): boolean
+	return self._connecting
 end
 
 --- Sets the language server address from host and port components.
@@ -152,27 +201,45 @@ function LSPManager.autoConnect(self: LSPManager): ()
 end
 
 --- Establishes a connection to the language server.
---- Sends the initial DataModel tree and starts tracking changes.
+--- Starts tracking changes and sends the initial DataModel tree.
 --- @param self -- The LSPManager instance.
 --- @return boolean -- True if connection was successful.
 function LSPManager.connect(self: LSPManager): boolean
-	if self._connected then
-		return true
+	if self._connected or self._connecting then
+		return self._connected
 	end
 
 	Log.debug("Connecting to LSP")
+	self._connecting = true
+	self._generation += 1
+	local generation = self._generation
+	local startTime = os.clock()
 
-	local success = self:sendFullDMInfo()
-	if not success then
+	local ok, success = pcall(self._resync, self, generation)
+	if not ok then
+		Log.warn(`Failed to send the DataModel: {success}`)
+		success = false
+	end
+	if self._generation ~= generation then
+		-- Disconnected while connecting
 		return false
 	end
+	self._connecting = false
 
-	self._instanceTracker:watchAll()
+	if not success then
+		self._instanceTracker:unwatchAll()
+		return false
+	end
 
 	self._connected = true
 	self.onConnectionChanged:fire(true)
 
-	Log.info("Successfully connected")
+	Log.info(`Successfully connected in {string.format("%.1f", os.clock() - startTime)}s`)
+
+	-- Send the file paths which were not looked up yet, and any changes made while connecting
+	if self._lookupsPending or self._instanceTracker:hasPendingChanges() then
+		self:sync()
+	end
 
 	return true
 end
@@ -181,13 +248,18 @@ end
 --- Stops tracking changes and cancels any pending updates.
 --- @param self -- The LSPManager instance.
 function LSPManager.disconnect(self: LSPManager): ()
-	if not self._connected then
+	if not self._connected and not self._connecting then
 		return
 	end
 
 	Log.debug("Disconnecting from LSP")
+	local wasConnected = self._connected
 	self._connected = false
-	self.onConnectionChanged:fire(false)
+	self._connecting = false
+	self._generation += 1
+	self._session = nil
+	self._supportsChanges = true
+	self._lookupsPending = false
 
 	if self._sendDebounce then
 		self._sendDebounce:cancel()
@@ -198,13 +270,41 @@ function LSPManager.disconnect(self: LSPManager): ()
 
 	self._instanceTracker:unwatchAll()
 
-	Log.info("Successfully disconnected")
+	if wasConnected then
+		self.onConnectionChanged:fire(false)
+		Log.info("Successfully disconnected")
+	end
+end
+
+--- Returns whether a previously looked up file path is still synced to the same instance.
+--- Files which were not synced are looked up again when the Script Sync status of an instance changes.
+--- @param synced -- The previous lookup.
+--- @return boolean -- True if the lookup can be reused.
+local function isStillSynced(synced: SyncedInstance): boolean
+	local instance = synced.instance
+	return instance == nil or (instance.Parent ~= nil and instance:GetFullName() == synced.fullName)
+end
+
+--- Forgets the file paths looked up for an instance whose Script Sync status changed, and the file paths which
+--- were not synced, as they may now be synced to it.
+--- @param self -- The LSPManager instance.
+--- @param instance -- The instance whose Script Sync status changed.
+function LSPManager._forgetSyncedInstance(self: LSPManager, instance: Instance): ()
+	for filePath, synced in self._syncedInstances do
+		if synced.instance == nil or synced.instance == instance then
+			self._syncedInstances[filePath] = nil
+		end
+	end
 end
 
 --- Get a mapping of instances to their Luau file paths.
+--- Synced instances found previously are reused while their full name is unchanged, as renaming or moving an
+--- instance changes its file path. The remaining file paths are looked up over multiple frames.
 --- @param self -- The LSPManager instance.
+--- @param lookUpMissing -- Whether to look up file paths which were not looked up before. Otherwise, they are left
+--- out of the mapping until the next sync.
 --- @return { [Instance]: { string } }? -- A mapping of instances to their Luau file paths, or nil if the server failed to respond.
-function LSPManager.getFilePaths(self: LSPManager): { [Instance]: { string } }?
+function LSPManager.getFilePaths(self: LSPManager, lookUpMissing: boolean): { [Instance]: { string } }?
 	assert(self._address, "LSPManager must be initialized before use")
 	Log.debug("Getting file paths")
 
@@ -241,10 +341,31 @@ function LSPManager.getFilePaths(self: LSPManager): { [Instance]: { string } }?
 	end
 
 	local instanceFilePaths = {}
+	local previousSyncedInstances = self._syncedInstances
+	local syncedInstances: { [string]: SyncedInstance } = {}
+	local budget = FrameBudget.new(FRAME_BUDGET_SECONDS)
+	self._lookupsPending = false
 
 	for _, filePath in filePaths do
-		local getSuccess, instance = pcall(InstanceFileSyncService.GetSyncedInstance, InstanceFileSyncService, filePath)
-		if getSuccess and instance then
+		budget:step()
+
+		local previous = previousSyncedInstances[filePath]
+		local synced: SyncedInstance
+		if previous and isStillSynced(previous) then
+			synced = previous
+		elseif lookUpMissing then
+			local getSuccess, instance =
+				pcall(InstanceFileSyncService.GetSyncedInstance, InstanceFileSyncService, filePath)
+			local syncedInstance = if getSuccess then instance else nil
+			synced = { instance = syncedInstance, fullName = syncedInstance and syncedInstance:GetFullName() }
+		else
+			self._lookupsPending = true
+			continue
+		end
+		syncedInstances[filePath] = synced
+
+		local instance = synced.instance
+		if instance then
 			if instanceFilePaths[instance] then
 				table.insert(instanceFilePaths[instance], filePath)
 			else
@@ -253,29 +374,60 @@ function LSPManager.getFilePaths(self: LSPManager): { [Instance]: { string } }?
 		end
 	end
 
+	self._syncedInstances = syncedInstances
 	return instanceFilePaths
 end
 
---- Sends the complete DataModel tree to the language server.
---- Called on initial connection and when changes are detected.
+--- Starts tracking the DataModel from scratch and sends it to the language server.
 --- @param self -- The LSPManager instance.
---- @return boolean -- True if the send was successful.
-function LSPManager.sendFullDMInfo(self: LSPManager): boolean
-	assert(self._address, "LSPManager must be initialized before use")
-	Log.debug("Sending full DM info")
-
-	local filePaths = self:getFilePaths()
+--- @param generation -- The generation of the connection to send the DataModel for.
+--- @return boolean -- True if the DataModel was sent successfully.
+function LSPManager._resync(self: LSPManager, generation: number): boolean
+	-- When connecting, send the DataModel as soon as possible: file paths which still need to be looked up are sent
+	-- once connected
+	local filePaths = self:getFilePaths(not self._connecting)
+	if self._generation ~= generation then
+		return false
+	end
 	if filePaths == nil then
-		-- Server isn't up, don't bother encoding the tree
+		-- Server isn't up, don't bother tracking the tree
 		-- since it will fail to send anyway
 		Log.debug("Server failed to respond, cancelling DataModel send")
 		self:disconnect()
 		return false
 	end
+	self._hasSyncedInstances = next(filePaths) ~= nil or self._lookupsPending
+	self._filePathsChanged = false
 
-	local tree = self._instanceTracker:encodeAll(filePaths)
+	if not self._instanceTracker:watchAll(filePaths) or self._generation ~= generation then
+		-- Stopped tracking while tracking the DataModel
+		return false
+	end
+
+	return self:sendFullDMInfo(generation)
+end
+
+--- Sends the complete tracked DataModel tree to the language server.
+--- Called on initial connection, and when the language server needs the full tree.
+--- @param self -- The LSPManager instance.
+--- @param generation -- The generation of the connection to send the DataModel for.
+--- @return boolean -- True if the send was successful.
+function LSPManager.sendFullDMInfo(self: LSPManager, generation: number): boolean
+	assert(self._address, "LSPManager must be initialized before use")
+	Log.debug("Sending full DM info")
+
+	local tree = self._instanceTracker:encodeAll()
+	if not tree or self._generation ~= generation then
+		return false
+	end
+
+	local session = HttpService:GenerateGUID(false)
+	tree.Session = session
 
 	local result = ServerEndpoints.full(self._address, tree)
+	if self._generation ~= generation then
+		return false
+	end
 
 	if not result.ok then
 		self:_logHttpError("Sending DataModel info", result.error)
@@ -283,18 +435,120 @@ function LSPManager.sendFullDMInfo(self: LSPManager): boolean
 		return false
 	end
 
+	self._session = session
 	Log.debug("Successfully sent full DataModel info")
 
 	return true
+end
+
+--- Sends the changes made to tracked instances since the last sync to the language server.
+--- @param self -- The LSPManager instance.
+--- @param generation -- The generation of the connection to send the changes for.
+--- @return boolean -- True if the changes were sent successfully.
+function LSPManager._syncChanges(self: LSPManager, generation: number): boolean
+	assert(self._address, "LSPManager must be initialized before use")
+
+	local changes = self._instanceTracker:collectChanges()
+	if not changes or self._generation ~= generation then
+		return false
+	end
+
+	if self._instanceTracker:needsRebuild() then
+		Log.debug("Included instances moved, resending the full DataModel")
+		return self:_resync(generation)
+	end
+
+	if self._filePathsChanged or self._hasSyncedInstances then
+		self._filePathsChanged = false
+
+		local filePaths = self:getFilePaths(true)
+		if self._generation ~= generation then
+			return false
+		elseif filePaths == nil then
+			self:disconnect()
+			return false
+		end
+		self._hasSyncedInstances = next(filePaths) ~= nil
+
+		for _, change in self._instanceTracker:updateFilePaths(filePaths) do
+			table.insert(changes, change)
+		end
+	end
+
+	if #changes == 0 then
+		return true
+	end
+
+	if self._supportsChanges and self._session then
+		Log.debug(`Sending {#changes} DataModel changes`)
+
+		local result = ServerEndpoints.changes(self._address, self._session, changes)
+		if self._generation ~= generation then
+			return false
+		elseif result.ok then
+			return true
+		end
+
+		local statusCode = string.match(result.error, "^(%d+):")
+		if result.error == "HttpError: ConnectFail" then
+			self:_logHttpError("Sending DataModel changes", result.error)
+			self:disconnect()
+			return false
+		elseif statusCode == "404" then
+			Log.debug("Language server does not support incremental changes, sending full DataModels instead")
+			self._supportsChanges = false
+		elseif statusCode == "409" then
+			Log.debug(`Language server requested the full DataModel: {result.error}`)
+		else
+			-- The changes may not have been applied (e.g. the request timed out), so resend everything
+			self:_logHttpError("Sending DataModel changes", result.error)
+		end
+	end
+
+	return self:sendFullDMInfo(generation)
+end
+
+--- Sends the changes made to tracked instances since the last sync to the language server.
+--- If a sync is already in progress, another sync runs once it completes.
+--- @param self -- The LSPManager instance.
+function LSPManager.sync(self: LSPManager): ()
+	if not self._connected then
+		return
+	end
+
+	local generation = self._generation
+	if self._syncing == generation then
+		self._syncRequested = true
+		return
+	end
+
+	self._syncing = generation
+	repeat
+		self._syncRequested = false
+		local success, result = pcall(self._syncChanges, self, generation)
+		if not success and self._generation == generation then
+			-- The tracked tree may be inconsistent after an unexpected error, so track everything again
+			Log.warn(`Failed to send DataModel changes, resending the full DataModel: {result}`)
+			local resyncSuccess, resyncResult = pcall(self._resync, self, generation)
+			if not resyncSuccess and self._generation == generation then
+				Log.warn(`Failed to send the DataModel: {resyncResult}`)
+				self:disconnect()
+			end
+		end
+	until self._generation ~= generation or not self._syncRequested
+
+	if self._syncing == generation then
+		self._syncing = nil
+	end
 end
 
 --- Schedules a deferred DataModel update using debouncing.
 --- Multiple rapid changes will be batched into a single update.
 --- @param self -- The LSPManager instance.
 --- @return thread -- The scheduled task thread.
-function LSPManager.deferredSendFullDMInfo(self: LSPManager): thread
+function LSPManager.deferredSync(self: LSPManager): thread
 	assert(self._sendDebounce, "LSPManager must be initialized before use")
-	Log.debug("Deferring send of DataModel info")
+	Log.debug("Deferring send of DataModel changes")
 	return self._sendDebounce:call()
 end
 
