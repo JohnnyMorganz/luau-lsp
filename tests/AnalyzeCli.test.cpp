@@ -352,7 +352,7 @@ TEST_CASE("analyze_resolves_game_requires_with_sourcemap")
     setupCliWorkspace(client, workspace);
 
     auto serverModulePath = Uri::file(t.path() + "/src/server/ServerModule.luau").fsPath();
-    CHECK(analyzeFile(workspace, serverModulePath, ReportFormat::Default, false));
+    CHECK(analyzeFile(workspace, serverModulePath, ReportFormat::Default, false, false));
 }
 
 TEST_CASE("analyze_resolves_non_mirrored_relative_requires_with_sourcemap")
@@ -392,7 +392,7 @@ TEST_CASE("analyze_resolves_non_mirrored_relative_requires_with_sourcemap")
     setupCliWorkspace(client, workspace);
 
     auto moduleAPath = Uri::file(t.path() + "/packages/core/ModuleA.luau").fsPath();
-    CHECK(analyzeFile(workspace, moduleAPath, ReportFormat::Default, false));
+    CHECK(analyzeFile(workspace, moduleAPath, ReportFormat::Default, false, false));
 }
 
 TEST_CASE("analyze_resolves_game_requires_from_file_outside_sourcemap")
@@ -427,7 +427,49 @@ TEST_CASE("analyze_resolves_game_requires_from_file_outside_sourcemap")
     setupCliWorkspace(client, workspace);
 
     auto mainPath = Uri::file(t.path() + "/dist/main.luau").fsPath();
-    CHECK(analyzeFile(workspace, mainPath, ReportFormat::Default, false));
+    CHECK(analyzeFile(workspace, mainPath, ReportFormat::Default, false, false));
+}
+
+TEST_CASE("analyze_file_succeeds_on_warning_without_fail_on_warnings")
+{
+    TempDir t("analyze_cli_without_fail_on_warnings");
+    auto filePath = t.write_child("test.luau", R"(
+        --!strict
+        local unused: number = 42
+    )");
+    t.write_child("sourcemap.json", R"({
+        "name": "Game",
+        "className": "DataModel",
+        "children": []
+    })");
+
+    CliClient client;
+    initRobloxCliClient(client);
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
+
+    CHECK(analyzeFile(workspace, filePath, ReportFormat::Default, false, false));
+}
+
+TEST_CASE("analyze_file_fails_on_warning_with_fail_on_warnings")
+{
+    TempDir t("analyze_cli_with_fail_on_warnings");
+    auto filePath = t.write_child("test.luau", R"(
+        --!strict
+        local unused: number = 42
+    )");
+    t.write_child("sourcemap.json", R"({
+        "name": "Game",
+        "className": "DataModel",
+        "children": []
+    })");
+
+    CliClient client;
+    initRobloxCliClient(client);
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
+
+    CHECK_FALSE(analyzeFile(workspace, filePath, ReportFormat::Default, false, true));
 }
 
 TEST_SUITE_END();
