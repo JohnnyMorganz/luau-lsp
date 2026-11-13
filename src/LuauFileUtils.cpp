@@ -67,6 +67,25 @@ std::vector<std::string> getUtf8CommandLineArgs()
     LocalFree(argvW);
     return args;
 }
+
+// LUAU-LSP DEVIATION: use extended length paths to support paths longer than MAX_PATH
+static std::wstring toExtendedLengthPath(const std::wstring& path)
+{
+    DWORD size = GetFullPathNameW(path.c_str(), 0, nullptr, nullptr);
+    std::wstring fullPath(size, L'\0');
+    DWORD length = GetFullPathNameW(path.c_str(), size, fullPath.data(), nullptr);
+    if (length == 0 || length >= size)
+        return path;
+
+    fullPath.resize(length);
+    if ((path.size() < MAX_PATH && fullPath.size() < MAX_PATH) || fullPath.rfind(LR"(\\?\)", 0) == 0 || fullPath.rfind(LR"(\\.\)", 0) == 0)
+        return path;
+
+    if (fullPath.rfind(LR"(\\)", 0) == 0)
+        return LR"(\\?\UNC\)" + fullPath.substr(2);
+
+    return LR"(\\?\)" + fullPath;
+}
 #endif
 
 bool isAbsolutePath(std::string_view path)
@@ -84,7 +103,7 @@ bool isAbsolutePath(std::string_view path)
 std::optional<std::string> readFile(const std::string& name)
 {
 #ifdef _WIN32
-    FILE* file = _wfopen(fromUtf8(name).c_str(), L"rb");
+    FILE* file = _wfopen(toExtendedLengthPath(fromUtf8(name)).c_str(), L"rb");
 #else
     FILE* file = fopen(name.c_str(), "rb");
 #endif
@@ -123,7 +142,7 @@ bool writeFileIfModified(const std::string& name, const std::string& content)
             return true;
     }
 #ifdef _WIN32
-    FILE* file = _wfsopen(fromUtf8(name).c_str(), L"wb", _SH_DENYWR);
+    FILE* file = _wfsopen(toExtendedLengthPath(fromUtf8(name)).c_str(), L"wb", _SH_DENYWR);
 #else
     FILE* file = fopen(name.c_str(), "wb");
 #endif
@@ -182,7 +201,7 @@ static void joinPaths(std::basic_string<Ch>& str, const Ch* lhs, const Ch* rhs)
 #ifdef _WIN32
 static bool traverseDirectoryRec(const std::wstring& path, const std::function<void(const std::string& name)>& callback, bool recursive)
 {
-    std::wstring query = path + std::wstring(L"/*");
+    std::wstring query = toExtendedLengthPath(path + std::wstring(L"/*"));
 
     WIN32_FIND_DATAW data;
     HANDLE h = FindFirstFileW(query.c_str(), &data);
@@ -305,7 +324,7 @@ bool traverseDirectoryRecursive(const std::string& path, const std::function<voi
 bool exists(const std::string& path)
 {
 #ifdef _WIN32
-    DWORD fileAttributes = GetFileAttributesW(fromUtf8(path).c_str());
+    DWORD fileAttributes = GetFileAttributesW(toExtendedLengthPath(fromUtf8(path)).c_str());
     if (fileAttributes == INVALID_FILE_ATTRIBUTES)
         return false;
     return true;
@@ -319,7 +338,7 @@ bool exists(const std::string& path)
 bool isFile(const std::string& path)
 {
 #ifdef _WIN32
-    DWORD fileAttributes = GetFileAttributesW(fromUtf8(path).c_str());
+    DWORD fileAttributes = GetFileAttributesW(toExtendedLengthPath(fromUtf8(path)).c_str());
     if (fileAttributes == INVALID_FILE_ATTRIBUTES)
         return false;
     return (fileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
@@ -335,7 +354,7 @@ bool isFile(const std::string& path)
 bool isDirectory(const std::string& path)
 {
 #ifdef _WIN32
-    DWORD fileAttributes = GetFileAttributesW(fromUtf8(path).c_str());
+    DWORD fileAttributes = GetFileAttributesW(toExtendedLengthPath(fromUtf8(path)).c_str());
     if (fileAttributes == INVALID_FILE_ATTRIBUTES)
         return false;
     return (fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
