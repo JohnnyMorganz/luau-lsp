@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 
 - Sync to upstream Luau 0.747
+- **Breaking**: the new Luau type solver is now enabled by default in both the language server and `luau-lsp analyze`. Upstream Luau removed `LuauSolverV2` from its list of experimental flags (in 0.743), so it is now turned on along with all other Luau FFlags unless `--no-flags-enabled` / `luau-lsp.fflags.enableByDefault: false` is used. Code that type-checked under the old solver may now report new errors. To keep using the old solver, set the `LuauSolverV2` FFlag to `false` (CLI: `--flag:LuauSolverV2=false`, editor: `luau-lsp.fflags.override`)
 
 ## [1.70.1] - 2026-09-27
 
