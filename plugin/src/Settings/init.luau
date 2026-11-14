@@ -50,7 +50,7 @@ export type Settings = typeof(setmetatable({} :: SettingsData, Settings))
 --- @param defaultSettingsModule -- The ModuleScript containing default settings.
 --- @return Settings -- A new Settings instance ready for initialization.
 function Settings.new(defaultSettingsModule: ModuleScript): Settings
-	local self = {
+	local self: SettingsData = {
 		_values = nil,
 		_module = nil,
 		_defaultSettingsModule = defaultSettingsModule,
@@ -157,9 +157,9 @@ function Settings.load(self: Settings): ()
 	end
 
 	-- Merge user settings with defaults to ensure all keys exist
-	local mergedSettings = table.clone(self._defaultSettings)
+	local mergedSettings: { [string]: any } = table.clone(self._defaultSettings :: any)
 	for key, value in result do
-		local expectedType = typeof(self._defaultSettings[key])
+		local expectedType = typeof((self._defaultSettings :: any)[key])
 		if expectedType ~= "nil" and expectedType ~= typeof(value) then
 			Log.warn(`Could not load settings: invalid type for {key}. Expected {expectedType}, got {typeof(value)}`)
 			return
@@ -187,11 +187,12 @@ end
 --- @param key -- The setting key to retrieve.
 --- @return any -- The setting value.
 function Settings.get(self: Settings, key: string): any
-	if self._values and self._values[key] ~= nil then
-		return self._values[key]
+	local values = self._values :: any
+	if values and values[key] ~= nil then
+		return values[key]
 	end
 
-	local defaultValue = self._defaultSettings[key]
+	local defaultValue = (self._defaultSettings :: any)[key]
 	if defaultValue == nil then
 		Log.warn(`Could not get setting: unknown key '{key}'`)
 	end
