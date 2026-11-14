@@ -54,12 +54,12 @@ settings.onChanged:connect(function()
 	end
 
 	local logLevel = settings:get("logLevel")
-	if not Log.Level[logLevel] then
+	if not (Log.Level :: { [string]: number })[logLevel] then
 		Log.warn(`Invalid log level: {logLevel}. Defaulting to INFO`)
 		logLevel = "INFO"
 	end
 
-	Log.setLevel(Log.Level[logLevel])
+	Log.setLevel((Log.Level :: { [string]: number })[logLevel])
 end)
 
 --- Initialize all systems

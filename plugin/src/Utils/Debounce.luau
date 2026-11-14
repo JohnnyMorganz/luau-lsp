@@ -33,7 +33,7 @@ export type Debounce = typeof(setmetatable({} :: DebounceData, Debounce))
 --- @param callback -- The function to call after the delay period.
 --- @return Debounce -- A new Debounce instance.
 function Debounce.new(delaySeconds: number, callback: () -> ()): Debounce
-	local self = {
+	local self: DebounceData = {
 		delaySeconds = delaySeconds,
 		callback = callback,
 		pendingTask = nil,
