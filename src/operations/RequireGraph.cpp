@@ -282,7 +282,7 @@ int startRequireGraph(const argparse::ArgumentParser& program)
     fileResolver.platform = platform.get();
     fileResolver.requireSuggester = fileResolver.platform->getRequireSuggester();
 
-    Luau::Frontend frontend(&fileResolver, &fileResolver, frontendOptions);
+    Luau::Frontend frontend(FFlag::LuauSolverV2 ? Luau::SolverMode::New : Luau::SolverMode::Old, &fileResolver, &fileResolver, frontendOptions);
     Luau::freeze(frontend.globals.globalTypes);
 
     if (sourcemapPath)
