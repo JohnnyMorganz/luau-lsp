@@ -32,17 +32,19 @@ end
 --- @param tree -- The encoded instance tree to send.
 --- @return types.Result<types.HttpResponse, string> -- Success with response or failure with error message.
 function ServerEndpoints.full(address: string, tree: types.EncodedInstance): types.Result<types.HttpResponse, string>
-	local success, result = pcall(HttpService.RequestAsync, HttpService, {
-		Method = "POST" :: "POST",
-		Url = `{address}/full`,
-		Headers = {
-			["Content-Type"] = "application/json",
-		},
-		Body = HttpService:JSONEncode({
-			tree = tree,
-		}),
-		Compress = Enum.HttpCompression.Gzip,
-	})
+	local success, result = pcall(function()
+		return HttpService:RequestAsync({
+			Method = "POST" :: "POST",
+			Url = `{address}/full`,
+			Headers = {
+				["Content-Type"] = "application/json",
+			},
+			Body = HttpService:JSONEncode({
+				tree = tree,
+			}),
+			Compress = Enum.HttpCompression.Gzip,
+		})
+	end)
 
 	return wrapHttpResult(success, result)
 end
@@ -51,10 +53,12 @@ end
 --- @param address -- The full server address (e.g., "http://localhost:3667").
 --- @return types.Result<types.HttpResponse, string> -- Success with response or failure with error message.
 function ServerEndpoints.clear(address: string): types.Result<types.HttpResponse, string>
-	local success, result = pcall(HttpService.RequestAsync, HttpService, {
-		Method = "POST" :: "POST",
-		Url = `{address}/clear`,
-	})
+	local success, result = pcall(function()
+		return HttpService:RequestAsync({
+			Method = "POST" :: "POST",
+			Url = `{address}/clear`,
+		})
+	end)
 
 	return wrapHttpResult(success, result)
 end
@@ -63,13 +67,15 @@ end
 --- @param address -- The full server address (e.g., "http://localhost:3667").
 --- @return types.Result<types.HttpResponse, string> -- Success with response or failure with error message.
 function ServerEndpoints.getFilePaths(address: string): types.Result<types.HttpResponse, string>
-	local success, result = pcall(HttpService.RequestAsync, HttpService, {
-		Method = "GET" :: "GET",
-		Url = `{address}/get-file-paths`,
-		Headers = {
-			["Content-Type"] = "application/json",
-		},
-	})
+	local success, result = pcall(function()
+		return HttpService:RequestAsync({
+			Method = "GET" :: "GET",
+			Url = `{address}/get-file-paths`,
+			Headers = {
+				["Content-Type"] = "application/json",
+			},
+		})
+	end)
 
 	return wrapHttpResult(success, result)
 end
