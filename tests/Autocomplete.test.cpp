@@ -62,6 +62,39 @@ struct FragmentAutocompleteFixture : Fixture
 
 TEST_SUITE_BEGIN("Autocomplete");
 
+TEST_CASE_FIXTURE(FragmentAutocompleteFixture, "fragment_autocomplete_does_not_break_require_resolution_in_diagnostics")
+{
+    ENABLE_NEW_SOLVER();
+
+    // Pull diagnostics, otherwise updateTextDocument triggers a diagnostic check
+    client->capabilities.textDocument = lsp::TextDocumentClientCapabilities{};
+    client->capabilities.textDocument->diagnostic = lsp::DiagnosticClientCapabilities{};
+
+    newDocument("module.luau", "return { hello = true }");
+
+    auto oldSource = "local module = require('./module')\nlocal x: number = module.hello\nlocal y = 1\n";
+    auto newSource = "local module = require('./module')\nlocal x: number = module.hello\nlocal y = module.hello\n";
+
+    auto uri = newDocument("foo.luau", oldSource);
+    auto moduleName = workspace.fileResolver.getModuleName(uri);
+    workspace.checkStrict(moduleName, nullptr, false);
+
+    updateDocument(uri, newSource);
+
+    lsp::CompletionParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{2, 17}; // after `module.`
+    workspace.completion(params, nullptr);
+
+    // The type error on `x` (boolean is not number) must still be reported: `require` must still resolve
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{uri}}, nullptr);
+    bool foundTypeError = false;
+    for (auto& d : diagnostics.items)
+        if (d.message.find("TypeError") != std::string::npos)
+            foundTypeError = true;
+    CHECK(foundTypeError);
+}
+
 TEST_CASE_FIXTURE(Fixture, "function_autocomplete_has_documentation")
 {
     auto [source, marker] = sourceWithMarker(R"(

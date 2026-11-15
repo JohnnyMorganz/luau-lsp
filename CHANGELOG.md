@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Sync to upstream Luau 0.742
 
+### Fixed
+
+- Fixed spurious type errors appearing after typing `.` or `:` because fragment autocomplete cleared the module's `require` trace, causing `require` calls to no longer resolve in diagnostics. Fixes [#1686](https://github.com/JohnnyMorganz/luau-lsp/issues/1686)
+
 ## [1.70.1] - 2026-09-27
 
 ### Added

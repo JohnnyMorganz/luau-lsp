@@ -774,7 +774,17 @@ std::vector<lsp::CompletionItem> WorkspaceFolder::completion(const lsp::Completi
 
         // It is important to keep the fragmentResult in scope for the whole completion step
         // Otherwise the incremental module may de-allocate leading to a use-after-free when accessing the result ancestry
+        // tryFragmentAutocomplete registers (and then erases) a requireTrace entry under the real module name for its temporary module.
+        // This clobbers the real module's trace, which will not be rebuilt on the next check as the source node is not dirty
+        // (we just parsed it above). Without it, `require` calls fail to resolve in subsequent diagnostics. So save and restore it.
+        std::optional<Luau::RequireTraceResult> savedRequireTrace;
+        if (auto it = frontend.requireTrace.find(moduleName); it != frontend.requireTrace.end())
+            savedRequireTrace = it->second;
+
         fragmentStatusResult = Luau::tryFragmentAutocomplete(frontend, moduleName, position, fragmentContext, stringCompletionCB);
+
+        if (savedRequireTrace)
+            frontend.requireTrace[moduleName] = std::move(*savedRequireTrace);
         throwIfCancelled(cancellationToken);
         if (fragmentStatusResult.status == Luau::FragmentAutocompleteStatus::Success)
         {
