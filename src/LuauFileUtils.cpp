@@ -69,8 +69,24 @@ std::vector<std::string> getUtf8CommandLineArgs()
 }
 
 // LUAU-LSP DEVIATION: use extended length paths to support paths longer than MAX_PATH
+static bool isFullyQualifiedPath(const std::wstring& path)
+{
+    auto isSeparator = [](wchar_t c)
+    {
+        return c == L'\\' || c == L'/';
+    };
+
+    if (path.size() >= 3 && ((path[0] >= L'A' && path[0] <= L'Z') || (path[0] >= L'a' && path[0] <= L'z')) && path[1] == L':' && isSeparator(path[2]))
+        return true;
+
+    return path.size() >= 2 && isSeparator(path[0]) && isSeparator(path[1]);
+}
+
 static std::wstring toExtendedLengthPath(const std::wstring& path)
 {
+    if (path.size() < MAX_PATH && isFullyQualifiedPath(path))
+        return path;
+
     DWORD size = GetFullPathNameW(path.c_str(), 0, nullptr, nullptr);
     std::wstring fullPath(size, L'\0');
     DWORD length = GetFullPathNameW(path.c_str(), size, fullPath.data(), nullptr);
