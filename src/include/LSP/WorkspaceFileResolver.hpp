@@ -136,7 +136,8 @@ public:
     std::optional<std::string> getEnvironmentForModule(const Luau::ModuleName& name) const override;
     void clearConfigCache();
 
-    static std::optional<std::string> parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat = false);
+    static std::optional<std::string> parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat = false,
+        std::vector<std::string>* warnings = nullptr);
     static std::optional<std::string> parseLuauConfig(
         const Uri& configPath, const std::string& contents, Luau::Config& result, const Luau::TypeCheckLimits& limits);
     const Luau::Config& readConfigRec(const Uri& path, const Luau::TypeCheckLimits& limits) const;

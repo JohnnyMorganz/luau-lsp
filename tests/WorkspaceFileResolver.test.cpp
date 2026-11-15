@@ -1205,3 +1205,16 @@ TEST_CASE_FIXTURE(Fixture, "sourcemap_string_require_relative_parent_resolves_da
 }
 
 TEST_SUITE_END();
+
+TEST_CASE("parseConfig ignores unknown lints and keeps the remaining configuration")
+{
+    Luau::Config config;
+    std::vector<std::string> warnings;
+    auto error = WorkspaceFileResolver::parseConfig(Uri::file("/project/.luaurc"),
+        R"({"lint": {"SomeOtherToolLint": true, "UnknownGlobal": true, "Another": false}, "languageMode": "strict"})", config, false, &warnings);
+
+    CHECK(!error);
+    CHECK_EQ(warnings.size(), 2);
+    CHECK_EQ(config.mode, Luau::Mode::Strict);
+    CHECK(config.enabledLint.isEnabled(Luau::LintWarning::Code_UnknownGlobal));
+}

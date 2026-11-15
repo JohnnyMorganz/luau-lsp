@@ -1,3 +1,4 @@
+#include <regex>
 #include <optional>
 #include <unordered_map>
 #include <iostream>
@@ -207,7 +208,20 @@ const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& nam
     return readConfigRec(*base, limits);
 }
 
-std::optional<std::string> WorkspaceFileResolver::parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat)
+static std::string escapeRegex(const std::string& str)
+{
+    static const std::string special = "\\^$.|?*+()[]{}";
+    std::string out;
+    for (char c : str)
+    {
+        if (special.find(c) != std::string::npos)
+            out += '\\';
+        out += c;
+    }
+    return out;
+}
+
+std::optional<std::string> WorkspaceFileResolver::parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat, std::vector<std::string>* warnings)
 {
     LUAU_ASSERT(configPath.parent());
 
@@ -219,7 +233,31 @@ std::optional<std::string> WorkspaceFileResolver::parseConfig(const Uri& configP
     opts.aliasOptions = std::move(aliasOpts);
     opts.compat = compat;
 
-    return Luau::parseConfig(contents, result, opts);
+    // Luau's parser aborts on the first unknown lint, discarding the rest of the config. Other tools sharing a .luaurc may define their own
+    // lints, so we strip unknown lints and parse the remainder, reporting them as warnings instead.
+    std::string sanitised = contents;
+    for (size_t attempt = 0; attempt < 1000; ++attempt)
+    {
+        Luau::Config attemptResult = result;
+        auto error = Luau::parseConfig(sanitised, attemptResult, opts);
+        constexpr std::string_view prefix = "Unknown lint ";
+        if (!error || error->rfind(prefix, 0) != 0)
+        {
+            if (!error)
+                result = std::move(attemptResult);
+            return error;
+        }
+
+        std::string name = error->substr(prefix.size());
+        std::regex entry("\"" + escapeRegex(name) + "\"\\s*:\\s*(\"[^\"]*\"|true|false)\\s*,?");
+        std::string stripped = std::regex_replace(sanitised, entry, " ", std::regex_constants::format_first_only);
+        if (stripped == sanitised)
+            return error; // Could not strip it, fall back to reporting the error
+        sanitised = std::move(stripped);
+        if (warnings)
+            warnings->push_back("Unknown lint '" + name + "' ignored");
+    }
+    return "Too many unknown lints";
 }
 
 std::optional<std::string> WorkspaceFileResolver::parseLuauConfig(
@@ -295,18 +333,32 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri, const L
         if (client)
             client->sendLogMessage(lsp::MessageType::Info, "Loading Luau configuration from " + configPath.fsPath());
 
-        std::optional<std::string> error = parseConfig(configPath, *contents, result);
-        if (error)
+        std::vector<std::string> warnings;
+        std::optional<std::string> error = parseConfig(configPath, *contents, result, /* compat = */ false, &warnings);
+        if (error || !warnings.empty())
         {
             if (client)
             {
-                lsp::Diagnostic diagnostic{{{0, 0}, {0, 0}}};
-                diagnostic.message = *error;
-                diagnostic.severity = lsp::DiagnosticSeverity::Error;
-                diagnostic.source = "Luau";
-                client->publishDiagnostics({configPath, std::nullopt, {diagnostic}});
+                std::vector<lsp::Diagnostic> diagnostics;
+                for (const auto& warning : warnings)
+                {
+                    lsp::Diagnostic diagnostic{{{0, 0}, {0, 0}}};
+                    diagnostic.message = warning;
+                    diagnostic.severity = lsp::DiagnosticSeverity::Warning;
+                    diagnostic.source = "Luau";
+                    diagnostics.push_back(std::move(diagnostic));
+                }
+                if (error)
+                {
+                    lsp::Diagnostic diagnostic{{{0, 0}, {0, 0}}};
+                    diagnostic.message = *error;
+                    diagnostic.severity = lsp::DiagnosticSeverity::Error;
+                    diagnostic.source = "Luau";
+                    diagnostics.push_back(std::move(diagnostic));
+                }
+                client->publishDiagnostics({configPath, std::nullopt, diagnostics});
             }
-            else
+            else if (error)
                 // TODO: this should never be reached anymore
                 std::cerr << configPath.toString() << ": " << *error;
         }
