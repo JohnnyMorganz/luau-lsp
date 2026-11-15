@@ -757,6 +757,97 @@ TEST_CASE_FIXTURE(Fixture, "hovering_over_comment_inside_anonymous_function_body
     CHECK_FALSE(result.has_value());
 }
 
+TEST_CASE_FIXTURE(Fixture, "method_call_hover_uses_resolved_generic_instantiation")
+{
+    if (workspace.frontend.getLuauSolverMode() != Luau::SolverMode::New)
+        return;
+
+    auto [source, marker] = sourceWithMarker(R"(
+        local Class = {}
+        Class.__index = Class
+
+        type ClassData<T> = {
+            value: T,
+        }
+
+        export type Class<T> = setmetatable<ClassData<T>, typeof(Class)>
+
+        function Class.Get<T>(self: ClassData<T>): T
+            return self.value
+        end
+
+        local object: Class<string> = nil :: any
+        local value = object:G|et()
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "function ClassData:Get(self: ClassData<string>): string"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "function_call_hover_uses_resolved_generic_instantiation")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local function identity<T>(value: T): T
+            return value
+        end
+
+        local value = ident|ity("hello")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "function identity(value: string): string"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "function_call_hover_uses_resolved_overload")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local f: ((number) -> number) & ((string) -> string) = nil :: any
+        local value = |f("hello")
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "function f(string): string"));
+}
+
+TEST_CASE_FIXTURE(Fixture, "hover_property_used_as_computed_table_key_shows_property_type")
+{
+    auto [source, marker] = sourceWithMarker(R"(
+        local a = { b = "key" }
+        local t = { [a.|b] = 5 }
+    )");
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::HoverParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = marker;
+
+    auto result = workspace.hover(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(result->contents.value, codeBlock("luau", "string"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "includes_documentation_for_base_table_member_of_setmetatable_type")
 {
     auto source = R"(
