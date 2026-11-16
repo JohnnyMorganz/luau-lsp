@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Added support for requiring `.jsonc` files as modules, matching Rojo. Comments and trailing commas are allowed ([#1457](https://github.com/JohnnyMorganz/luau-lsp/issues/1457))
+
 ### Fixed
 
 - `luau-lsp analyze` now reports each module's type errors once. A file that was already checked as a dependency of an earlier analyzed file printed its own type errors again, along with those of every module it requires

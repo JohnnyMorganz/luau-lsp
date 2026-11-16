@@ -28,7 +28,8 @@ std::optional<std::string> SourceNode::getScriptFilePath() const
         {
             return path;
         }
-        else if (uri.extension() == ".json" && isScript() && !endsWith(uri.filename(), ".meta.json"))
+        else if ((uri.extension() == ".json" || uri.extension() == ".jsonc") && isScript() && !endsWith(uri.filename(), ".meta.json") &&
+                 !endsWith(uri.filename(), ".meta.jsonc"))
         {
             return path;
         }

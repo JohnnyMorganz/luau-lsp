@@ -19,6 +19,18 @@ TEST_CASE("getScriptFilePath returns json file if node is populated by JSON")
     CHECK_EQ(node.getScriptFilePath(), "test.json");
 }
 
+TEST_CASE("getScriptFilePath returns jsonc file if node is populated by JSONC")
+{
+    SourceNode node("test", "ModuleScript", {"test.jsonc"}, {});
+    CHECK_EQ(node.getScriptFilePath(), "test.jsonc");
+}
+
+TEST_CASE("getScriptFilePath doesn't pick .meta.jsonc")
+{
+    SourceNode node("init", "ModuleScript", {"init.meta.jsonc", "init.lua"}, {});
+    CHECK_EQ(node.getScriptFilePath(), "init.lua");
+}
+
 TEST_CASE("getScriptFilePath returns toml file if node is populated by TOML")
 {
     SourceNode node("test", "ModuleScript", {"test.toml"}, {});

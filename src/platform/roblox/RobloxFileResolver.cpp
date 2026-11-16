@@ -64,11 +64,12 @@ std::optional<std::string> RobloxPlatform::readSourceCode(const Luau::ModuleName
     if (!source)
         return std::nullopt;
 
-    if (path.extension() == ".json")
+    if (path.extension() == ".json" || path.extension() == ".jsonc")
     {
         try
         {
-            source = "--!strict\nreturn " + jsonValueToLuau(json::parse(*source));
+            const auto jsonSource = path.extension() == ".jsonc" ? jsoncToJson(*source) : *source;
+            source = "--!strict\nreturn " + jsonValueToLuau(json::parse(jsonSource));
         }
         catch (const std::exception& e)
         {

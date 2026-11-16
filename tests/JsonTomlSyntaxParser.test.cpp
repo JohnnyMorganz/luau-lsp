@@ -220,4 +220,65 @@ products:
     expectItem(table, "products", "nil");
 }
 
+TEST_CASE("jsoncToJson removes line and block comments")
+{
+    auto result = nlohmann::json::parse(jsoncToJson(R"(
+    {
+        // line comment
+        "a": 1, /* block
+        comment */ "b": [1, /* inline */ 2]
+    } // trailing comment
+    )"));
+
+    CHECK_EQ(result, nlohmann::json::parse(R"({"a": 1, "b": [1, 2]})"));
+}
+
+TEST_CASE("jsoncToJson removes trailing commas")
+{
+    auto result = nlohmann::json::parse(jsoncToJson(R"(
+    {
+        "a": [1, 2,],
+        "b": {"c": 3,},
+    }
+    )"));
+
+    CHECK_EQ(result, nlohmann::json::parse(R"({"a": [1, 2], "b": {"c": 3}})"));
+}
+
+TEST_CASE("jsoncToJson removes trailing commas separated from the closing bracket by comments")
+{
+    auto result = nlohmann::json::parse(jsoncToJson("[1, 2, // two\n /* end */ ]"));
+    CHECK_EQ(result, nlohmann::json::parse("[1, 2]"));
+}
+
+TEST_CASE("jsoncToJson leaves string contents untouched")
+{
+    auto result = nlohmann::json::parse(jsoncToJson(R"({"url": "http://example.com", "text": "/* not a comment */, ]", "quote": "a\"//b",})"));
+
+    CHECK_EQ(result["url"], "http://example.com");
+    CHECK_EQ(result["text"], "/* not a comment */, ]");
+    CHECK_EQ(result["quote"], "a\"//b");
+}
+
+TEST_CASE("jsoncToJson leaves plain JSON unchanged")
+{
+    const std::string json = R"({"a": [1, 2, {"b": null}], "c": "d"})";
+    CHECK_EQ(jsoncToJson(json), json);
+}
+
+TEST_CASE("jsoncToJson does not make invalid JSON valid")
+{
+    auto isValid = [](std::string_view jsonc)
+    {
+        return !nlohmann::json::parse(jsoncToJson(jsonc), nullptr, false).is_discarded();
+    };
+
+    CHECK_FALSE(isValid("[,]"));
+    CHECK_FALSE(isValid("[1,,]"));
+    CHECK_FALSE(isValid("{,}"));
+    CHECK_FALSE(isValid("[1, 2] /* unterminated"));
+    CHECK_FALSE(isValid(R"(["unterminated])"));
+    CHECK(isValid("[1, 2,]"));
+}
+
 TEST_SUITE_END();
