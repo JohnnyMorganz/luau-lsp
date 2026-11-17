@@ -611,6 +611,49 @@ TEST_CASE_FIXTURE(Fixture, "resolve_yml_modules")
     CHECK_EQ(source->source, "--!strict\nreturn {[\"value\"] = 1;}");
 }
 
+TEST_CASE_FIXTURE(Fixture, "resolve_jsonc_modules")
+{
+    auto path = tempDir.write_child("settings.jsonc", R"(
+    {
+        // Comments and trailing commas are allowed
+        "value": 1, /* block comment */
+        "list": [1, 2,],
+    }
+    )");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    auto source = workspace.fileResolver.readSource("game/Settings");
+    REQUIRE(source);
+
+    CHECK_EQ(source->source, "--!strict\nreturn {[\"list\"] = {1;2;};[\"value\"] = 1;}");
+}
+
+TEST_CASE_FIXTURE(Fixture, "invalid_jsonc_modules_are_not_loaded")
+{
+    auto path = tempDir.write_child("settings.jsonc", R"({"value": 1,, })");
+
+    auto sourcemap = std::string(R"(
+    {
+        "name": "Game",
+        "className": "DataModel",
+        "children": [{ "name": "Settings", "className": "ModuleScript", "filePaths": ["{filepath}"] }]
+    }
+    )");
+    replace(sourcemap, "{filepath}", path);
+    loadSourcemap(sourcemap);
+
+    CHECK_FALSE(workspace.fileResolver.readSource("game/Settings"));
+}
+
 TEST_CASE_FIXTURE(Fixture, "support_config_luau")
 {
     auto fooPath = tempDir.touch_child("project/code/foo.luau");
