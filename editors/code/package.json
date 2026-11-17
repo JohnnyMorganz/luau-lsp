@@ -221,7 +221,7 @@
           "scope": "window"
         },
         "luau-lsp.ignoreGlobs": {
-          "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open",
+          "markdownDescription": "Diagnostics will not be reported for any file matching these globs unless the file is currently open. Patterns are read like `.gitignore` lines: the last pattern that matches decides, and a leading `!` re-includes files an earlier pattern ignored, e.g. `[\"vendor/**\", \"!vendor/keep/**\"]`",
           "type": "array",
           "items": {
             "type": "string"
@@ -660,7 +660,7 @@
           "scope": "resource"
         },
         "luau-lsp.completion.imports.ignoreGlobs": {
-          "markdownDescription": "Files that match these globs will not be shown during auto-import",
+          "markdownDescription": "Files that match these globs will not be shown during auto-import. Patterns are read like `.gitignore` lines: the last pattern that matches decides, and a leading `!` re-includes files an earlier pattern ignored",
           "type": "array",
           "items": {
             "type": "string"
