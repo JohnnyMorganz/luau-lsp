@@ -110,6 +110,68 @@ TEST_CASE_FIXTURE(Fixture, "isIgnoredFile")
 #endif
 }
 
+TEST_CASE_FIXTURE(Fixture, "isIgnoredFile_a_negated_pattern_re_includes_an_ignored_path")
+{
+    client->globalConfig.ignoreGlobs = {"vendor/**", "!vendor/keep/**"};
+
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/other.luau")), true);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/other/deep.luau")), true);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/keep/kept.luau")), false);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/keep/deep/kept.luau")), false);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("src/main.luau")), false);
+}
+
+TEST_CASE_FIXTURE(Fixture, "isIgnoredFile_the_last_matching_pattern_decides")
+{
+    client->globalConfig.ignoreGlobs = {"vendor/**", "!vendor/keep/**", "vendor/keep/secret/**"};
+
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/keep/kept.luau")), false);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/keep/secret/hidden.luau")), true);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/other.luau")), true);
+}
+
+TEST_CASE_FIXTURE(Fixture, "isIgnoredFile_a_negation_with_nothing_to_undo_changes_nothing")
+{
+    client->globalConfig.ignoreGlobs = {"!src/**", "vendor/**"};
+
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("src/main.luau")), false);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/other.luau")), true);
+
+    // A negation before the exclusion it names has nothing to undo, so the later exclusion still applies
+    client->globalConfig.ignoreGlobs = {"!vendor/keep/**", "vendor/**"};
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/keep/kept.luau")), true);
+}
+
+TEST_CASE_FIXTURE(Fixture, "isIgnoredFile_a_lone_exclamation_mark_is_not_a_pattern")
+{
+    client->globalConfig.ignoreGlobs = {"!"};
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("src/main.luau")), false);
+
+    client->globalConfig.ignoreGlobs = {"vendor/**", "!"};
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/other.luau")), true);
+}
+
+TEST_CASE_FIXTURE(Fixture, "isIgnoredFile_a_backslash_escaped_exclamation_mark_is_a_literal")
+{
+    client->globalConfig.ignoreGlobs = {"\\!important.luau"};
+
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("!important.luau")), true);
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("important.luau")), false);
+}
+
+TEST_CASE_FIXTURE(Fixture, "isIgnoredFileForAutoImports_a_negated_pattern_re_includes_an_ignored_path")
+{
+    client->globalConfig.completion.imports.ignoreGlobs = {"vendor/**", "!vendor/keep/**"};
+
+    CHECK_EQ(workspace.isIgnoredFileForAutoImports(workspace.rootUri.resolvePath("vendor/other.luau")), true);
+    CHECK_EQ(workspace.isIgnoredFileForAutoImports(workspace.rootUri.resolvePath("vendor/keep/kept.luau")), false);
+    CHECK_EQ(workspace.isIgnoredFileForAutoImports(workspace.rootUri.resolvePath("src/main.luau")), false);
+
+    // The two settings are separate: negating in one doesn't re-include for the other
+    client->globalConfig.ignoreGlobs = {"vendor/**"};
+    CHECK_EQ(workspace.isIgnoredFile(workspace.rootUri.resolvePath("vendor/keep/kept.luau")), true);
+}
+
 TEST_CASE_FIXTURE(Fixture, "isDefinitionsFile")
 {
     client->globalConfig.types.definitionFiles = {{"@roblox", "globalTypes.d.luau"}};

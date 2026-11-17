@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `luau-lsp.ignoreGlobs` and `luau-lsp.completion.imports.ignoreGlobs` now read their patterns like `.gitignore` lines: the last pattern that matches decides, and a leading `!` re-includes files an earlier pattern ignored, so `["vendor/**", "!vendor/keep/**"]` ignores everything under `vendor/` except `vendor/keep/`. Write `\!` to match a name that starts with a literal `!` ([#1528](https://github.com/JohnnyMorganz/luau-lsp/issues/1528))
+
 ### Fixed
 
 - `luau-lsp analyze` now reports each module's type errors once. A file that was already checked as a dependency of an earlier analyzed file printed its own type errors again, along with those of every module it requires

@@ -266,21 +266,38 @@ void WorkspaceFolder::onDidChangeWatchedFiles(const std::vector<lsp::FileEvent>&
     client->sendWorkDoneProgressEnd(kWatchedFilesProgressToken);
 }
 
+/// Applies a list of ignore globs the way .gitignore reads its lines: the last pattern that matches decides, and a
+/// pattern starting with `!` re-includes a path that an earlier pattern ignored. A name that starts with a literal `!`
+/// is written `\!`, which the matcher reads as an escaped character.
+static bool matchesIgnoreGlobs(const std::string& relativePath, const std::vector<std::string>& patterns)
+{
+    bool ignored = false;
+    for (const auto& pattern : patterns)
+    {
+        const bool negated = !pattern.empty() && pattern.front() == '!';
+
+        // A bare `!` names nothing to re-include
+        if (negated && pattern.size() == 1)
+            continue;
+
+        // A pattern can only change the outcome in one direction: an ignore pattern can't re-include a path that
+        // is ignored already, and a negation has nothing to undo for a path that isn't
+        if (negated != ignored)
+            continue;
+
+        if (glob::gitignore_glob_match(relativePath, negated ? pattern.substr(1) : pattern))
+            ignored = !negated;
+    }
+    return ignored;
+}
+
 /// Whether the file has been marked as ignored by any of the ignored lists in the configuration
 bool WorkspaceFolder::isIgnoredFile(const Uri& uri, const std::optional<ClientConfiguration>& givenConfig) const
 {
     // We want to test globs against a relative path to workspace, since that's what makes most sense
     auto relativePathString = uri.lexicallyRelative(rootUri);
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
-    std::vector<std::string> patterns = config.ignoreGlobs; // TODO: extend further?
-    for (auto& pattern : patterns)
-    {
-        if (glob::gitignore_glob_match(relativePathString, pattern))
-        {
-            return true;
-        }
-    }
-    return false;
+    return matchesIgnoreGlobs(relativePathString, config.ignoreGlobs); // TODO: extend further?
 }
 
 bool WorkspaceFolder::isIgnoredFileForAutoImports(const Uri& uri, const std::optional<ClientConfiguration>& givenConfig) const
@@ -288,15 +305,7 @@ bool WorkspaceFolder::isIgnoredFileForAutoImports(const Uri& uri, const std::opt
     // We want to test globs against a relative path to workspace, since that's what makes most sense
     auto relativePathString = uri.lexicallyRelative(rootUri);
     auto config = givenConfig ? *givenConfig : client->getConfiguration(rootUri);
-    std::vector<std::string> patterns = config.completion.imports.ignoreGlobs;
-    for (auto& pattern : patterns)
-    {
-        if (glob::gitignore_glob_match(relativePathString, pattern))
-        {
-            return true;
-        }
-    }
-    return false;
+    return matchesIgnoreGlobs(relativePathString, config.completion.imports.ignoreGlobs);
 }
 
 bool WorkspaceFolder::isDefinitionFile(const Uri& path, const std::optional<ClientConfiguration>& givenConfig) const
