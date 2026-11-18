@@ -5740,6 +5740,26 @@
                 }
             ],
             "Name": "InstanceHandle"
+        },
+        {
+            "Members": [
+                {
+                    "MemberType": "Function",
+                    "Name": "ResolveInstance",
+                    "Parameters": [
+                        {
+                            "Name": "scope",
+                            "Type": {
+                                "Name": "Instance"
+                            }
+                        }
+                    ],
+                    "ReturnType": {
+                        "Name": "Instance?"
+                    }
+                }
+            ],
+            "Name": "ScopedInstanceIdentity"
         }
     ]
 }
