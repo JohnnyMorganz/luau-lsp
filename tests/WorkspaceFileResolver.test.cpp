@@ -531,6 +531,48 @@ TEST_CASE_FIXTURE(Fixture, "init_luau_files_are_aware_of_luaurc_files_that_are_s
     CHECK(initConfig.aliases.find("test"));
 }
 
+TEST_CASE_FIXTURE(Fixture, "luaurc_ignores_unknown_lints_and_loads_other_settings")
+{
+    const auto modulePath = tempDir.touch_child("project/module.luau");
+    const auto configPath = tempDir.write_child("project/.luaurc", R"({
+        "lint": {
+            "ThirdPartyLint": true,
+            "*": false,
+            "LocalUnused": true, // This lint overrides the wildcard.
+            "AnotherThirdPartyLint": false
+        },
+        "languageMode": "strict",
+        "aliases": {"ThirdPartyLint": "./lib"}
+    })");
+
+    const auto& config = workspace.fileResolver.getConfig(workspace.fileResolver.getModuleName(Uri::file(modulePath)), workspace.limits);
+
+    CHECK(config.enabledLint.isEnabled(Luau::LintWarning::Code_LocalUnused));
+    CHECK_FALSE(config.enabledLint.isEnabled(Luau::LintWarning::Code_FunctionUnused));
+    CHECK_EQ(config.mode, Luau::Mode::Strict);
+    CHECK(config.aliases.find("thirdpartylint"));
+
+    std::vector<std::string> warnings;
+    for (const auto& [method, params] : client->notificationQueue)
+    {
+        if (method == "window/logMessage" && params && params->at("type") == lsp::MessageType::Warning)
+            warnings.push_back(params->at("message").get<std::string>());
+    }
+    REQUIRE_EQ(warnings.size(), 2);
+    CHECK_EQ(warnings[0], Uri::file(configPath).fsPath() + ": Ignoring unknown lint ThirdPartyLint");
+    CHECK_EQ(warnings[1], Uri::file(configPath).fsPath() + ": Ignoring unknown lint AnotherThirdPartyLint");
+}
+
+TEST_CASE_FIXTURE(Fixture, "luaurc_still_rejects_invalid_known_lint_values")
+{
+    Luau::Config config;
+    const auto error = WorkspaceFileResolver::parseConfig(workspace.rootUri.resolvePath(".luaurc"),
+        R"({"lint": {"ThirdPartyLint": true, "LocalUnused": "invalid"}})", config, client.get());
+
+    REQUIRE(error);
+    CHECK_EQ(*error, "In key LocalUnused: Bad setting 'invalid'.  Valid options are true and false");
+}
+
 TEST_CASE_FIXTURE(Fixture, "resolve_json_modules")
 {
     auto path = tempDir.write_child("settings.json", R"({"value": 1})");
