@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Warn about unknown lints in `.luaurc` files without rejecting the configuration ([#1678](https://github.com/JohnnyMorganz/luau-lsp/issues/1678))
 - `luau-lsp analyze` now reports each module's type errors once. A file that was already checked as a dependency of an earlier analyzed file printed its own type errors again, along with those of every module it requires
 
 ### Changed

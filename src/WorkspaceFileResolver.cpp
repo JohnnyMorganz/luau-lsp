@@ -1,7 +1,9 @@
+#include <algorithm>
 #include <optional>
 #include <unordered_map>
 #include <iostream>
 #include "Luau/Ast.h"
+#include "Luau/Lexer.h"
 #include "Luau/LuauConfig.h"
 #include "LSP/WorkspaceFileResolver.hpp"
 
@@ -207,7 +209,82 @@ const Luau::Config& WorkspaceFileResolver::getConfig(const Luau::ModuleName& nam
     return readConfigRec(*base, limits);
 }
 
-std::optional<std::string> WorkspaceFileResolver::parseConfig(const Uri& configPath, const std::string& contents, Luau::Config& result, bool compat)
+static std::optional<std::string> filterUnknownLints(const Uri& configPath, const std::string& contents, const Client* client)
+{
+    using Luau::Lexeme;
+
+    Luau::Allocator allocator;
+    Luau::AstNameTable names(allocator);
+    Luau::Lexer lexer(contents.data(), contents.size(), names);
+    auto next = [&]
+    {
+        lexer.next();
+        while (lexer.current().type == Lexeme::FloorDiv)
+            lexer.nextline();
+        return lexer.current().type;
+    };
+    auto lintEntryEnd = [&]() -> std::optional<size_t>
+    {
+        if (next() != ':')
+            return std::nullopt;
+
+        auto value = next();
+        if (value != Lexeme::QuotedString && value != Lexeme::ReservedTrue && value != Lexeme::ReservedFalse)
+            return std::nullopt;
+
+        auto separator = next();
+        if (separator == ',')
+            return lexer.getOffset();
+        if (separator == '}')
+            return lexer.getOffset() - 1;
+        return std::nullopt;
+    };
+
+    std::optional<std::string> filtered;
+    int depth = 0;
+    bool inLint = false;
+    auto previous = Lexeme::Eof;
+    for (next(); lexer.current().type != Lexeme::Eof; next())
+    {
+        const auto& token = lexer.current();
+        if ((previous == '{' || previous == ',') && token.type == Lexeme::QuotedString)
+        {
+            std::string_view key(token.data, token.getLength());
+            if (depth == 1 && key == "lint")
+                inLint = next() == ':' && next() == '{';
+            else if (depth == 2 && inLint && key != "*" && Luau::LintWarning::parseName(std::string(key).c_str()) == Luau::LintWarning::Code_Unknown)
+            {
+                if (auto end = lintEntryEnd())
+                {
+                    if (!filtered)
+                        filtered = contents;
+                    const auto begin = key.data() - contents.data() - 1;
+                    std::replace_if(filtered->begin() + begin, filtered->begin() + *end, [](char ch) { return ch != '\n' && ch != '\r'; }, ' ');
+
+                    std::string warning = configPath.fsPath() + ": Ignoring unknown lint " + std::string(key);
+                    if (client)
+                        client->sendLogMessage(lsp::MessageType::Warning, warning);
+                    else
+                        std::cerr << "Warning: " << warning << '\n';
+                }
+            }
+        }
+
+        previous = lexer.current().type;
+        if (previous == '{' || previous == '[')
+            ++depth;
+        else if (previous == '}' || previous == ']')
+        {
+            --depth;
+            if (depth == 1)
+                inLint = false;
+        }
+    }
+    return filtered;
+}
+
+std::optional<std::string> WorkspaceFileResolver::parseConfig(
+    const Uri& configPath, const std::string& contents, Luau::Config& result, const Client* client, bool compat)
 {
     LUAU_ASSERT(configPath.parent());
 
@@ -219,7 +296,8 @@ std::optional<std::string> WorkspaceFileResolver::parseConfig(const Uri& configP
     opts.aliasOptions = std::move(aliasOpts);
     opts.compat = compat;
 
-    return Luau::parseConfig(contents, result, opts);
+    auto filtered = compat ? std::nullopt : filterUnknownLints(configPath, contents, client);
+    return Luau::parseConfig(filtered ? *filtered : contents, result, opts);
 }
 
 std::optional<std::string> WorkspaceFileResolver::parseLuauConfig(
@@ -295,7 +373,7 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri, const L
         if (client)
             client->sendLogMessage(lsp::MessageType::Info, "Loading Luau configuration from " + configPath.fsPath());
 
-        std::optional<std::string> error = parseConfig(configPath, *contents, result);
+        std::optional<std::string> error = parseConfig(configPath, *contents, result, client);
         if (error)
         {
             if (client)
@@ -323,7 +401,7 @@ const Luau::Config& WorkspaceFileResolver::readConfigRec(const Uri& uri, const L
             client->sendLogMessage(lsp::MessageType::Info, "Loading Luau configuration from " + robloxRcPath.fsPath());
 
         // Backwards compatibility for .robloxrc files
-        std::optional<std::string> error = parseConfig(robloxRcPath, *robloxRcContents, result, /* compat = */ true);
+        std::optional<std::string> error = parseConfig(robloxRcPath, *robloxRcContents, result, client, /* compat = */ true);
         if (error)
         {
             if (client)
