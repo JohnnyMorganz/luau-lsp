@@ -12,7 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
-- Sync to upstream Luau 0.747
+- Sync to upstream Luau 0.748
 - **Breaking**: `luau-lsp analyze` now uses the new Luau type solver by default, as upstream Luau no longer treats `LuauSolverV2` as an experimental flag. The language server is also affected when all FFlags are enabled by default. Pass `--flag:LuauSolverV2=false` to keep the old solver
 
 ## [1.70.1] - 2026-09-27
