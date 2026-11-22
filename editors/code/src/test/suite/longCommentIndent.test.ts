@@ -67,6 +67,30 @@ suite("Long comment indentation Test Suite", () => {
       assert.strictEqual(insideAtMarker('local s = "\\"--[["\ndo|'), false);
     });
 
+    test("string escapes and line breaks", () => {
+      // `\z` skips the line break, so the string continues on the next line
+      assert.strictEqual(
+        insideAtMarker('local s = "a\\z\n   --[["\ndo|'),
+        false,
+      );
+      // An escaped CRLF line break continues the string
+      assert.strictEqual(
+        insideAtMarker('local s = "a\\\r\n--[["\r\ndo|'),
+        false,
+      );
+      // An unterminated string ends at the line break
+      assert.strictEqual(insideAtMarker('local s = "abc\n--[[\ndo|'), true);
+    });
+
+    test("brackets that are not long brackets", () => {
+      assert.strictEqual(insideAtMarker("local x = t[1] --[[\ndo|"), true);
+      assert.strictEqual(insideAtMarker("local x = t[=1] --[[\ndo|"), true);
+      assert.strictEqual(
+        insideAtMarker("local s = [==[ ]] --[[ ]==]\ndo|"),
+        false,
+      );
+    });
+
     test("inside a long string", () => {
       assert.strictEqual(insideAtMarker("local s = [[\n\tdo|\n]]"), false);
     });
