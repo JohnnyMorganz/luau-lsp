@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - `luau-lsp analyze` now reports each module's type errors once. A file that was already checked as a dependency of an earlier analyzed file printed its own type errors again, along with those of every module it requires
+- VSCode extension: pressing Enter after a keyword such as `do`, `function`, `then` or `repeat` inside a multi-line comment (`--[[ ]]`) no longer indents the next line ([#1644](https://github.com/JohnnyMorganz/luau-lsp/issues/1644))
 
 ### Changed
 

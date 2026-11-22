@@ -23,6 +23,8 @@ import {
 
 import { onTypeFormattingMiddleware } from "./onTypeFormattingMiddleware";
 
+import { indentationToKeep, isInsideLongComment } from "./longCommentIndent";
+
 import { registerRequireGraph } from "./requireGraph";
 
 import { registerViewInternalSource } from "./internalSource";
@@ -662,6 +664,61 @@ export async function activate(context: vscode.ExtensionContext) {
             }
           });
       }
+    }),
+  );
+
+  // The indentation rules in language-configuration.json cannot tell when a line
+  // is inside a multi-line comment, so pressing Enter after a keyword such as `do`
+  // in a `--[[ ]]` comment would indent the next line. Restore the indentation of
+  // the line Enter was pressed on in that case.
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      const document = event.document;
+      if (
+        document.languageId !== "luau" ||
+        event.reason !== undefined ||
+        event.contentChanges.length !== 1
+      ) {
+        return;
+      }
+      const editor = vscode.window.activeTextEditor;
+      if (!editor || editor.document !== document) {
+        return;
+      }
+
+      const change = event.contentChanges[0];
+      const start = change.range.start;
+      const lineBeforeCursor = document
+        .lineAt(start.line)
+        .text.slice(0, start.character);
+      const indentation = indentationToKeep(lineBeforeCursor, change.text);
+      if (
+        indentation === undefined ||
+        start.line + 1 >= document.lineCount ||
+        !isInsideLongComment(document.getText(), document.offsetAt(start))
+      ) {
+        return;
+      }
+
+      const insertedIndentation = change.text.replace(/^\r?\n/, "");
+      if (
+        !document.lineAt(start.line + 1).text.startsWith(insertedIndentation)
+      ) {
+        return;
+      }
+      editor.edit(
+        (builder) =>
+          builder.replace(
+            new vscode.Range(
+              start.line + 1,
+              0,
+              start.line + 1,
+              insertedIndentation.length,
+            ),
+            indentation,
+          ),
+        { undoStopBefore: false, undoStopAfter: false },
+      );
     }),
   );
 
