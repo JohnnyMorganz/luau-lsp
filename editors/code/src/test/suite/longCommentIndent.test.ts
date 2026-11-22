@@ -25,6 +25,15 @@ suite("Long comment indentation Test Suite", () => {
       assert.strictEqual(insideAtMarker("--[[\n\tfunction|"), true);
     });
 
+    test("right before the closing bracket", () => {
+      assert.strictEqual(insideAtMarker("--[[\n\tdo|]]"), true);
+      assert.strictEqual(insideAtMarker("--[[\n\tdo]]|"), false);
+    });
+
+    test("a comment right after a string", () => {
+      assert.strictEqual(insideAtMarker('local s = ""--[[\ndo|'), true);
+    });
+
     test("inside a long comment with a long bracket level", () => {
       assert.strictEqual(insideAtMarker("--[==[\n\t]] then|\n]==]"), true);
       assert.strictEqual(insideAtMarker("--[=[\n\trepeat|\n]=]"), true);
@@ -117,6 +126,8 @@ suite("Long comment indentation Test Suite", () => {
       assert.strictEqual(indentationToKeep("\tdo", "\n\tfoo"), undefined);
       assert.strictEqual(indentationToKeep("\tdo", "\n\t\n\t"), undefined);
       assert.strictEqual(indentationToKeep("\tdo", ""), undefined);
+      assert.strictEqual(indentationToKeep("do", "\n\tfoo"), undefined);
+      assert.strictEqual(indentationToKeep("do", "x\n\t"), undefined);
     });
   });
 });
