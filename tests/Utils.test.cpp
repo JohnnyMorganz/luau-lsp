@@ -279,6 +279,37 @@ TEST_CASE("getUtf8CommandLineArgs returns command line arguments")
     // Should have at least the program name
     CHECK_FALSE(args.empty());
 }
+
+static std::filesystem::path withExtendedLengthPrefix(const std::string& path)
+{
+    return LR"(\\?\)" + std::filesystem::path(path).make_preferred().wstring();
+}
+
+TEST_CASE("file operations can handle paths longer than MAX_PATH")
+{
+    TempDir t("long_paths");
+    auto directory = t.path() + "/" + std::string(255, 'a');
+    auto file = directory + "/module.luau";
+    REQUIRE(std::filesystem::create_directory(withExtendedLengthPrefix(directory)));
+
+    CHECK(Luau::FileUtils::writeFileIfModified(file, "return {}"));
+    CHECK_EQ(Luau::FileUtils::readFile(file), "return {}");
+    CHECK(Luau::FileUtils::exists(file));
+    CHECK(Luau::FileUtils::isFile(file));
+    CHECK(Luau::FileUtils::isDirectory(directory));
+    CHECK(Luau::FileUtils::isDirectory(directory + "/.."));
+
+    std::vector<std::string> paths;
+    Luau::FileUtils::traverseDirectoryRecursive(t.path(),
+        [&](const auto& path)
+        {
+            paths.push_back(path);
+        });
+    CHECK_EQ(paths, std::vector<std::string>{file});
+
+    std::filesystem::remove(withExtendedLengthPrefix(file));
+    std::filesystem::remove(withExtendedLengthPrefix(directory));
+}
 #endif
 
 TEST_SUITE_END();

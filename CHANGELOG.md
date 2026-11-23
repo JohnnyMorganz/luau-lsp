@@ -15,6 +15,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Sync to upstream Luau 0.747
 - **Breaking**: `luau-lsp analyze` now uses the new Luau type solver by default, as upstream Luau no longer treats `LuauSolverV2` as an experimental flag. The language server is also affected when all FFlags are enabled by default. Pass `--flag:LuauSolverV2=false` to keep the old solver
 
+### Fixed
+
+- Fixed files and directories whose paths are 260 characters or longer being inaccessible on Windows, which caused requires to those files to fail to resolve ([#1581](https://github.com/JohnnyMorganz/luau-lsp/issues/1581))
+
 ## [1.70.1] - 2026-09-27
 
 ### Added
