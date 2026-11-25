@@ -275,6 +275,43 @@ TEST_CASE_FIXTURE(Fixture, "find_references_of_a_global_from_definitions_file")
     CHECK_EQ(lsp::Range{{2, 18}, {2, 22}}, result->at(1).range);
 }
 
+TEST_CASE_FIXTURE(Fixture, "find_references_of_a_property_of_a_table_from_builtin_definitions")
+{
+    auto source = R"(
+        local x = math.floor(1.5)
+        local y = math.floor(2.5)
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 25}; // 'floor' property
+
+    // `math` is declared by the builtin definitions, which have no source module to search for references
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(0, result->size());
+}
+
+TEST_CASE_FIXTURE(Fixture, "find_references_of_a_property_of_a_table_from_definitions_file")
+{
+    auto source = R"(
+        local x = Vector3.new(1, 2, 3)
+        local y = Vector3.new(4, 5, 6)
+    )";
+
+    auto uri = newDocument("foo.luau", source);
+
+    lsp::ReferenceParams params;
+    params.textDocument = lsp::TextDocumentIdentifier{uri};
+    params.position = lsp::Position{1, 27}; // 'new' property
+
+    auto result = workspace.references(params, nullptr);
+    REQUIRE(result);
+    CHECK_EQ(0, result->size());
+}
+
 TEST_CASE_FIXTURE(Fixture, "find_references_of_type_definition_used_as_return_type")
 {
     auto source = R"(
