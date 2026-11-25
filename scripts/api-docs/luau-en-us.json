@@ -1361,6 +1361,8 @@
       "readi32": "@luau/global/buffer.readi32",
       "readu32": "@luau/global/buffer.readu32",
       "readf32": "@luau/global/buffer.readf32",
+      "readvectorf32x2": "@luau/global/buffer.readvectorf32x2",
+      "readvectorf32x3": "@luau/global/buffer.readvectorf32x3",
       "readf64": "@luau/global/buffer.readf64",
       "writebits": "@luau/global/buffer.writebits",
       "writei8": "@luau/global/buffer.writei8",
@@ -1370,6 +1372,8 @@
       "writei32": "@luau/global/buffer.writei32",
       "writeu32": "@luau/global/buffer.writeu32",
       "writef32": "@luau/global/buffer.writef32",
+      "writevectorf32x2": "@luau/global/buffer.writevectorf32x2",
+      "writevectorf32x3": "@luau/global/buffer.writevectorf32x3",
       "writef64": "@luau/global/buffer.writef64",
       "readstring": "@luau/global/buffer.readstring",
       "writestring": "@luau/global/buffer.writestring",
@@ -1383,7 +1387,7 @@
     "documentation": "Size of the buffer in bytes. Must be a positive integer."
   },
   "@luau/global/buffer.create/return/0": {
-    "documentation": ""
+    "documentation": "A new buffer of the requested size with all bytes initialized to zero."
   },
   "@luau/global/buffer.create": {
     "documentation": "Creates a buffer.",
@@ -1403,7 +1407,7 @@
     "documentation": "The string whose bytes initialize the new buffer."
   },
   "@luau/global/buffer.fromstring/return/0": {
-    "documentation": ""
+    "documentation": "A new buffer containing a copy of the string's bytes."
   },
   "@luau/global/buffer.fromstring": {
     "documentation": "Creates a buffer from a string.",
@@ -1423,7 +1427,7 @@
     "documentation": "The buffer to convert."
   },
   "@luau/global/buffer.tostring/return/0": {
-    "documentation": ""
+    "documentation": "A string containing all bytes from the buffer."
   },
   "@luau/global/buffer.tostring": {
     "documentation": "Converts a buffer to a string.",
@@ -1443,7 +1447,7 @@
     "documentation": "The buffer to get the size of."
   },
   "@luau/global/buffer.len/return/0": {
-    "documentation": ""
+    "documentation": "The size of the buffer in bytes."
   },
   "@luau/global/buffer.len": {
     "documentation": "Returns the size of the buffer in bytes.",
@@ -1469,7 +1473,7 @@
     "documentation": "Integer bit count to read. Error is thrown if this value is not in range of <code>0</code> to <code>32</code>, inclusive."
   },
   "@luau/global/buffer.readbits/return/0": {
-    "documentation": ""
+    "documentation": "The unsigned integer value read from the specified bits."
   },
   "@luau/global/buffer.readbits": {
     "documentation": "Reads a range of bits into an unsigned integer from the buffer based on a specific <code>bitCount</code> integer from <code>0</code> to <code>32</code>, inclusive.",
@@ -1500,7 +1504,7 @@
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
   },
   "@luau/global/buffer.readi8/return/0": {
-    "documentation": ""
+    "documentation": "The value of the 8-bit signed integer at the given offset."
   },
   "@luau/global/buffer.readi8": {
     "documentation": "Reads an 8-bit signed integer from the buffer.",
@@ -1527,7 +1531,7 @@
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
   },
   "@luau/global/buffer.readu8/return/0": {
-    "documentation": ""
+    "documentation": "The value of the 8-bit unsigned integer at the given offset."
   },
   "@luau/global/buffer.readu8": {
     "documentation": "Reads an 8-bit unsigned integer from the buffer.",
@@ -1554,7 +1558,7 @@
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
   },
   "@luau/global/buffer.readi16/return/0": {
-    "documentation": ""
+    "documentation": "The value of the 16-bit signed integer at the given offset."
   },
   "@luau/global/buffer.readi16": {
     "documentation": "Reads a 16-bit signed integer from the buffer.",
@@ -1581,7 +1585,7 @@
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
   },
   "@luau/global/buffer.readu16/return/0": {
-    "documentation": ""
+    "documentation": "The value of the 16-bit unsigned integer at the given offset."
   },
   "@luau/global/buffer.readu16": {
     "documentation": "Reads a 16-bit unsigned integer from the buffer.",
@@ -1608,7 +1612,7 @@
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
   },
   "@luau/global/buffer.readi32/return/0": {
-    "documentation": ""
+    "documentation": "The value of the 32-bit signed integer at the given offset."
   },
   "@luau/global/buffer.readi32": {
     "documentation": "Reads a 32-bit signed integer from the buffer.",
@@ -1635,7 +1639,7 @@
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
   },
   "@luau/global/buffer.readu32/return/0": {
-    "documentation": ""
+    "documentation": "The value of the 32-bit unsigned integer at the given offset."
   },
   "@luau/global/buffer.readu32": {
     "documentation": "Reads a 32-bit unsigned integer from the buffer.",
@@ -1662,7 +1666,7 @@
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
   },
   "@luau/global/buffer.readf32/return/0": {
-    "documentation": ""
+    "documentation": "The value of the 32-bit floating-point number at the given offset."
   },
   "@luau/global/buffer.readf32": {
     "documentation": "Reads a 32-bit floating-point value from the buffer.",
@@ -1682,6 +1686,60 @@
     "learn_more_link": "https://luau.org/library/#buffer-library",
     "code_sample": ""
   },
+  "@luau/global/buffer.readvectorf32x2/param/0": {
+    "documentation": "The buffer to read from."
+  },
+  "@luau/global/buffer.readvectorf32x2/param/1": {
+    "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
+  },
+  "@luau/global/buffer.readvectorf32x2/return/0": {
+    "documentation": "A vector containing the two values read from the buffer. The third component is zero."
+  },
+  "@luau/global/buffer.readvectorf32x2": {
+    "documentation": "Reads two 32-bit floating-point values from the buffer into a vector.",
+    "params": [
+      {
+        "name": "b",
+        "documentation": "@luau/global/buffer.readvectorf32x2/param/0"
+      },
+      {
+        "name": "offset",
+        "documentation": "@luau/global/buffer.readvectorf32x2/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/buffer.readvectorf32x2/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#buffer-library",
+    "code_sample": ""
+  },
+  "@luau/global/buffer.readvectorf32x3/param/0": {
+    "documentation": "The buffer to read from."
+  },
+  "@luau/global/buffer.readvectorf32x3/param/1": {
+    "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
+  },
+  "@luau/global/buffer.readvectorf32x3/return/0": {
+    "documentation": "A vector containing the three values read from the buffer."
+  },
+  "@luau/global/buffer.readvectorf32x3": {
+    "documentation": "Reads three 32-bit floating-point values from the buffer into a vector.",
+    "params": [
+      {
+        "name": "b",
+        "documentation": "@luau/global/buffer.readvectorf32x3/param/0"
+      },
+      {
+        "name": "offset",
+        "documentation": "@luau/global/buffer.readvectorf32x3/param/1"
+      }
+    ],
+    "returns": [
+      "@luau/global/buffer.readvectorf32x3/return/0"
+    ],
+    "learn_more_link": "https://luau.org/library/#buffer-library",
+    "code_sample": ""
+  },
   "@luau/global/buffer.readf64/param/0": {
     "documentation": "The buffer to read from."
   },
@@ -1689,7 +1747,7 @@
     "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
   },
   "@luau/global/buffer.readf64/return/0": {
-    "documentation": ""
+    "documentation": "The value of the 64-bit floating-point number at the given offset."
   },
   "@luau/global/buffer.readf64": {
     "documentation": "Reads a 64-bit floating-point value from the buffer.",
@@ -1948,6 +2006,64 @@
     "learn_more_link": "https://luau.org/library/#buffer-library",
     "code_sample": ""
   },
+  "@luau/global/buffer.writevectorf32x2/param/0": {
+    "documentation": "The buffer to write to."
+  },
+  "@luau/global/buffer.writevectorf32x2/param/1": {
+    "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
+  },
+  "@luau/global/buffer.writevectorf32x2/param/2": {
+    "documentation": "The vector whose <code>X</code> and <code>Y</code> components are written to the buffer."
+  },
+  "@luau/global/buffer.writevectorf32x2": {
+    "documentation": "Writes two vector components as 32-bit floating-point values to the buffer.",
+    "params": [
+      {
+        "name": "b",
+        "documentation": "@luau/global/buffer.writevectorf32x2/param/0"
+      },
+      {
+        "name": "offset",
+        "documentation": "@luau/global/buffer.writevectorf32x2/param/1"
+      },
+      {
+        "name": "value",
+        "documentation": "@luau/global/buffer.writevectorf32x2/param/2"
+      }
+    ],
+    "returns": [],
+    "learn_more_link": "https://luau.org/library/#buffer-library",
+    "code_sample": ""
+  },
+  "@luau/global/buffer.writevectorf32x3/param/0": {
+    "documentation": "The buffer to write to."
+  },
+  "@luau/global/buffer.writevectorf32x3/param/1": {
+    "documentation": "Offset from the beginning of the buffer memory, starting from <code>0</code>."
+  },
+  "@luau/global/buffer.writevectorf32x3/param/2": {
+    "documentation": "The vector whose <code>X</code>, <code>Y</code>, and <code>Z</code> components are written to the buffer."
+  },
+  "@luau/global/buffer.writevectorf32x3": {
+    "documentation": "Writes three vector components as 32-bit floating-point values to the buffer.",
+    "params": [
+      {
+        "name": "b",
+        "documentation": "@luau/global/buffer.writevectorf32x3/param/0"
+      },
+      {
+        "name": "offset",
+        "documentation": "@luau/global/buffer.writevectorf32x3/param/1"
+      },
+      {
+        "name": "value",
+        "documentation": "@luau/global/buffer.writevectorf32x3/param/2"
+      }
+    ],
+    "returns": [],
+    "learn_more_link": "https://luau.org/library/#buffer-library",
+    "code_sample": ""
+  },
   "@luau/global/buffer.writef64/param/0": {
     "documentation": "The buffer to write to."
   },
@@ -1987,7 +2103,7 @@
     "documentation": "Length to read."
   },
   "@luau/global/buffer.readstring/return/0": {
-    "documentation": ""
+    "documentation": "A string of length <code>count</code> read from the buffer at the specified offset."
   },
   "@luau/global/buffer.readstring": {
     "documentation": "Reads a string from the buffer.",
@@ -2138,7 +2254,7 @@
     "code_sample": ""
   },
   "@luau/global/os.clock/return/0": {
-    "documentation": ""
+    "documentation": "The elapsed time in seconds since an arbitrary point, with sub-microsecond precision."
   },
   "@luau/global/os.clock": {
     "documentation": "Returns elapsed time in seconds since an arbitrary baseline with sub-microsecond precision.",
@@ -2156,7 +2272,7 @@
     "documentation": "The time value to format."
   },
   "@luau/global/os.date/return/0": {
-    "documentation": ""
+    "documentation": "A dictionary containing date and time components when the format string is <code>\"*t\"</code> or <code>\"!*t\"</code>."
   },
   "@luau/global/os.date": {
     "documentation": "Formats the given string with date/time information based on the given time.",
@@ -2183,7 +2299,7 @@
     "documentation": "The earlier time value, as returned by <code>os.time()</code>."
   },
   "@luau/global/os.difftime/return/0": {
-    "documentation": ""
+    "documentation": "The number of seconds from <code>t1</code> to <code>t2</code> (computed as <code>t2 - t1</code>)."
   },
   "@luau/global/os.difftime": {
     "documentation": "Returns the number of seconds from one time to another.",
@@ -2207,7 +2323,7 @@
     "documentation": "A dictionary table describing a specific time, similar to that returned by <code>os.date()</code>. If not provided, uses the current UTC time."
   },
   "@luau/global/os.time/return/0": {
-    "documentation": ""
+    "documentation": "The number of seconds since the Unix epoch (1 January 1970, 00:00:00 UTC)."
   },
   "@luau/global/os.time": {
     "documentation": "Returns how many seconds have passed since the Unix epoch (1 January 1970, 00:00:00) under current UTC time.",
@@ -2995,7 +3111,7 @@
     "documentation": "The ending index of the range of characters to convert."
   },
   "@luau/global/string.byte/return/0": {
-    "documentation": ""
+    "documentation": "The numerical byte values (<code>0</code>-<code>255</code>) of each character in the specified range."
   },
   "@luau/global/string.byte": {
     "documentation": "Returns the internal numerical codes of the characters <code>s[i], s[i+1], ..., s[j]</code>. The default value for <code>i</code> is <code>1</code>; the default value for <code>j</code> is <code>i</code>. These indices are corrected following the same rules of function string.sub.",
@@ -3023,7 +3139,7 @@
     "documentation": "Zero or more integers in the range <code>[0, 255]</code>, each representing a byte value."
   },
   "@luau/global/string.char/return/0": {
-    "documentation": ""
+    "documentation": "A string whose length equals the number of arguments, with each byte set to the corresponding integer value."
   },
   "@luau/global/string.char": {
     "documentation": "Receives zero or more integers and returns a string with length equal to the number of arguments, in which each character has the internal numerical code equal to its corresponding argument.",
@@ -3091,7 +3207,7 @@
     "documentation": "Values to be formatted according to the specifiers in the format string."
   },
   "@luau/global/string.format/return/0": {
-    "documentation": ""
+    "documentation": "The format string with each specifier replaced by the formatted representation of the corresponding argument."
   },
   "@luau/global/string.format": {
     "documentation": "Returns a formatted version of its variable number of arguments following the description given in its first argument, which must be a string.",
@@ -3118,7 +3234,7 @@
     "documentation": "The pattern to match repeatedly against the string."
   },
   "@luau/global/string.gmatch/return/0": {
-    "documentation": ""
+    "documentation": "An iterator function that returns the next match (or captures) each time it is called."
   },
   "@luau/global/string.gmatch": {
     "documentation": "Returns an iterator function that returns the next captures from pattern over the string <code>s</code> each time it's called.",
@@ -3151,10 +3267,10 @@
     "documentation": "The maximum number of substitutions to make."
   },
   "@luau/global/string.gsub/return/0": {
-    "documentation": ""
+    "documentation": "A copy of <code>s</code> with pattern occurrences replaced."
   },
   "@luau/global/string.gsub/return/1": {
-    "documentation": ""
+    "documentation": "The total number of substitutions made."
   },
   "@luau/global/string.gsub": {
     "documentation": "Returns a copy of <code>s</code> in which all or the first <code>n</code> occurrences of the pattern are replaced with the given replacement. The second value returned is the total number of substitutions made.",
@@ -3187,7 +3303,7 @@
     "documentation": "The string to measure."
   },
   "@luau/global/string.len/return/0": {
-    "documentation": ""
+    "documentation": "The number of bytes in the string."
   },
   "@luau/global/string.len": {
     "documentation": "Returns the length of a string.",
@@ -3207,7 +3323,7 @@
     "documentation": "The string to convert to lowercase."
   },
   "@luau/global/string.lower/return/0": {
-    "documentation": ""
+    "documentation": "A copy of the string with all uppercase ASCII letters changed to lowercase."
   },
   "@luau/global/string.lower": {
     "documentation": "Returns a copy of a string with all uppercase letters changed to lowercase.",
@@ -3233,7 +3349,7 @@
     "documentation": "The byte position at which to start searching."
   },
   "@luau/global/string.match/return/0": {
-    "documentation": ""
+    "documentation": "The captured substrings if the pattern contains captures, or the whole match otherwise; <code>nil</code> if no match is found."
   },
   "@luau/global/string.match": {
     "documentation": "Looks for the first match of <code>pattern</code> in the string <code>s</code>.",
@@ -3264,7 +3380,7 @@
     "documentation": "The values to serialize into binary form according to the format string."
   },
   "@luau/global/string.pack/return/0": {
-    "documentation": ""
+    "documentation": "A binary string containing the arguments packed according to the format string."
   },
   "@luau/global/string.pack": {
     "documentation": "Returns a binary string containing the provided arguments.",
@@ -3288,7 +3404,7 @@
     "documentation": "A format string describing the packing layout (must not contain variable-length options <code>s</code> or <code>z</code>)."
   },
   "@luau/global/string.packsize/return/0": {
-    "documentation": ""
+    "documentation": "The total number of bytes that a string packed with the given format would occupy."
   },
   "@luau/global/string.packsize": {
     "documentation": "Returns the size in bytes of any string packed with a given description.",
@@ -3311,7 +3427,7 @@
     "documentation": "The number of times to repeat the string."
   },
   "@luau/global/string.rep/return/0": {
-    "documentation": ""
+    "documentation": "A string formed by concatenating <code>n</code> copies of <code>s</code>, or an empty string if <code>n</code> is zero or negative."
   },
   "@luau/global/string.rep": {
     "documentation": "Returns a string that is the concatenation of <code>n</code> copies of the string <code>s</code>.",
@@ -3335,7 +3451,7 @@
     "documentation": "The string to reverse."
   },
   "@luau/global/string.reverse/return/0": {
-    "documentation": ""
+    "documentation": "A new string with the bytes of <code>s</code> in reverse order."
   },
   "@luau/global/string.reverse": {
     "documentation": "Returns a string that is the string <code>s</code> reversed.",
@@ -3358,7 +3474,7 @@
     "documentation": "The separator character(s) to be used for splitting the string."
   },
   "@luau/global/string.split/return/0": {
-    "documentation": ""
+    "documentation": "A table of substrings produced by splitting <code>s</code> at each occurrence of the separator."
   },
   "@luau/global/string.split": {
     "documentation": "Splits a string into parts based on the defined separator character(s), returning a table of ordered results.",
@@ -3388,7 +3504,7 @@
     "documentation": "The ending byte position of the substring, inclusive (negative values count from the end)."
   },
   "@luau/global/string.sub/return/0": {
-    "documentation": ""
+    "documentation": "The substring from position <code>i</code> to <code>j</code> inclusive, or an empty string if the range is empty."
   },
   "@luau/global/string.sub": {
     "documentation": "Returns the substring of <code>s</code> that starts at <code>i</code> and continues until and including <code>j</code>. <code>i</code> and <code>j</code> can be negative. <code>i</code> defaults to <code>1</code> and <code>j</code> defaults to <code>-1</code>.",
@@ -3450,7 +3566,7 @@
     "documentation": "The string to convert to uppercase."
   },
   "@luau/global/string.upper/return/0": {
-    "documentation": ""
+    "documentation": "A copy of the string with all lowercase ASCII letters changed to uppercase."
   },
   "@luau/global/string.upper": {
     "documentation": "Returns a copy of a string with all lowercase letters changed to uppercase.",
@@ -3716,6 +3832,7 @@
     "keys": {
       "close": "@luau/global/coroutine.close",
       "create": "@luau/global/coroutine.create",
+      "finally": "@luau/global/coroutine.finally",
       "isyieldable": "@luau/global/coroutine.isyieldable",
       "resume": "@luau/global/coroutine.resume",
       "running": "@luau/global/coroutine.running",
@@ -3767,6 +3884,28 @@
     "returns": [
       "@luau/global/coroutine.create/return/0"
     ],
+    "learn_more_link": "https://luau.org/library/#coroutine-library",
+    "code_sample": ""
+  },
+  "@luau/global/coroutine.finally/param/0": {
+    "documentation": "The coroutine thread to observe."
+  },
+  "@luau/global/coroutine.finally/param/1": {
+    "documentation": "Function or a callable object to invoke."
+  },
+  "@luau/global/coroutine.finally": {
+    "documentation": "Registers a callback to invoke when a coroutine finishes, errors, or is closed.",
+    "params": [
+      {
+        "name": "co",
+        "documentation": "@luau/global/coroutine.finally/param/0"
+      },
+      {
+        "name": "callback",
+        "documentation": "@luau/global/coroutine.finally/param/1"
+      }
+    ],
+    "returns": [],
     "learn_more_link": "https://luau.org/library/#coroutine-library",
     "code_sample": ""
   },
@@ -3987,13 +4126,13 @@
     "code_sample": ""
   },
   "@luau/global/getmetatable/param/0": {
-    "documentation": "The object to fetch the metatable of."
+    "documentation": "The value to fetch the metatable of."
   },
   "@luau/global/getmetatable/return/0": {
     "documentation": "The metatable of <code>t</code>, the value of the <code>__metatable</code> metamethod if set, or <code>nil</code> if no metatable exists."
   },
   "@luau/global/getmetatable": {
-    "documentation": "Returns the metatable of the given table.",
+    "documentation": "Returns the metatable of the given value.",
     "params": [
       {
         "name": "t",

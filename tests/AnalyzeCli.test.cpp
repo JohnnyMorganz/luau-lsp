@@ -9,6 +9,8 @@
 #include "Luau/TypeAttach.h"
 #include "Luau/PrettyPrinter.h"
 
+LUAU_FASTFLAG(DebugLuauMagicTypes)
+
 TEST_SUITE_BEGIN("AnalyzeCli");
 
 namespace std
@@ -352,7 +354,8 @@ TEST_CASE("analyze_resolves_game_requires_with_sourcemap")
     setupCliWorkspace(client, workspace);
 
     auto serverModulePath = Uri::file(t.path() + "/src/server/ServerModule.luau").fsPath();
-    CHECK(analyzeFile(workspace, serverModulePath, ReportFormat::Default, false));
+    std::unordered_set<std::string> reportedModules;
+    CHECK(analyzeFile(workspace, serverModulePath, ReportFormat::Default, false, reportedModules));
 }
 
 TEST_CASE("analyze_resolves_non_mirrored_relative_requires_with_sourcemap")
@@ -392,7 +395,8 @@ TEST_CASE("analyze_resolves_non_mirrored_relative_requires_with_sourcemap")
     setupCliWorkspace(client, workspace);
 
     auto moduleAPath = Uri::file(t.path() + "/packages/core/ModuleA.luau").fsPath();
-    CHECK(analyzeFile(workspace, moduleAPath, ReportFormat::Default, false));
+    std::unordered_set<std::string> reportedModules;
+    CHECK(analyzeFile(workspace, moduleAPath, ReportFormat::Default, false, reportedModules));
 }
 
 TEST_CASE("analyze_resolves_game_requires_from_file_outside_sourcemap")
@@ -427,7 +431,94 @@ TEST_CASE("analyze_resolves_game_requires_from_file_outside_sourcemap")
     setupCliWorkspace(client, workspace);
 
     auto mainPath = Uri::file(t.path() + "/dist/main.luau").fsPath();
-    CHECK(analyzeFile(workspace, mainPath, ReportFormat::Default, false));
+    std::unordered_set<std::string> reportedModules;
+    CHECK(analyzeFile(workspace, mainPath, ReportFormat::Default, false, reportedModules));
+}
+
+TEST_CASE("analyze_does_not_report_type_errors_of_already_checked_modules_again")
+{
+    TempDir t("analyze_cli_type_errors_reported_once");
+    auto leafPath = t.write_child("leaf.luau", R"(
+        --!strict
+        local value: number = "not a number"
+        return { value = value }
+    )");
+    auto midPath = t.write_child("mid.luau", R"(
+        local leaf = require("./leaf")
+        return { value = leaf.value }
+    )");
+    auto topPath = t.write_child("top.luau", R"(
+        local mid = require("./mid")
+        return mid.value
+    )");
+
+    CliClient client;
+    initCliClient(client);
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
+
+    std::unordered_set<std::string> reportedModules;
+
+    // Checking top.luau also checks mid.luau and leaf.luau, and reports the type error in leaf.luau
+    CHECK_FALSE(analyzeFile(workspace, topPath, ReportFormat::Default, false, reportedModules));
+
+    // The error in leaf.luau was already reported, so it is not reported again
+    CHECK(analyzeFile(workspace, midPath, ReportFormat::Default, false, reportedModules));
+    CHECK(analyzeFile(workspace, leafPath, ReportFormat::Default, false, reportedModules));
+}
+
+TEST_CASE("analyze_reports_lints_of_already_checked_modules")
+{
+    TempDir t("analyze_cli_lints_of_checked_modules");
+    t.write_child(".luaurc", R"({ "lintErrors": true })");
+    auto leafPath = t.write_child("leaf.luau", R"(
+        local unused = 1
+        return {}
+    )");
+    auto topPath = t.write_child("top.luau", R"(
+        local _ = require("./leaf")
+    )");
+
+    CliClient client;
+    initCliClient(client);
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
+
+    std::unordered_set<std::string> reportedModules;
+    CHECK(analyzeFile(workspace, topPath, ReportFormat::Default, false, reportedModules));
+
+    // leaf.luau was checked as a dependency of top.luau, but its lints are only reported when it is analyzed
+    CHECK_FALSE(analyzeFile(workspace, leafPath, ReportFormat::Default, false, reportedModules));
+}
+
+TEST_CASE("analyze_reports_type_errors_of_a_required_module_after_an_internal_compiler_error")
+{
+    ScopedFastFlag sff{FFlag::DebugLuauMagicTypes, true};
+
+    TempDir t("analyze_cli_errors_after_internal_compiler_error");
+    auto leafPath = t.write_child("leaf.luau", R"(
+        --!strict
+        local value: number = "not a number"
+        return { value = value }
+    )");
+    // `_luau_ice` throws an InternalCompilerError while checking top.luau, after leaf.luau was checked
+    auto topPath = t.write_child("top.luau", R"(
+        --!strict
+        local leaf = require("./leaf")
+        local _crash: _luau_ice = leaf.value
+        return leaf
+    )");
+
+    CliClient client;
+    initCliClient(client);
+    WorkspaceFolder workspace(&client, "CLI", Uri::file(t.path()), std::nullopt);
+    setupCliWorkspace(client, workspace);
+
+    std::unordered_set<std::string> reportedModules;
+    analyzeFile(workspace, topPath, ReportFormat::Default, false, reportedModules);
+
+    // The error in leaf.luau was not reported when checking top.luau failed, so it is reported now
+    CHECK_FALSE(analyzeFile(workspace, leafPath, ReportFormat::Default, false, reportedModules));
 }
 
 TEST_SUITE_END();

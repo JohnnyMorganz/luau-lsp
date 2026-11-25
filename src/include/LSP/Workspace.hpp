@@ -11,6 +11,9 @@
 #include "Protocol/Extensions.hpp"
 #include "LSP/Client.hpp"
 #include "LSP/WorkspaceFileResolver.hpp"
+#include "Luau/Common.h"
+
+LUAU_FASTFLAG(LuauSolverV2)
 
 using LSPCancellationToken = std::shared_ptr<Luau::FrontendCancellationToken>;
 
@@ -75,7 +78,7 @@ public:
         // but it seems that the option specified here is the one used
         // when calling Luau::autocomplete
         , frontend(Luau::Frontend(
-              &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
+              FFlag::LuauSolverV2 ? Luau::SolverMode::New : Luau::SolverMode::Old, &fileResolver, &fileResolver, {/* retainFullTypeGraphs: */ true, /* forAutocomplete: */ false, /* runLintChecks: */ true}))
         , limits(Luau::TypeCheckLimits{})
     {
         fileResolver.client = client;

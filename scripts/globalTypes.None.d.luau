@@ -1,4 +1,4 @@
---#METADATA#{"CREATABLE_INSTANCES": ["AccessoryDescription", "Accoutrement", "Accessory", "Hat", "AdPlacement", "AdPortal", "AdvancedDragger", "Animation", "AnimationGraphDefinition", "CurveAnimation", "KeyframeSequence", "AnimationController", "AnimationNodeDefinition", "AnimationRigData", "AnimationValueNodeDefinition", "AnimationValueOutputDefinition", "Animator", "Annotation", "WorkspaceAnnotation", "Atmosphere", "Attachment", "Bone", "AudioAnalyzer", "AudioChannelMixer", "AudioChannelSplitter", "AudioChorus", "AudioCompressor", "AudioDeviceInput", "AudioDeviceOutput", "AudioDistortion", "AudioEcho", "AudioEmitter", "AudioEqualizer", "AudioFader", "AudioFilter", "AudioFlanger", "AudioGate", "AudioLimiter", "AudioListener", "AudioPitchShifter", "AudioPlayer", "AudioRecorder", "AudioReverb", "AudioSearchParams", "AudioSpeechToText", "AudioTextToSpeech", "AudioTremolo", "AudioWindSynthesizer", "AvatarAbilityRules", "AvatarAccessoryRules", "AvatarAnimationRules", "AvatarBodyRules", "AvatarClothingRules", "AvatarCollisionRules", "AvatarRules", "Backpack", "RemoteEvent", "UnreliableRemoteEvent", "WrapDeformer", "WrapLayer", "WrapTarget", "Beam", "BindableEvent", "BindableFunction", "BodyAngularVelocity", "BodyForce", "BodyGyro", "BodyPosition", "BodyThrust", "BodyVelocity", "RocketPropulsion", "BodyPartDescription", "Breakpoint", "BodyColors", "CharacterMesh", "Pants", "Shirt", "ShirtGraphic", "Skin", "ClickDetector", "DragDetector", "Clouds", "CompositeValueCurve", "Configuration", "AlignOrientation", "AlignPosition", "AngularVelocity", "AnimationConstraint", "BallSocketConstraint", "HingeConstraint", "LineForce", "LinearVelocity", "PlaneConstraint", "Plane", "RigidConstraint", "RodConstraint", "RopeConstraint", "CylindricalConstraint", "PrismaticConstraint", "SpringConstraint", "Torque", "TorsionSpringConstraint", "UniversalConstraint", "VectorForce", "ControlState", "HumanoidController", "SkateboardController", "VehicleController", "AirController", "ClimbController", "GroundController", "SwimController", "ControllerManager", "CustomEvent", "CustomEventReceiver", "CustomLog", "BlockMesh", "CylinderMesh", "FileMesh", "SpecialMesh", "DataStoreGetOptions", "DataStoreIncrementOptions", "DataStoreOptions", "DataStoreSetOptions", "DebuggerWatch", "Dialog", "DialogChoice", "DigitsRigDescription", "Dragger", "EulerRotationCurve", "ExperienceInviteOptions", "ExplorerFilter", "Explosion", "FaceControls", "Decal", "Texture", "Hole", "MotorFeature", "Fire", "FloatCurve", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "Folder", "GeneratedFolder", "ForceField", "FunctionalTest", "GetTextBoundsParams", "CanvasGroup", "Frame", "ImageButton", "TextButton", "ImageLabel", "TextLabel", "InputActionLabel", "RelativeGui", "ScrollingFrame", "TextBox", "TextChannelWindow", "VideoDisplay", "VideoFrame", "ViewportFrame", "BillboardGui", "ScreenGui", "GuiMain", "AdGui", "SurfaceGui", "FloorWire", "SelectionBox", "BoxHandleAdornment", "ConeHandleAdornment", "CylinderHandleAdornment", "ImageHandleAdornment", "LineHandleAdornment", "PyramidHandleAdornment", "SphereHandleAdornment", "WireframeHandleAdornment", "ParabolaAdornment", "SelectionSphere", "ArcHandles", "Handles", "SurfaceSelection", "SelectionPartLasso", "SelectionPointLasso", "Path2D", "HapticEffect", "HeightmapImporterService", "HiddenSurfaceRemovalAsset", "Highlight", "Humanoid", "HumanoidDescription", "HumanoidRigDescription", "IKControl", "InputAction", "InputBinding", "InputContext", "InternalSyncItem", "RotateP", "RotateV", "Glue", "ManualGlue", "ManualWeld", "Motor", "Motor6D", "Rotate", "Snap", "VelocityMotor", "Weld", "Keyframe", "KeyframeMarker", "PointLight", "SpotLight", "SurfaceLight", "LocalizationTable", "AuroraScript", "Script", "LocalScript", "ModuleScript", "MakeupDescription", "MarkerCurve", "MaterialVariant", "MemoryStoreService", "Message", "Hint", "NoCollisionConstraint", "Noise", "OperationGraph", "CornerWedgePart", "Part", "FlagStand", "Seat", "SkateboardPlatform", "SpawnLocation", "WedgePart", "MeshPart", "PartOperation", "IntersectOperation", "NegateOperation", "UnionOperation", "TrussPart", "VehicleSeat", "Camera", "ViewportCamera", "Model", "Actor", "HopperBin", "Tool", "Flag", "ProceduralModel", "WorldModel", "PartOperationAsset", "ParticleEmitter", "Path3D", "PathfindingLink", "PathfindingModifier", "Player", "PluginAction", "PluginCapabilities", "NumberPose", "Pose", "BloomEffect", "BlurEffect", "ColorCorrectionEffect", "ColorGradingEffect", "DepthOfFieldEffect", "SunRaysEffect", "ProximityPrompt", "ProximityPromptService", "RTAnimationTracker", "RealtimeMedia", "ReflectionMetadata", "ReflectionMetadataCallbacks", "ReflectionMetadataClasses", "ReflectionMetadataEnums", "ReflectionMetadataEvents", "ReflectionMetadataFunctions", "ReflectionMetadataClass", "ReflectionMetadataEnum", "ReflectionMetadataEnumItem", "ReflectionMetadataMember", "ReflectionMetadataProperties", "ReflectionMetadataYieldFunctions", "RemoteFunction", "RenderingTest", "RotationCurve", "AtmosphereSensor", "BuoyancySensor", "ControllerPartSensor", "FluidForceSensor", "Sky", "Smoke", "Sound", "ChorusSoundEffect", "CompressorSoundEffect", "DistortionSoundEffect", "EchoSoundEffect", "EqualizerSoundEffect", "FlangeSoundEffect", "PitchShiftSoundEffect", "ReverbSoundEffect", "TremoloSoundEffect", "SoundGroup", "Sparkles", "StandalonePluginScripts", "StarterGear", "StateMachineDefinition", "StateMachineTransitionDefinition", "StudioAttachment", "StudioCallout", "StyleRule", "StyleSheet", "StyleDerive", "StyleLink", "StyleQuery", "SurfaceAppearance", "Team", "TeleportOptions", "TerrainDetail", "TerrainRegion", "TestService", "TextChannel", "TextChatCommand", "TextChatMessageProperties", "BubbleChatMessageProperties", "TextDocument", "TextGenerator", "TrackerStreamAnimation", "Trail", "Tween", "UIAspectRatioConstraint", "UISizeConstraint", "UITextSizeConstraint", "UICorner", "UIDragDetector", "UIFlexItem", "UIGradient", "UIGridLayout", "UIListLayout", "UIPageLayout", "UITableLayout", "UIPadding", "UIScale", "UIShadow", "UIStroke", "BinaryStringValue", "BoolValue", "BrickColorValue", "CFrameValue", "Color3Value", "DoubleConstrainedValue", "IntConstrainedValue", "IntValue", "NumberValue", "ObjectValue", "RayValue", "StringValue", "Vector3Value", "ValueCurve", "Vector3Curve", "VideoDeviceInput", "VideoPlayer", "VirtualInputManager", "VisualizationMode", "VisualizationModeCategory", "WeldConstraint", "Wire", "WrapTextureTransfer"], "SERVICES": ["AccountService", "AchievementService", "ActivityHistoryEventService", "AdService", "AnalyticsService", "AnimatedImageService", "AnimationClipProvider", "AnimationFromVideoCreatorService", "AnimationFromVideoCreatorStudioService", "AnnotationsService", "AppAgeSignalsService", "AppLifecycleObserverService", "AppRatingPromptService", "AppUpdateService", "AssetCounterService", "AssetDeliveryProxy", "AssetImportService", "AssetManagerService", "AssetQualityService", "AssetService", "AudioFocusService", "AuroraScriptService", "AuroraService", "AvatarChatService", "AvatarCreationService", "AvatarEditorService", "AvatarImportService", "AvatarSettings", "BackendReplicatedStorage", "BackendServerScriptService", "BackendServerStorage", "BadgeService", "CoreGui", "StarterGui", "BranchService", "BrowserService", "BugReporterService", "BulkImportService", "CacheableContentProvider", "HSRDataContentProvider", "MeshContentProvider", "SlimContentProvider", "SolidModelContentProvider", "WrapContentProvider", "CallingService", "CalloutService", "CaptureService", "ChangeHistoryService", "ChangeHistoryStreamingService", "Chat", "ClientStorageService", "CloudCRUDService", "CloudExecutionService", "ClusterPacketCache", "CollaboratorsService", "CollectionService", "CommerceService", "ConfigService", "ConfigureServerService", "ConnectivityService", "ContentProvider", "ContextActionService", "ControllerService", "CookiesService", "CoreGuiConfiguration", "CorePackages", "CoreScriptDebuggingManagerHelper", "CoreScriptSyncService", "CreationDBService", "CreatorStoreService", "CrossDMScriptChangeListener", "DataStoreService", "Debris", "DebugSettings", "DebuggablePluginWatcher", "DebuggerConnectionManager", "DebuggerManager", "DebuggerUIService", "DeferredAssetManagerService", "DesignFoundationsService", "DeviceDisplayService", "DeviceIdService", "DraftsService", "DraggerService", "EditableService", "EditorSourceService", "EncodingService", "EventIngestService", "ExampleV2Service", "ExperienceAuthService", "ExperienceNotificationService", "ExperienceService", "ExperienceStateCaptureService", "ExperienceStateRecordingService", "ExplorerServiceVisibilityService", "ExternalIdentityService", "FaceAnimatorService", "FacialAgeEstimationService", "FacialAnimationRecordingService", "FacialAnimationStreamingServiceV2", "FeatureRestrictionManager", "FileManagerService", "FileSyncReplicationService", "FlagStandService", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "FriendService", "GamePassService", "GameSettings", "GamepadService", "GenerationService", "GenericChallengeService", "Geometry", "GeometryService", "GongService", "GroupService", "GuiService", "GuidRegistryService", "HapticService", "HarmonyService", "HeapProfilerService", "HeatmapQueryService", "HeatmapService", "HeightmapImporterService", "Hopper", "HttpRbxApiService", "HttpService", "ILegacyStudioBridge", "LegacyStudioBridge", "IXPService", "ImageScreenCaptureService", "IncrementalPatchBuilder", "InsertService", "InstanceExtensionsService", "InstanceFileSyncService", "IntentService", "InternalMessagingService", "InternalMessagingServiceVerifier", "InternalSyncService", "JointsService", "KeyboardService", "KeyframeSequenceProvider", "LanguageService", "Lighting", "LinkingService", "LiveScriptingService", "LiveSyncService", "LocalStorageService", "AppStorageService", "UserStorageService", "LocalizationService", "LodDataService", "LogReporterService", "LogService", "LoginService", "LuaSettings", "LuaWebService", "LuauExpressionService", "LuauScriptAnalyzerService", "MLModelDeliveryService", "MLService", "MarketplaceService", "MatchmakingService", "MaterialGenerationService", "MaterialService", "MemStorageService", "MemoryStoreService", "MessageBusService", "MessagingService", "MetaBreakpointManager", "MicroProfilerService", "ModerationService", "MomentsService", "MouseService", "NetworkClient", "NetworkServer", "NetworkSettings", "NotificationService", "OmniRecommendationsService", "OpenCloudService", "Workspace", "PackageService", "PackageUIService", "Packages", "PartyEmulatorService", "PatchBundlerFileWatch", "PathfindingService", "PerformanceControlService", "PermissionsService", "PhysicsService", "PhysicsSettings", "PinShortcutService", "PlaceAssetIdsService", "PlaceStatsService", "PlacesService", "PlatformCloudStorageService", "PlatformFriendsService", "PlatformLibraries", "PlayerDataService", "PlayerEmulatorService", "PlayerHydrationService", "PlayerViewService", "Players", "PluginConnectionService", "PluginDebugService", "PluginGuiService", "PluginManagementService", "PluginPolicyService", "PointsService", "PolicyService", "PopLatencyService", "Preloaded", "ProceduralBehaviorSchedulerService", "ProcessInstancePhysicsService", "ProjectService", "ProximityPromptService", "PublishService", "QueueService", "RbxAnalyticsService", "RecommendationService", "ReflectionService", "RemoteCommandService", "RemoteCursorService", "RemoteDebuggerServer", "RenderSettings", "ReplicatedFirst", "ReplicatedStorage", "RequestOrchestratorService", "RibbonNotificationService", "RobloxPluginGuiService", "RobloxReplicatedStorage", "RobloxServerStorage", "RolloutValidationService", "RomarkRbxAnalyticsService", "RomarkService", "RtMessagingService", "RunService", "RuntimeContentService", "RuntimeScriptService", "SafetyService", "SceneAnalysisService", "ScriptChangeService", "ScriptCloneWatcher", "ScriptCloneWatcherHelper", "ScriptCommitService", "ScriptContext", "ScriptDebuggerService", "ScriptEditorService", "ScriptProfilerService", "ScriptRegistrationService", "ScriptScannerService", "ScriptService", "Selection", "SelectionHighlightManager", "SerializationService", "ServerScriptService", "ServerStorage", "ServiceVisibilityService", "SessionCheckService", "SessionService", "SharedTableRegistry", "SlimAnimationReplicationService", "SlimDebugSettings", "SlimReplicationService", "SlimService", "SmoothVoxelsUpgraderService", "SocialService", "SoundService", "SoundShimService", "SpawnerService", "StartPageService", "StarterPack", "StarterPlayer", "StartupMessageService", "Stats", "StopWatchReporter", "Studio", "StudioAssetService", "StudioCameraService", "StudioCaptureService", "StudioData", "StudioDeviceEmulatorService", "StudioDeviceSimulatorService", "StudioPublishService", "StudioScriptDebugEventListener", "StudioSdkService", "StudioService", "StudioTestService", "StudioUserService", "StudioWidgetsService", "StylingService", "SystemThemeService", "TaskScheduler", "TeamCreateData", "TeamCreatePublishService", "TeamCreateService", "Teams", "TelemetryService", "TeleportService", "TemporaryCageMeshProvider", "TemporaryScriptService", "TestService", "TextBoxService", "TextChatService", "TextService", "TextureGenerationService", "ThirdPartyUserService", "TimerService", "ToastNotificationService", "TouchInputService", "TraceRouteService", "TracerService", "TutorialService", "TweenService", "UGCAvatarService", "UGCValidationService", "UIDragDetectorService", "UniqueIdLookupService", "UnvalidatedAssetService", "UserGameSettings", "UserInputService", "UserService", "VRService", "VRStatusService", "VersionControlService", "VideoCaptureService", "VideoScreenCaptureService", "VideoService", "VirtualInputManager", "VirtualUser", "VisibilityCheckDispatcher", "Visit", "VisualizationModeService", "VoiceChatInternal", "VoiceChatService", "WebSocketService", "WebViewService", "WindowProtocolService", "WrapDeformMeshProvider"]}
+--#METADATA#{"CREATABLE_INSTANCES": ["AccessoryDescription", "Accoutrement", "Accessory", "Hat", "AdPlacement", "AdPortal", "AdvancedDragger", "Animation", "AnimationGraphDefinition", "CurveAnimation", "KeyframeSequence", "AnimationController", "AnimationNodeDefinition", "AnimationPlayer", "AnimationRigData", "AnimationValueNodeDefinition", "AnimationValueOutputDefinition", "Animator", "Annotation", "WorkspaceAnnotation", "Atmosphere", "Attachment", "Bone", "AudioAnalyzer", "AudioChannelMixer", "AudioChannelSplitter", "AudioChorus", "AudioCompressor", "AudioDeviceInput", "AudioDeviceOutput", "AudioDistortion", "AudioEcho", "AudioEmitter", "AudioEqualizer", "AudioFader", "AudioFilter", "AudioFlanger", "AudioGate", "AudioLimiter", "AudioListener", "AudioPitchShifter", "AudioPlayer", "AudioRecorder", "AudioReverb", "AudioSearchParams", "AudioSpeechToText", "AudioStreamReader", "AudioStreamWriter", "AudioTextToSpeech", "AudioTremolo", "AudioWindSynthesizer", "AvatarAbilityRules", "AvatarAccessoryRules", "AvatarAnimationRules", "AvatarBodyRules", "AvatarClothingRules", "AvatarCollisionRules", "AvatarEffectDescription", "AvatarRules", "Backpack", "RemoteEvent", "UnreliableRemoteEvent", "WrapDeformer", "WrapLayer", "WrapTarget", "Beam", "BindableEvent", "BindableFunction", "BodyAngularVelocity", "BodyForce", "BodyGyro", "BodyPosition", "BodyThrust", "BodyVelocity", "RocketPropulsion", "BodyPartDescription", "Breakpoint", "BodyColors", "CharacterMesh", "Pants", "Shirt", "ShirtGraphic", "Skin", "ClickDetector", "DragDetector", "Clouds", "CompositeValueCurve", "Configuration", "AlignOrientation", "AlignPosition", "AngularVelocity", "AnimationConstraint", "BallSocketConstraint", "HingeConstraint", "LineForce", "LinearVelocity", "PlaneConstraint", "Plane", "RigidConstraint", "RodConstraint", "RopeConstraint", "CylindricalConstraint", "PrismaticConstraint", "SpringConstraint", "Torque", "TorsionSpringConstraint", "UniversalConstraint", "VectorForce", "ControlState", "HumanoidController", "SkateboardController", "VehicleController", "AirController", "ClimbController", "GroundController", "SwimController", "ControllerManager", "CustomEvent", "CustomEventReceiver", "CustomLog", "BlockMesh", "CylinderMesh", "FileMesh", "SpecialMesh", "DataStoreGetOptions", "DataStoreIncrementOptions", "DataStoreOptions", "DataStoreSetOptions", "DebuggerWatch", "Dialog", "DialogChoice", "DigitsRigDescription", "Dragger", "EulerRotationCurve", "ExperienceInviteOptions", "ExplorerFilter", "Explosion", "FaceControls", "Decal", "Texture", "Hole", "MotorFeature", "FeatureMatchingTable", "Fire", "FloatCurve", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "Folder", "GeneratedFolder", "FollowRotationBoneBehavior", "FollowTwistBoneBehavior", "ForceField", "FunctionalTest", "GetTextBoundsParams", "CanvasGroup", "Frame", "ImageButton", "TextButton", "ImageLabel", "TextLabel", "InputActionLabel", "RelativeGui", "ScrollingFrame", "TextBox", "TextChannelWindow", "VideoDisplay", "VideoFrame", "ViewportFrame", "BillboardGui", "ScreenGui", "GuiMain", "AdGui", "SurfaceGui", "FloorWire", "SelectionBox", "BoxHandleAdornment", "ConeHandleAdornment", "CylinderHandleAdornment", "ImageHandleAdornment", "LineHandleAdornment", "PyramidHandleAdornment", "SphereHandleAdornment", "WireframeHandleAdornment", "ParabolaAdornment", "SelectionSphere", "ArcHandles", "Handles", "SurfaceSelection", "SelectionPartLasso", "SelectionPointLasso", "Path2D", "HapticEffect", "HeightmapImporterService", "HiddenSurfaceRemovalAsset", "Highlight", "Humanoid", "HumanoidDescription", "HumanoidRigDescription", "IKControl", "InputAction", "InputBinding", "InputContext", "InternalSyncItem", "RotateP", "RotateV", "Glue", "ManualGlue", "ManualWeld", "Motor", "Motor6D", "Rotate", "Snap", "VelocityMotor", "Weld", "Keyframe", "KeyframeMarker", "PointLight", "SpotLight", "SurfaceLight", "LocalizationTable", "AuroraScript", "Script", "LocalScript", "ModuleScript", "MakeupDescription", "MarkerCurve", "MaterialVariant", "MemoryStoreService", "Message", "Hint", "NoCollisionConstraint", "Noise", "OperationGraph", "CornerWedgePart", "Part", "FlagStand", "Seat", "SkateboardPlatform", "SpawnLocation", "WedgePart", "MeshPart", "PartOperation", "IntersectOperation", "NegateOperation", "UnionOperation", "TrussPart", "VehicleSeat", "Camera", "ViewportCamera", "Model", "Actor", "HopperBin", "Tool", "Flag", "ProceduralModel", "WorldModel", "PartOperationAsset", "ParticleEmitter", "ParticleEmitter2D", "Path3D", "PathfindingLink", "PathfindingModifier", "Player", "PluginAction", "PluginCapabilities", "NumberPose", "Pose", "BloomEffect", "BlurEffect", "ColorCorrectionEffect", "ColorGradingEffect", "DepthOfFieldEffect", "SunRaysEffect", "ProximityPrompt", "ProximityPromptService", "RTAnimationTracker", "RealtimeMedia", "ReflectionMetadata", "ReflectionMetadataCallbacks", "ReflectionMetadataClasses", "ReflectionMetadataEnums", "ReflectionMetadataEvents", "ReflectionMetadataFunctions", "ReflectionMetadataClass", "ReflectionMetadataEnum", "ReflectionMetadataEnumItem", "ReflectionMetadataMember", "ReflectionMetadataProperties", "ReflectionMetadataYieldFunctions", "RemoteFunction", "RenderingTest", "RotationCurve", "AtmosphereSensor", "BuoyancySensor", "ControllerPartSensor", "FluidForceSensor", "PhysicsActivitySensor", "Sky", "Smoke", "Sound", "ChorusSoundEffect", "CompressorSoundEffect", "DistortionSoundEffect", "EchoSoundEffect", "EqualizerSoundEffect", "FlangeSoundEffect", "PitchShiftSoundEffect", "ReverbSoundEffect", "TremoloSoundEffect", "SoundGroup", "Sparkles", "StandalonePluginScripts", "StarterGear", "StateMachineDefinition", "StateMachineTransitionDefinition", "StudioAttachment", "StudioCallout", "StyleRule", "StyleSheet", "StyleDerive", "StyleLink", "StyleQuery", "SurfaceAppearance", "Team", "TeleportOptions", "TerrainDetail", "TerrainRegion", "TestService", "TextChannel", "TextChatCommand", "TextChatMessageProperties", "BubbleChatMessageProperties", "TextDocument", "TextGenerator", "TrackerStreamAnimation", "Trail", "Tween", "UIBlur", "UIAspectRatioConstraint", "UISizeConstraint", "UITextSizeConstraint", "UICorner", "UIDragDetector", "UIFlexItem", "UIGradient", "UIGridLayout", "UIListLayout", "UIPageLayout", "UITableLayout", "UIPadding", "UIScale", "UIShadow", "UIStroke", "BinaryStringValue", "BoolValue", "BrickColorValue", "CFrameValue", "Color3Value", "DoubleConstrainedValue", "IntConstrainedValue", "IntValue", "NumberValue", "ObjectValue", "RayValue", "StringValue", "Vector3Value", "ValueCurve", "Vector3Curve", "VideoDeviceInput", "VideoPlayer", "VirtualInputManager", "VisualizationMode", "VisualizationModeCategory", "WeldConstraint", "Wire", "WrapTextureTransfer"], "SERVICES": ["AccountService", "AchievementService", "ActivityHistoryEventService", "AdService", "AnalyticsService", "AnimatedImageService", "AnimationClipProvider", "AnimationFromVideoCreatorService", "AnimationFromVideoCreatorStudioService", "AnnotationsService", "AppAgeSignalsService", "AppLifecycleObserverService", "AppRatingPromptService", "AppUpdateService", "AssetCounterService", "AssetDeliveryProxy", "AssetImportService", "AssetManagerService", "AssetQualityService", "AssetService", "AudioFocusService", "AuroraScriptService", "AuroraService", "AvatarChatService", "AvatarCreationService", "AvatarEditorService", "AvatarImportService", "AvatarSettings", "BackendReplicatedStorage", "BackendServerScriptService", "BackendServerStorage", "BadgeService", "CoreGui", "StarterGui", "BranchService", "BrowserService", "BugReporterService", "CacheableContentProvider", "HSRDataContentProvider", "MeshContentProvider", "SlimContentProvider", "SolidModelContentProvider", "WrapContentProvider", "CallingService", "CalloutService", "CaptureService", "ChangeHistoryService", "ChangeHistoryStreamingService", "Chat", "ClientStorageService", "CloudCRUDService", "CloudClientService", "CloudExecutionService", "ClusterPacketCache", "CollaboratorsService", "CollectionService", "CommerceService", "ConfigService", "ConfigureServerService", "ConnectivityService", "ContentProvider", "ContextActionService", "ControllerService", "CookiesService", "CoreGuiConfiguration", "CorePackages", "CoreScriptDebuggingManagerHelper", "CoreScriptSyncService", "CreationDBService", "CreatorStoreService", "CrossDMScriptChangeListener", "DataStoreService", "Debris", "DebugSettings", "DebuggablePluginWatcher", "DebuggerConnectionManager", "DebuggerManager", "DebuggerUIService", "DeferredAssetManagerService", "DesignFoundationsService", "DeviceDisplayService", "DeviceIdService", "DraftsService", "DraggerService", "EditableService", "EditorSourceService", "EncodingService", "EventIngestService", "ExampleV2Service", "ExperienceAuthService", "ExperienceNotificationService", "ExperienceService", "ExperienceStateCaptureService", "ExperienceStateRecordingService", "ExplorerServiceVisibilityService", "ExternalIdentityService", "FaceAnimatorService", "FacialAgeEstimationService", "FacialAnimationRecordingService", "FacialAnimationStreamingServiceV2", "FeatureMatchingService", "FeatureRestrictionManager", "FileManagerService", "FilePickerService", "FileSyncReplicationService", "FlagStandService", "FlyweightService", "CSGDictionaryService", "NonReplicatedCSGDictionaryService", "FriendService", "FriendsCallingService", "GameDownloaderService", "GamePassService", "GameSettings", "GamepadService", "GenerationService", "GenericChallengeService", "Geometry", "GeometryService", "GongService", "GroupService", "GuiService", "GuidRegistryService", "HapticService", "HarmonyService", "HeapProfilerService", "HeatmapQueryService", "HeatmapService", "HeightmapImporterService", "HiddenPlayerService", "Hopper", "HttpRbxApiService", "HttpService", "ILegacyStudioBridge", "LegacyStudioBridge", "IXPService", "ImageScreenCaptureService", "IncrementalPatchBuilder", "InputReplayService", "InsertService", "InstanceExtensionsService", "InstanceFileSyncService", "InstanceRegistryService", "IntegrityService", "IntentService", "InternalMessagingService", "InternalMessagingServiceVerifier", "InternalSyncService", "JointsService", "KeyboardService", "KeyframeSequenceProvider", "LanguageService", "Lighting", "LinkingService", "LiveScriptingService", "LiveSyncService", "LocalStorageService", "AppStorageService", "UserStorageService", "LocalizationService", "LodDataService", "LogReporterService", "LogService", "LoginService", "LuaSettings", "LuaWebService", "LuauExpressionService", "LuauScriptAnalyzerService", "MLModelDeliveryService", "MLService", "MarketplaceService", "MatchmakingService", "MaterialGenerationService", "MaterialService", "MemStorageService", "MemoryStoreService", "MessageBusService", "MessagingService", "MetaBreakpointManager", "MicroProfilerService", "ModelInfoService", "ModerationService", "MomentsService", "MouseService", "NetworkClient", "NetworkServer", "NetworkSettings", "NotificationService", "OmniRecommendationsService", "OpenCloudService", "Workspace", "PackageService", "PackageUIService", "Packages", "PartyEmulatorService", "PatchBundlerFileWatch", "PathfindingService", "PerformanceControlService", "PermissionsService", "PhysicsService", "PhysicsSettings", "PinShortcutService", "PlaceAssetIdsService", "PlaceSettings", "PlaceStatsService", "PlacesService", "PlatformCloudStorageService", "PlatformFriendsService", "PlatformLibraries", "PlayerDataService", "PlayerEmulatorService", "PlayerHydrationService", "PlayerViewService", "Players", "PluginConnectionService", "PluginDebugService", "PluginGuiService", "PluginManagementService", "PluginPolicyService", "PointsService", "PolicyService", "PopLatencyService", "Preloaded", "ProceduralBehaviorSchedulerService", "ProcessInstancePhysicsService", "ProjectService", "ProximityPromptService", "PublishService", "QueueService", "RbxAnalyticsService", "RecommendationService", "ReflectionService", "RemoteCommandService", "RemoteCursorService", "RemoteDebuggerServer", "RenderSettings", "ReplicatedFirst", "ReplicatedStorage", "RequestOrchestratorService", "RibbonNotificationService", "RobloxPluginGuiService", "RobloxReplicatedStorage", "RobloxServerStorage", "RolloutValidationService", "RomarkRbxAnalyticsService", "RomarkService", "RtMessagingService", "RunService", "RuntimeContentService", "RuntimeScriptService", "SafetyService", "SceneAnalysisService", "ScriptChangeService", "ScriptCloneWatcher", "ScriptCloneWatcherHelper", "ScriptCommitService", "ScriptContext", "ScriptDebuggerService", "ScriptEditorService", "ScriptProfilerService", "ScriptRegistrationService", "ScriptScannerService", "ScriptService", "Selection", "SelectionHighlightManager", "SerializationService", "ServerScriptService", "ServerStorage", "ServiceVisibilityService", "SessionCheckService", "SessionService", "SessionStorage", "SharedTableRegistry", "SlimAnimationReplicationService", "SlimDebugSettings", "SlimReplicationService", "SlimService", "SmoothVoxelsUpgraderService", "SocialService", "SoundService", "SoundShimService", "SpawnerService", "StartPageService", "StarterPack", "StarterPlayer", "StartupMessageService", "Stats", "StopWatchReporter", "Studio", "StudioAssetService", "StudioCameraService", "StudioCaptureService", "StudioData", "StudioDeviceEmulatorService", "StudioDeviceSimulatorService", "StudioPublishService", "StudioScriptDebugEventListener", "StudioSdkService", "StudioService", "StudioTestService", "StudioUserService", "StudioWidgetsService", "StylingService", "SystemThemeService", "TaskScheduler", "TeamCreateData", "TeamCreatePublishService", "TeamCreateService", "Teams", "TelemetryService", "TeleportService", "TemporaryCageMeshProvider", "TemporaryScriptService", "TestCoordinatorService", "TestService", "TextBoxService", "TextChatService", "TextService", "TextureGenerationService", "ThirdPartyUserService", "TimerService", "ToastNotificationService", "TouchInputService", "TraceRouteService", "TracerService", "TutorialService", "TweenService", "UGCAvatarService", "UGCValidationService", "UIDragDetectorService", "UniqueIdLookupService", "UnvalidatedAssetService", "UserGameSettings", "UserInputService", "UserService", "VRService", "VRStatusService", "VersionControlService", "VideoCaptureService", "VideoScreenCaptureService", "VideoService", "VirtualInputManager", "VirtualUser", "VisibilityCheckDispatcher", "Visit", "VisualizationModeService", "VoiceChatInternal", "VoiceChatService", "WebSocketService", "WebViewService", "WindowProtocolService"]}
 
 
 type ContentId = string
@@ -44,6 +44,10 @@ declare utf8: {
 }
 
 declare function warn<T...>(...: T...)
+
+-- FIXME: This type is not entirely correct - `loadstring` returns a function or
+-- (nil, string).
+declare function loadstring<A...>(src: string, chunkname: string?): (((A...) -> any)?, string?)
 
 @[deprecated { use = "task.spawn" }]
 declare function spawn(callback: (dt: number, gt: number) -> ())
@@ -366,17 +370,6 @@ declare extern type EnumAnalyticsProgressionType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAnalyticsProgressionType?
 	function FromValue(self, Value: number): EnumAnalyticsProgressionType?
 end
-declare extern type EnumAnimatedImagePlaybackState extends EnumItem with end
-declare extern type EnumAnimatedImagePlaybackState_INTERNAL extends Enum with
-	Begin: EnumAnimatedImagePlaybackState
-	Canceled: EnumAnimatedImagePlaybackState
-	Completed: EnumAnimatedImagePlaybackState
-	Paused: EnumAnimatedImagePlaybackState
-	Playing: EnumAnimatedImagePlaybackState
-	function GetEnumItems(self): { EnumAnimatedImagePlaybackState }
-	function FromName(self, Name: string): EnumAnimatedImagePlaybackState?
-	function FromValue(self, Value: number): EnumAnimatedImagePlaybackState?
-end
 declare extern type EnumAnimatedImageScaleType extends EnumItem with end
 declare extern type EnumAnimatedImageScaleType_INTERNAL extends Enum with
 	Crop: EnumAnimatedImageScaleType
@@ -512,6 +505,7 @@ end
 declare extern type EnumAnimationValueNodeType extends EnumItem with end
 declare extern type EnumAnimationValueNodeType_INTERNAL extends Enum with
 	Expression: EnumAnimationValueNodeType
+	FeatureMatching: EnumAnimationValueNodeType
 	Invalid: EnumAnimationValueNodeType
 	function GetEnumItems(self): { EnumAnimationValueNodeType }
 	function FromName(self, Name: string): EnumAnimationValueNodeType?
@@ -597,6 +591,7 @@ end
 declare extern type EnumAppShellActionType extends EnumItem with end
 declare extern type EnumAppShellActionType_INTERNAL extends Enum with
 	AvatarEditorPageLoaded: EnumAppShellActionType
+	CampaignPageLoaded: EnumAppShellActionType
 	GamePageLoaded: EnumAppShellActionType
 	HomePageInteractive: EnumAppShellActionType
 	HomePageLoaded: EnumAppShellActionType
@@ -604,6 +599,7 @@ declare extern type EnumAppShellActionType_INTERNAL extends Enum with
 	OpenApp: EnumAppShellActionType
 	ReadConversation: EnumAppShellActionType
 	TapAvatarTab: EnumAppShellActionType
+	TapCampaignPageTab: EnumAppShellActionType
 	TapChatTab: EnumAppShellActionType
 	TapConversationEntry: EnumAppShellActionType
 	TapGamePageTab: EnumAppShellActionType
@@ -692,12 +688,14 @@ declare extern type EnumAssetRepresentation_INTERNAL extends Enum with
 end
 declare extern type EnumAssetType extends EnumItem with end
 declare extern type EnumAssetType_INTERNAL extends Enum with
+	AnimatedImage: EnumAssetType
 	Animation: EnumAssetType
 	Audio: EnumAssetType
 	AvatarBackground: EnumAssetType
 	BackAccessory: EnumAssetType
 	Badge: EnumAssetType
 	ClimbAnimation: EnumAssetType
+	ComputeFunction: EnumAssetType
 	DeathAnimation: EnumAssetType
 	Decal: EnumAssetType
 	DressSkirtAccessory: EnumAssetType
@@ -747,6 +745,7 @@ declare extern type EnumAssetType_INTERNAL extends Enum with
 	ShirtAccessory: EnumAssetType
 	ShortsAccessory: EnumAssetType
 	ShoulderAccessory: EnumAssetType
+	SpawnEffect: EnumAssetType
 	SweaterAccessory: EnumAssetType
 	SwimAnimation: EnumAssetType
 	TShirt: EnumAssetType
@@ -839,6 +838,18 @@ declare extern type EnumAudioSimulationFidelity_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumAudioSimulationFidelity?
 	function FromValue(self, Value: number): EnumAudioSimulationFidelity?
 end
+declare extern type EnumAudioSortType extends EnumItem with end
+declare extern type EnumAudioSortType_INTERNAL extends Enum with
+	LongestToShortest: EnumAudioSortType
+	MostUsed: EnumAudioSortType
+	RecentlyCreated: EnumAudioSortType
+	Relevance: EnumAudioSortType
+	ShortestToLongest: EnumAudioSortType
+	Trending: EnumAudioSortType
+	function GetEnumItems(self): { EnumAudioSortType }
+	function FromName(self, Name: string): EnumAudioSortType?
+	function FromValue(self, Value: number): EnumAudioSortType?
+end
 declare extern type EnumAudioSubType extends EnumItem with end
 declare extern type EnumAudioSubType_INTERNAL extends Enum with
 	Music: EnumAudioSubType
@@ -922,6 +933,7 @@ declare extern type EnumAvatarAssetType_INTERNAL extends Enum with
 	ShirtAccessory: EnumAvatarAssetType
 	ShortsAccessory: EnumAvatarAssetType
 	ShoulderAccessory: EnumAvatarAssetType
+	SpawnEffect: EnumAvatarAssetType
 	SweaterAccessory: EnumAvatarAssetType
 	SwimAnimation: EnumAvatarAssetType
 	TShirt: EnumAvatarAssetType
@@ -959,6 +971,14 @@ declare extern type EnumAvatarContextMenuOption_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumAvatarContextMenuOption }
 	function FromName(self, Name: string): EnumAvatarContextMenuOption?
 	function FromValue(self, Value: number): EnumAvatarContextMenuOption?
+end
+declare extern type EnumAvatarEffectType extends EnumItem with end
+declare extern type EnumAvatarEffectType_INTERNAL extends Enum with
+	None: EnumAvatarEffectType
+	Spawn: EnumAvatarEffectType
+	function GetEnumItems(self): { EnumAvatarEffectType }
+	function FromName(self, Name: string): EnumAvatarEffectType?
+	function FromValue(self, Value: number): EnumAvatarEffectType?
 end
 declare extern type EnumAvatarGenerationError extends EnumItem with end
 declare extern type EnumAvatarGenerationError_INTERNAL extends Enum with
@@ -1094,6 +1114,7 @@ end
 declare extern type EnumAvatarSettingsHitAndTouchDetectionMode extends EnumItem with end
 declare extern type EnumAvatarSettingsHitAndTouchDetectionMode_INTERNAL extends Enum with
 	UseCollider: EnumAvatarSettingsHitAndTouchDetectionMode
+	UseHitbox: EnumAvatarSettingsHitAndTouchDetectionMode
 	UseParts: EnumAvatarSettingsHitAndTouchDetectionMode
 	function GetEnumItems(self): { EnumAvatarSettingsHitAndTouchDetectionMode }
 	function FromName(self, Name: string): EnumAvatarSettingsHitAndTouchDetectionMode?
@@ -1122,6 +1143,15 @@ declare extern type EnumAvatarSettingsScaleMode_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumAvatarSettingsScaleMode }
 	function FromName(self, Name: string): EnumAvatarSettingsScaleMode?
 	function FromValue(self, Value: number): EnumAvatarSettingsScaleMode?
+end
+declare extern type EnumAvatarSettingsTouchAndQueryDetectionMode extends EnumItem with end
+declare extern type EnumAvatarSettingsTouchAndQueryDetectionMode_INTERNAL extends Enum with
+	UseCollider: EnumAvatarSettingsTouchAndQueryDetectionMode
+	UseHitbox: EnumAvatarSettingsTouchAndQueryDetectionMode
+	UseParts: EnumAvatarSettingsTouchAndQueryDetectionMode
+	function GetEnumItems(self): { EnumAvatarSettingsTouchAndQueryDetectionMode }
+	function FromName(self, Name: string): EnumAvatarSettingsTouchAndQueryDetectionMode?
+	function FromValue(self, Value: number): EnumAvatarSettingsTouchAndQueryDetectionMode?
 end
 declare extern type EnumAvatarThumbnailCustomizationType extends EnumItem with end
 declare extern type EnumAvatarThumbnailCustomizationType_INTERNAL extends Enum with
@@ -1330,6 +1360,15 @@ declare extern type EnumCameraPanMode_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumCameraPanMode }
 	function FromName(self, Name: string): EnumCameraPanMode?
 	function FromValue(self, Value: number): EnumCameraPanMode?
+end
+declare extern type EnumCameraRotateCursorLock extends EnumItem with end
+declare extern type EnumCameraRotateCursorLock_INTERNAL extends Enum with
+	BothModes: EnumCameraRotateCursorLock
+	FpsOnly: EnumCameraRotateCursorLock
+	Never: EnumCameraRotateCursorLock
+	function GetEnumItems(self): { EnumCameraRotateCursorLock }
+	function FromName(self, Name: string): EnumCameraRotateCursorLock?
+	function FromValue(self, Value: number): EnumCameraRotateCursorLock?
 end
 declare extern type EnumCameraSpeedAdjustBinding extends EnumItem with end
 declare extern type EnumCameraSpeedAdjustBinding_INTERNAL extends Enum with
@@ -2302,8 +2341,9 @@ declare extern type EnumDistanceAttenuationMode_INTERNAL extends Enum with
 end
 declare extern type EnumDomainType extends EnumItem with end
 declare extern type EnumDomainType_INTERNAL extends Enum with
-	EXPERIENCE: EnumDomainType
-	OAUTH: EnumDomainType
+	Experience: EnumDomainType
+	Group: EnumDomainType
+	OAuth: EnumDomainType
 	function GetEnumItems(self): { EnumDomainType }
 	function FromName(self, Name: string): EnumDomainType?
 	function FromValue(self, Value: number): EnumDomainType?
@@ -2396,6 +2436,7 @@ end
 declare extern type EnumEasingStyle extends EnumItem with end
 declare extern type EnumEasingStyle_INTERNAL extends Enum with
 	Back: EnumEasingStyle
+	Bezier: EnumEasingStyle
 	Bounce: EnumEasingStyle
 	Circular: EnumEasingStyle
 	Cubic: EnumEasingStyle
@@ -2406,6 +2447,7 @@ declare extern type EnumEasingStyle_INTERNAL extends Enum with
 	Quart: EnumEasingStyle
 	Quint: EnumEasingStyle
 	Sine: EnumEasingStyle
+	Spring: EnumEasingStyle
 	function GetEnumItems(self): { EnumEasingStyle }
 	function FromName(self, Name: string): EnumEasingStyle?
 	function FromValue(self, Value: number): EnumEasingStyle?
@@ -2449,6 +2491,7 @@ declare extern type EnumEngagementLevel_INTERNAL extends Enum with
 end
 declare extern type EnumEngineFolder extends EnumItem with end
 declare extern type EnumEngineFolder_INTERNAL extends Enum with
+	ClientSettings: EnumEngineFolder
 	Logs: EnumEngineFolder
 	Screenshots: EnumEngineFolder
 	Videos: EnumEngineFolder
@@ -2498,6 +2541,16 @@ declare extern type EnumExperienceEventStatus_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumExperienceEventStatus }
 	function FromName(self, Name: string): EnumExperienceEventStatus?
 	function FromValue(self, Value: number): EnumExperienceEventStatus?
+end
+declare extern type EnumExperienceRatingResult extends EnumItem with end
+declare extern type EnumExperienceRatingResult_INTERNAL extends Enum with
+	Completed: EnumExperienceRatingResult
+	Dismissed: EnumExperienceRatingResult
+	Failed: EnumExperienceRatingResult
+	NotAllowed: EnumExperienceRatingResult
+	function GetEnumItems(self): { EnumExperienceRatingResult }
+	function FromName(self, Name: string): EnumExperienceRatingResult?
+	function FromValue(self, Value: number): EnumExperienceRatingResult?
 end
 declare extern type EnumExperienceStateCaptureSelectionMode extends EnumItem with end
 declare extern type EnumExperienceStateCaptureSelectionMode_INTERNAL extends Enum with
@@ -2635,6 +2688,32 @@ declare extern type EnumFacsActionUnit_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumFacsActionUnit?
 	function FromValue(self, Value: number): EnumFacsActionUnit?
 end
+declare extern type EnumFeatureChannelEncoding extends EnumItem with end
+declare extern type EnumFeatureChannelEncoding_INTERNAL extends Enum with
+	Float16: EnumFeatureChannelEncoding
+	Float32: EnumFeatureChannelEncoding
+	function GetEnumItems(self): { EnumFeatureChannelEncoding }
+	function FromName(self, Name: string): EnumFeatureChannelEncoding?
+	function FromValue(self, Value: number): EnumFeatureChannelEncoding?
+end
+declare extern type EnumFeatureMatchingSource extends EnumItem with end
+declare extern type EnumFeatureMatchingSource_INTERNAL extends Enum with
+	Continuity: EnumFeatureMatchingSource
+	Ignore: EnumFeatureMatchingSource
+	Input: EnumFeatureMatchingSource
+	function GetEnumItems(self): { EnumFeatureMatchingSource }
+	function FromName(self, Name: string): EnumFeatureMatchingSource?
+	function FromValue(self, Value: number): EnumFeatureMatchingSource?
+end
+declare extern type EnumFeatureNormalization extends EnumItem with end
+declare extern type EnumFeatureNormalization_INTERNAL extends Enum with
+	None: EnumFeatureNormalization
+	StandardScore: EnumFeatureNormalization
+	UnitL2: EnumFeatureNormalization
+	function GetEnumItems(self): { EnumFeatureNormalization }
+	function FromName(self, Name: string): EnumFeatureNormalization?
+	function FromValue(self, Value: number): EnumFeatureNormalization?
+end
 declare extern type EnumFeatureRestrictionAbuseVector extends EnumItem with end
 declare extern type EnumFeatureRestrictionAbuseVector_INTERNAL extends Enum with
 	Communication: EnumFeatureRestrictionAbuseVector
@@ -2642,6 +2721,14 @@ declare extern type EnumFeatureRestrictionAbuseVector_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumFeatureRestrictionAbuseVector }
 	function FromName(self, Name: string): EnumFeatureRestrictionAbuseVector?
 	function FromValue(self, Value: number): EnumFeatureRestrictionAbuseVector?
+end
+declare extern type EnumFeatureSelectionMode extends EnumItem with end
+declare extern type EnumFeatureSelectionMode_INTERNAL extends Enum with
+	Nearest: EnumFeatureSelectionMode
+	WeightedRandom: EnumFeatureSelectionMode
+	function GetEnumItems(self): { EnumFeatureSelectionMode }
+	function FromName(self, Name: string): EnumFeatureSelectionMode?
+	function FromValue(self, Value: number): EnumFeatureSelectionMode?
 end
 declare extern type EnumFeedbackType extends EnumItem with end
 declare extern type EnumFeedbackType_INTERNAL extends Enum with
@@ -2734,6 +2821,15 @@ declare extern type EnumFluidForces_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumFluidForces }
 	function FromName(self, Name: string): EnumFluidForces?
 	function FromValue(self, Value: number): EnumFluidForces?
+end
+declare extern type EnumFollowTwistBoneAxisMode extends EnumItem with end
+declare extern type EnumFollowTwistBoneAxisMode_INTERNAL extends Enum with
+	Follower: EnumFollowTwistBoneAxisMode
+	Local: EnumFollowTwistBoneAxisMode
+	StartToEndBone: EnumFollowTwistBoneAxisMode
+	function GetEnumItems(self): { EnumFollowTwistBoneAxisMode }
+	function FromName(self, Name: string): EnumFollowTwistBoneAxisMode?
+	function FromValue(self, Value: number): EnumFollowTwistBoneAxisMode?
 end
 declare extern type EnumFont extends EnumItem with end
 declare extern type EnumFont_INTERNAL extends Enum with
@@ -2906,6 +3002,7 @@ declare extern type EnumFriendsCallingEndReason_INTERNAL extends Enum with
 	Failed: EnumFriendsCallingEndReason
 	LocalHangup: EnumFriendsCallingEndReason
 	Missed: EnumFriendsCallingEndReason
+	NoReason: EnumFriendsCallingEndReason
 	None: EnumFriendsCallingEndReason
 	RemoteHangup: EnumFriendsCallingEndReason
 	function GetEnumItems(self): { EnumFriendsCallingEndReason }
@@ -2988,6 +3085,42 @@ declare extern type EnumGameAvatarType_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumGameAvatarType }
 	function FromName(self, Name: string): EnumGameAvatarType?
 	function FromValue(self, Value: number): EnumGameAvatarType?
+end
+declare extern type EnumGameDownloadPhase extends EnumItem with end
+declare extern type EnumGameDownloadPhase_INTERNAL extends Enum with
+	CheckingGuards: EnumGameDownloadPhase
+	Downloading: EnumGameDownloadPhase
+	FetchingManifest: EnumGameDownloadPhase
+	function GetEnumItems(self): { EnumGameDownloadPhase }
+	function FromName(self, Name: string): EnumGameDownloadPhase?
+	function FromValue(self, Value: number): EnumGameDownloadPhase?
+end
+declare extern type EnumGameDownloadResult extends EnumItem with end
+declare extern type EnumGameDownloadResult_INTERNAL extends Enum with
+	Cancelled: EnumGameDownloadResult
+	LowPowerMode: EnumGameDownloadResult
+	ManifestUnavailable: EnumGameDownloadResult
+	Moderated: EnumGameDownloadResult
+	NetworkError: EnumGameDownloadResult
+	NetworkMetered: EnumGameDownloadResult
+	NotEnoughSpace: EnumGameDownloadResult
+	NotOnWiFi: EnumGameDownloadResult
+	Success: EnumGameDownloadResult
+	function GetEnumItems(self): { EnumGameDownloadResult }
+	function FromName(self, Name: string): EnumGameDownloadResult?
+	function FromValue(self, Value: number): EnumGameDownloadResult?
+end
+declare extern type EnumGameDownloadStartResult extends EnumItem with end
+declare extern type EnumGameDownloadStartResult_INTERNAL extends Enum with
+	AlreadyDownloading: EnumGameDownloadStartResult
+	GameDownloadInProgress: EnumGameDownloadStartResult
+	LowPowerMode: EnumGameDownloadStartResult
+	NetworkMetered: EnumGameDownloadStartResult
+	NotOnWiFi: EnumGameDownloadStartResult
+	Started: EnumGameDownloadStartResult
+	function GetEnumItems(self): { EnumGameDownloadStartResult }
+	function FromName(self, Name: string): EnumGameDownloadStartResult?
+	function FromValue(self, Value: number): EnumGameDownloadStartResult?
 end
 declare extern type EnumGamepadType extends EnumItem with end
 declare extern type EnumGamepadType_INTERNAL extends Enum with
@@ -3101,6 +3234,19 @@ declare extern type EnumGroupMembershipStatus_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumGroupMembershipStatus }
 	function FromName(self, Name: string): EnumGroupMembershipStatus?
 	function FromValue(self, Value: number): EnumGroupMembershipStatus?
+end
+declare extern type EnumGuiNavigationDirection extends EnumItem with end
+declare extern type EnumGuiNavigationDirection_INTERNAL extends Enum with
+	Backward: EnumGuiNavigationDirection
+	Down: EnumGuiNavigationDirection
+	Forward: EnumGuiNavigationDirection
+	Left: EnumGuiNavigationDirection
+	None: EnumGuiNavigationDirection
+	Right: EnumGuiNavigationDirection
+	Up: EnumGuiNavigationDirection
+	function GetEnumItems(self): { EnumGuiNavigationDirection }
+	function FromName(self, Name: string): EnumGuiNavigationDirection?
+	function FromValue(self, Value: number): EnumGuiNavigationDirection?
 end
 declare extern type EnumGuiState extends EnumItem with end
 declare extern type EnumGuiState_INTERNAL extends Enum with
@@ -3362,9 +3508,16 @@ declare extern type EnumImageCombineType_INTERNAL extends Enum with
 	Add: EnumImageCombineType
 	AlphaBlend: EnumImageCombineType
 	BlendSourceOver: EnumImageCombineType
+	Darken: EnumImageCombineType
+	Difference: EnumImageCombineType
+	HardLight: EnumImageCombineType
+	Lighten: EnumImageCombineType
 	Multiply: EnumImageCombineType
 	NormalMapBlend: EnumImageCombineType
+	Overlay: EnumImageCombineType
 	Overwrite: EnumImageCombineType
+	Screen: EnumImageCombineType
+	SoftLight: EnumImageCombineType
 	Subtract: EnumImageCombineType
 	function GetEnumItems(self): { EnumImageCombineType }
 	function FromName(self, Name: string): EnumImageCombineType?
@@ -3873,6 +4026,14 @@ declare extern type EnumLexemeType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumLexemeType?
 	function FromValue(self, Value: number): EnumLexemeType?
 end
+declare extern type EnumLightAttenuationMode extends EnumItem with end
+declare extern type EnumLightAttenuationMode_INTERNAL extends Enum with
+	Legacy: EnumLightAttenuationMode
+	Realistic: EnumLightAttenuationMode
+	function GetEnumItems(self): { EnumLightAttenuationMode }
+	function FromName(self, Name: string): EnumLightAttenuationMode?
+	function FromValue(self, Value: number): EnumLightAttenuationMode?
+end
 declare extern type EnumLightingStyle extends EnumItem with end
 declare extern type EnumLightingStyle_INTERNAL extends Enum with
 	Realistic: EnumLightingStyle
@@ -4223,6 +4384,26 @@ declare extern type EnumMessageType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumMessageType?
 	function FromValue(self, Value: number): EnumMessageType?
 end
+declare extern type EnumMetadataFieldType extends EnumItem with end
+declare extern type EnumMetadataFieldType_INTERNAL extends Enum with
+	Buffer: EnumMetadataFieldType
+	CFrame: EnumMetadataFieldType
+	ContentId: EnumMetadataFieldType
+	Float32: EnumMetadataFieldType
+	Float64: EnumMetadataFieldType
+	Int32: EnumMetadataFieldType
+	Int64: EnumMetadataFieldType
+	TagMask32: EnumMetadataFieldType
+	UInt16: EnumMetadataFieldType
+	UInt32: EnumMetadataFieldType
+	UInt64: EnumMetadataFieldType
+	UInt8: EnumMetadataFieldType
+	Vector2: EnumMetadataFieldType
+	Vector3: EnumMetadataFieldType
+	function GetEnumItems(self): { EnumMetadataFieldType }
+	function FromName(self, Name: string): EnumMetadataFieldType?
+	function FromValue(self, Value: number): EnumMetadataFieldType?
+end
 declare extern type EnumModelLevelOfDetail extends EnumItem with end
 declare extern type EnumModelLevelOfDetail_INTERNAL extends Enum with
 	Automatic: EnumModelLevelOfDetail
@@ -4410,6 +4591,16 @@ declare extern type EnumOrientationAlignmentMode_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumOrientationAlignmentMode?
 	function FromValue(self, Value: number): EnumOrientationAlignmentMode?
 end
+declare extern type EnumOrthographicMode extends EnumItem with end
+declare extern type EnumOrthographicMode_INTERNAL extends Enum with
+	Diagonal: EnumOrthographicMode
+	Horizontal: EnumOrthographicMode
+	MaxAxis: EnumOrthographicMode
+	Vertical: EnumOrthographicMode
+	function GetEnumItems(self): { EnumOrthographicMode }
+	function FromName(self, Name: string): EnumOrthographicMode?
+	function FromValue(self, Value: number): EnumOrthographicMode?
+end
 declare extern type EnumOutfitSource extends EnumItem with end
 declare extern type EnumOutfitSource_INTERNAL extends Enum with
 	All: EnumOutfitSource
@@ -4483,12 +4674,21 @@ declare extern type EnumPartType extends EnumItem with end
 declare extern type EnumPartType_INTERNAL extends Enum with
 	Ball: EnumPartType
 	Block: EnumPartType
+	Capsule: EnumPartType
 	CornerWedge: EnumPartType
 	Cylinder: EnumPartType
 	Wedge: EnumPartType
 	function GetEnumItems(self): { EnumPartType }
 	function FromName(self, Name: string): EnumPartType?
 	function FromValue(self, Value: number): EnumPartType?
+end
+declare extern type EnumParticleEmitter2DEmissionMode extends EnumItem with end
+declare extern type EnumParticleEmitter2DEmissionMode_INTERNAL extends Enum with
+	BoundingBox: EnumParticleEmitter2DEmissionMode
+	Point: EnumParticleEmitter2DEmissionMode
+	function GetEnumItems(self): { EnumParticleEmitter2DEmissionMode }
+	function FromName(self, Name: string): EnumParticleEmitter2DEmissionMode?
+	function FromValue(self, Value: number): EnumParticleEmitter2DEmissionMode?
 end
 declare extern type EnumParticleEmitterShape extends EnumItem with end
 declare extern type EnumParticleEmitterShape_INTERNAL extends Enum with
@@ -4656,6 +4856,7 @@ declare extern type EnumPioneerSource_INTERNAL extends Enum with
 	DaveyBazooka: EnumPioneerSource
 	Oof: EnumPioneerSource
 	Roblox: EnumPioneerSource
+	RobloxPioneerTest: EnumPioneerSource
 	function GetEnumItems(self): { EnumPioneerSource }
 	function FromName(self, Name: string): EnumPioneerSource?
 	function FromValue(self, Value: number): EnumPioneerSource?
@@ -4749,24 +4950,24 @@ declare extern type EnumPlayerChatType_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPlayerChatType?
 	function FromValue(self, Value: number): EnumPlayerChatType?
 end
-declare extern type EnumPlayerDataErrorState extends EnumItem with end
-declare extern type EnumPlayerDataErrorState_INTERNAL extends Enum with
-	FlushFailed: EnumPlayerDataErrorState
-	LoadFailed: EnumPlayerDataErrorState
-	None: EnumPlayerDataErrorState
-	ReleaseFailed: EnumPlayerDataErrorState
-	function GetEnumItems(self): { EnumPlayerDataErrorState }
-	function FromName(self, Name: string): EnumPlayerDataErrorState?
-	function FromValue(self, Value: number): EnumPlayerDataErrorState?
+declare extern type EnumPlayerDeviceTrustDecision extends EnumItem with end
+declare extern type EnumPlayerDeviceTrustDecision_INTERNAL extends Enum with
+	Accept: EnumPlayerDeviceTrustDecision
+	Reject: EnumPlayerDeviceTrustDecision
+	function GetEnumItems(self): { EnumPlayerDeviceTrustDecision }
+	function FromName(self, Name: string): EnumPlayerDeviceTrustDecision?
+	function FromValue(self, Value: number): EnumPlayerDeviceTrustDecision?
 end
-declare extern type EnumPlayerDataLoadFailureBehavior extends EnumItem with end
-declare extern type EnumPlayerDataLoadFailureBehavior_INTERNAL extends Enum with
-	Failure: EnumPlayerDataLoadFailureBehavior
-	FallbackToDefault: EnumPlayerDataLoadFailureBehavior
-	Kick: EnumPlayerDataLoadFailureBehavior
-	function GetEnumItems(self): { EnumPlayerDataLoadFailureBehavior }
-	function FromName(self, Name: string): EnumPlayerDataLoadFailureBehavior?
-	function FromValue(self, Value: number): EnumPlayerDataLoadFailureBehavior?
+declare extern type EnumPlayerDeviceTrustLevel extends EnumItem with end
+declare extern type EnumPlayerDeviceTrustLevel_INTERNAL extends Enum with
+	Full: EnumPlayerDeviceTrustLevel
+	None: EnumPlayerDeviceTrustLevel
+	Pending: EnumPlayerDeviceTrustLevel
+	Standard: EnumPlayerDeviceTrustLevel
+	Unknown: EnumPlayerDeviceTrustLevel
+	function GetEnumItems(self): { EnumPlayerDeviceTrustLevel }
+	function FromName(self, Name: string): EnumPlayerDeviceTrustLevel?
+	function FromValue(self, Value: number): EnumPlayerDeviceTrustLevel?
 end
 declare extern type EnumPlayerExitReason extends EnumItem with end
 declare extern type EnumPlayerExitReason_INTERNAL extends Enum with
@@ -4891,15 +5092,6 @@ declare extern type EnumPrefetchDownloadStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumPrefetchDownloadStatus?
 	function FromValue(self, Value: number): EnumPrefetchDownloadStatus?
 end
-declare extern type EnumPrimalPhysicsSolver extends EnumItem with end
-declare extern type EnumPrimalPhysicsSolver_INTERNAL extends Enum with
-	Default: EnumPrimalPhysicsSolver
-	Disabled: EnumPrimalPhysicsSolver
-	Experimental: EnumPrimalPhysicsSolver
-	function GetEnumItems(self): { EnumPrimalPhysicsSolver }
-	function FromName(self, Name: string): EnumPrimalPhysicsSolver?
-	function FromValue(self, Value: number): EnumPrimalPhysicsSolver?
-end
 declare extern type EnumPrimitiveType extends EnumItem with end
 declare extern type EnumPrimitiveType_INTERNAL extends Enum with
 	Ball: EnumPrimitiveType
@@ -4950,11 +5142,13 @@ declare extern type EnumProductPurchaseDecision_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumProductPurchaseDecision?
 	function FromValue(self, Value: number): EnumProductPurchaseDecision?
 end
-declare extern type EnumProjectServiceOperationResult extends EnumItem with end
-declare extern type EnumProjectServiceOperationResult_INTERNAL extends Enum with
-	function GetEnumItems(self): { EnumProjectServiceOperationResult }
-	function FromName(self, Name: string): EnumProjectServiceOperationResult?
-	function FromValue(self, Value: number): EnumProjectServiceOperationResult?
+declare extern type EnumProjectionType extends EnumItem with end
+declare extern type EnumProjectionType_INTERNAL extends Enum with
+	Orthographic: EnumProjectionType
+	Perspective: EnumProjectionType
+	function GetEnumItems(self): { EnumProjectionType }
+	function FromName(self, Name: string): EnumProjectionType?
+	function FromValue(self, Value: number): EnumProjectionType?
 end
 declare extern type EnumPromptCreateAssetResult extends EnumItem with end
 declare extern type EnumPromptCreateAssetResult_INTERNAL extends Enum with
@@ -5290,6 +5484,16 @@ declare extern type EnumReplicateInstanceDestroySetting_INTERNAL extends Enum wi
 	function FromName(self, Name: string): EnumReplicateInstanceDestroySetting?
 	function FromValue(self, Value: number): EnumReplicateInstanceDestroySetting?
 end
+declare extern type EnumReplicationMode extends EnumItem with end
+declare extern type EnumReplicationMode_INTERNAL extends Enum with
+	Automatic: EnumReplicationMode
+	High: EnumReplicationMode
+	Low: EnumReplicationMode
+	Medium: EnumReplicationMode
+	function GetEnumItems(self): { EnumReplicationMode }
+	function FromName(self, Name: string): EnumReplicationMode?
+	function FromValue(self, Value: number): EnumReplicationMode?
+end
 declare extern type EnumResamplerMode extends EnumItem with end
 declare extern type EnumResamplerMode_INTERNAL extends Enum with
 	Default: EnumResamplerMode
@@ -5458,6 +5662,16 @@ declare extern type EnumRigType_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumRigType }
 	function FromName(self, Name: string): EnumRigType?
 	function FromValue(self, Value: number): EnumRigType?
+end
+declare extern type EnumRobuxTransferEligibility extends EnumItem with end
+declare extern type EnumRobuxTransferEligibility_INTERNAL extends Enum with
+	Eligible: EnumRobuxTransferEligibility
+	ReceiverNotEligible: EnumRobuxTransferEligibility
+	SenderNotEligible: EnumRobuxTransferEligibility
+	Unknown: EnumRobuxTransferEligibility
+	function GetEnumItems(self): { EnumRobuxTransferEligibility }
+	function FromName(self, Name: string): EnumRobuxTransferEligibility?
+	function FromValue(self, Value: number): EnumRobuxTransferEligibility?
 end
 declare extern type EnumRollOffMode extends EnumItem with end
 declare extern type EnumRollOffMode_INTERNAL extends Enum with
@@ -5823,6 +6037,15 @@ declare extern type EnumSensorUpdateType_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumSensorUpdateType }
 	function FromName(self, Name: string): EnumSensorUpdateType?
 	function FromValue(self, Value: number): EnumSensorUpdateType?
+end
+declare extern type EnumSerializationFormat extends EnumItem with end
+declare extern type EnumSerializationFormat_INTERNAL extends Enum with
+	Binary: EnumSerializationFormat
+	Json: EnumSerializationFormat
+	Luau: EnumSerializationFormat
+	function GetEnumItems(self): { EnumSerializationFormat }
+	function FromName(self, Name: string): EnumSerializationFormat?
+	function FromValue(self, Value: number): EnumSerializationFormat?
 end
 declare extern type EnumServerLiveEditingMode extends EnumItem with end
 declare extern type EnumServerLiveEditingMode_INTERNAL extends Enum with
@@ -6610,6 +6833,26 @@ declare extern type EnumTerrainSolidMergeOperation_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTerrainSolidMergeOperation?
 	function FromValue(self, Value: number): EnumTerrainSolidMergeOperation?
 end
+declare extern type EnumTestCaseStatus extends EnumItem with end
+declare extern type EnumTestCaseStatus_INTERNAL extends Enum with
+	Fail: EnumTestCaseStatus
+	Pass: EnumTestCaseStatus
+	Skipped: EnumTestCaseStatus
+	TimedOut: EnumTestCaseStatus
+	function GetEnumItems(self): { EnumTestCaseStatus }
+	function FromName(self, Name: string): EnumTestCaseStatus?
+	function FromValue(self, Value: number): EnumTestCaseStatus?
+end
+declare extern type EnumTestRunStatus extends EnumItem with end
+declare extern type EnumTestRunStatus_INTERNAL extends Enum with
+	Fail: EnumTestRunStatus
+	NoTests: EnumTestRunStatus
+	Pass: EnumTestRunStatus
+	Skipped: EnumTestRunStatus
+	function GetEnumItems(self): { EnumTestRunStatus }
+	function FromName(self, Name: string): EnumTestRunStatus?
+	function FromValue(self, Value: number): EnumTestRunStatus?
+end
 declare extern type EnumTextChannelDisplayMode extends EnumItem with end
 declare extern type EnumTextChannelDisplayMode_INTERNAL extends Enum with
 	AllTextChannels: EnumTextChannelDisplayMode
@@ -6927,6 +7170,15 @@ declare extern type EnumTweenStatus_INTERNAL extends Enum with
 	function FromName(self, Name: string): EnumTweenStatus?
 	function FromValue(self, Value: number): EnumTweenStatus?
 end
+declare extern type EnumUIBlurStrength extends EnumItem with end
+declare extern type EnumUIBlurStrength_INTERNAL extends Enum with
+	Heavy: EnumUIBlurStrength
+	Light: EnumUIBlurStrength
+	Medium: EnumUIBlurStrength
+	function GetEnumItems(self): { EnumUIBlurStrength }
+	function FromName(self, Name: string): EnumUIBlurStrength?
+	function FromValue(self, Value: number): EnumUIBlurStrength?
+end
 declare extern type EnumUICaptureMode extends EnumItem with end
 declare extern type EnumUICaptureMode_INTERNAL extends Enum with
 	All: EnumUICaptureMode
@@ -7190,6 +7442,14 @@ declare extern type EnumVRLaserPointerMode_INTERNAL extends Enum with
 	function GetEnumItems(self): { EnumVRLaserPointerMode }
 	function FromName(self, Name: string): EnumVRLaserPointerMode?
 	function FromValue(self, Value: number): EnumVRLaserPointerMode?
+end
+declare extern type EnumVRPresentationMode extends EnumItem with end
+declare extern type EnumVRPresentationMode_INTERNAL extends Enum with
+	Flat: EnumVRPresentationMode
+	Stereo: EnumVRPresentationMode
+	function GetEnumItems(self): { EnumVRPresentationMode }
+	function FromName(self, Name: string): EnumVRPresentationMode?
+	function FromValue(self, Value: number): EnumVRPresentationMode?
 end
 declare extern type EnumVRSafetyBubbleMode extends EnumItem with end
 declare extern type EnumVRSafetyBubbleMode_INTERNAL extends Enum with
@@ -7626,7 +7886,6 @@ type ENUM_LIST = {
 	AnalyticsLogLevel: EnumAnalyticsLogLevel_INTERNAL,
 	AnalyticsProgressionStatus: EnumAnalyticsProgressionStatus_INTERNAL,
 	AnalyticsProgressionType: EnumAnalyticsProgressionType_INTERNAL,
-	AnimatedImagePlaybackState: EnumAnimatedImagePlaybackState_INTERNAL,
 	AnimatedImageScaleType: EnumAnimatedImageScaleType_INTERNAL,
 	AnimationClipFromVideoStatus: EnumAnimationClipFromVideoStatus_INTERNAL,
 	AnimationNodeBlend2DInputMode: EnumAnimationNodeBlend2DInputMode_INTERNAL,
@@ -7666,6 +7925,7 @@ type ENUM_LIST = {
 	AudioPositionType: EnumAudioPositionType_INTERNAL,
 	AudioSampleFormat: EnumAudioSampleFormat_INTERNAL,
 	AudioSimulationFidelity: EnumAudioSimulationFidelity_INTERNAL,
+	AudioSortType: EnumAudioSortType_INTERNAL,
 	AudioSubType: EnumAudioSubType_INTERNAL,
 	AudioWindowSize: EnumAudioWindowSize_INTERNAL,
 	AuthorityMode: EnumAuthorityMode_INTERNAL,
@@ -7674,6 +7934,7 @@ type ENUM_LIST = {
 	AvatarAssetType: EnumAvatarAssetType_INTERNAL,
 	AvatarChatServiceFeature: EnumAvatarChatServiceFeature_INTERNAL,
 	AvatarContextMenuOption: EnumAvatarContextMenuOption_INTERNAL,
+	AvatarEffectType: EnumAvatarEffectType_INTERNAL,
 	AvatarGenerationError: EnumAvatarGenerationError_INTERNAL,
 	AvatarItemType: EnumAvatarItemType_INTERNAL,
 	AvatarPromptResult: EnumAvatarPromptResult_INTERNAL,
@@ -7693,6 +7954,7 @@ type ENUM_LIST = {
 	AvatarSettingsJumpMode: EnumAvatarSettingsJumpMode_INTERNAL,
 	AvatarSettingsLegacyCollisionMode: EnumAvatarSettingsLegacyCollisionMode_INTERNAL,
 	AvatarSettingsScaleMode: EnumAvatarSettingsScaleMode_INTERNAL,
+	AvatarSettingsTouchAndQueryDetectionMode: EnumAvatarSettingsTouchAndQueryDetectionMode_INTERNAL,
 	AvatarThumbnailCustomizationType: EnumAvatarThumbnailCustomizationType_INTERNAL,
 	AvatarUnificationMode: EnumAvatarUnificationMode_INTERNAL,
 	Axis: EnumAxis_INTERNAL,
@@ -7714,6 +7976,7 @@ type ENUM_LIST = {
 	CameraMode: EnumCameraMode_INTERNAL,
 	CameraNavigationModel: EnumCameraNavigationModel_INTERNAL,
 	CameraPanMode: EnumCameraPanMode_INTERNAL,
+	CameraRotateCursorLock: EnumCameraRotateCursorLock_INTERNAL,
 	CameraSpeedAdjustBinding: EnumCameraSpeedAdjustBinding_INTERNAL,
 	CameraType: EnumCameraType_INTERNAL,
 	CanCollaborateError: EnumCanCollaborateError_INTERNAL,
@@ -7813,6 +8076,7 @@ type ENUM_LIST = {
 	ExperienceActivationStatus: EnumExperienceActivationStatus_INTERNAL,
 	ExperienceAuthScope: EnumExperienceAuthScope_INTERNAL,
 	ExperienceEventStatus: EnumExperienceEventStatus_INTERNAL,
+	ExperienceRatingResult: EnumExperienceRatingResult_INTERNAL,
 	ExperienceStateCaptureSelectionMode: EnumExperienceStateCaptureSelectionMode_INTERNAL,
 	ExperienceStateRecordingLoadMode: EnumExperienceStateRecordingLoadMode_INTERNAL,
 	ExperienceStateRecordingLoadSourceType: EnumExperienceStateRecordingLoadSourceType_INTERNAL,
@@ -7823,7 +8087,11 @@ type ENUM_LIST = {
 	FacialAgeEstimationResultType: EnumFacialAgeEstimationResultType_INTERNAL,
 	FacialAnimationStreamingState: EnumFacialAnimationStreamingState_INTERNAL,
 	FacsActionUnit: EnumFacsActionUnit_INTERNAL,
+	FeatureChannelEncoding: EnumFeatureChannelEncoding_INTERNAL,
+	FeatureMatchingSource: EnumFeatureMatchingSource_INTERNAL,
+	FeatureNormalization: EnumFeatureNormalization_INTERNAL,
 	FeatureRestrictionAbuseVector: EnumFeatureRestrictionAbuseVector_INTERNAL,
+	FeatureSelectionMode: EnumFeatureSelectionMode_INTERNAL,
 	FeedbackType: EnumFeedbackType_INTERNAL,
 	FieldOfViewMode: EnumFieldOfViewMode_INTERNAL,
 	FillDirection: EnumFillDirection_INTERNAL,
@@ -7833,6 +8101,7 @@ type ENUM_LIST = {
 	FinishRecordingOperation: EnumFinishRecordingOperation_INTERNAL,
 	FluidFidelity: EnumFluidFidelity_INTERNAL,
 	FluidForces: EnumFluidForces_INTERNAL,
+	FollowTwistBoneAxisMode: EnumFollowTwistBoneAxisMode_INTERNAL,
 	Font: EnumFont_INTERNAL,
 	FontSize: EnumFontSize_INTERNAL,
 	FontStyle: EnumFontStyle_INTERNAL,
@@ -7851,6 +8120,9 @@ type ENUM_LIST = {
 	FrustumStreamingMode: EnumFrustumStreamingMode_INTERNAL,
 	FunctionalTestResult: EnumFunctionalTestResult_INTERNAL,
 	GameAvatarType: EnumGameAvatarType_INTERNAL,
+	GameDownloadPhase: EnumGameDownloadPhase_INTERNAL,
+	GameDownloadResult: EnumGameDownloadResult_INTERNAL,
+	GameDownloadStartResult: EnumGameDownloadStartResult_INTERNAL,
 	GamepadType: EnumGamepadType_INTERNAL,
 	GearGenreSetting: EnumGearGenreSetting_INTERNAL,
 	GearType: EnumGearType_INTERNAL,
@@ -7861,6 +8133,7 @@ type ENUM_LIST = {
 	GraphicsMode: EnumGraphicsMode_INTERNAL,
 	GraphicsOptimizationMode: EnumGraphicsOptimizationMode_INTERNAL,
 	GroupMembershipStatus: EnumGroupMembershipStatus_INTERNAL,
+	GuiNavigationDirection: EnumGuiNavigationDirection_INTERNAL,
 	GuiState: EnumGuiState_INTERNAL,
 	GuiType: EnumGuiType_INTERNAL,
 	HandlesStyle: EnumHandlesStyle_INTERNAL,
@@ -7908,6 +8181,7 @@ type ENUM_LIST = {
 	KnownWindow: EnumKnownWindow_INTERNAL,
 	LeftRight: EnumLeftRight_INTERNAL,
 	LexemeType: EnumLexemeType_INTERNAL,
+	LightAttenuationMode: EnumLightAttenuationMode_INTERNAL,
 	LightingStyle: EnumLightingStyle_INTERNAL,
 	Limb: EnumLimb_INTERNAL,
 	LineJoinMode: EnumLineJoinMode_INTERNAL,
@@ -7938,6 +8212,7 @@ type ENUM_LIST = {
 	MeshScaleUnit: EnumMeshScaleUnit_INTERNAL,
 	MeshType: EnumMeshType_INTERNAL,
 	MessageType: EnumMessageType_INTERNAL,
+	MetadataFieldType: EnumMetadataFieldType_INTERNAL,
 	ModelLevelOfDetail: EnumModelLevelOfDetail_INTERNAL,
 	ModelStreamingBehavior: EnumModelStreamingBehavior_INTERNAL,
 	ModelStreamingMode: EnumModelStreamingMode_INTERNAL,
@@ -7957,6 +8232,7 @@ type ENUM_LIST = {
 	NotificationButtonType: EnumNotificationButtonType_INTERNAL,
 	OperationType: EnumOperationType_INTERNAL,
 	OrientationAlignmentMode: EnumOrientationAlignmentMode_INTERNAL,
+	OrthographicMode: EnumOrthographicMode_INTERNAL,
 	OutfitSource: EnumOutfitSource_INTERNAL,
 	OutfitType: EnumOutfitType_INTERNAL,
 	OutputLayoutMode: EnumOutputLayoutMode_INTERNAL,
@@ -7965,6 +8241,7 @@ type ENUM_LIST = {
 	PageMilestoneType: EnumPageMilestoneType_INTERNAL,
 	PageType: EnumPageType_INTERNAL,
 	PartType: EnumPartType_INTERNAL,
+	ParticleEmitter2DEmissionMode: EnumParticleEmitter2DEmissionMode_INTERNAL,
 	ParticleEmitterShape: EnumParticleEmitterShape_INTERNAL,
 	ParticleEmitterShapeInOut: EnumParticleEmitterShapeInOut_INTERNAL,
 	ParticleEmitterShapeStyle: EnumParticleEmitterShapeStyle_INTERNAL,
@@ -7990,8 +8267,8 @@ type ENUM_LIST = {
 	PlayerActions: EnumPlayerActions_INTERNAL,
 	PlayerCharacterDestroyBehavior: EnumPlayerCharacterDestroyBehavior_INTERNAL,
 	PlayerChatType: EnumPlayerChatType_INTERNAL,
-	PlayerDataErrorState: EnumPlayerDataErrorState_INTERNAL,
-	PlayerDataLoadFailureBehavior: EnumPlayerDataLoadFailureBehavior_INTERNAL,
+	PlayerDeviceTrustDecision: EnumPlayerDeviceTrustDecision_INTERNAL,
+	PlayerDeviceTrustLevel: EnumPlayerDeviceTrustLevel_INTERNAL,
 	PlayerExitReason: EnumPlayerExitReason_INTERNAL,
 	PlayerPlatformActivationStatus: EnumPlayerPlatformActivationStatus_INTERNAL,
 	PlayerPlatformSpenderStatus: EnumPlayerPlatformSpenderStatus_INTERNAL,
@@ -8005,13 +8282,12 @@ type ENUM_LIST = {
 	PreferredInput: EnumPreferredInput_INTERNAL,
 	PreferredTextSize: EnumPreferredTextSize_INTERNAL,
 	PrefetchDownloadStatus: EnumPrefetchDownloadStatus_INTERNAL,
-	PrimalPhysicsSolver: EnumPrimalPhysicsSolver_INTERNAL,
 	PrimitiveType: EnumPrimitiveType_INTERNAL,
 	PrivilegeType: EnumPrivilegeType_INTERNAL,
 	ProductLocationRestriction: EnumProductLocationRestriction_INTERNAL,
 	ProductPurchaseChannel: EnumProductPurchaseChannel_INTERNAL,
 	ProductPurchaseDecision: EnumProductPurchaseDecision_INTERNAL,
-	ProjectServiceOperationResult: EnumProjectServiceOperationResult_INTERNAL,
+	ProjectionType: EnumProjectionType_INTERNAL,
 	PromptCreateAssetResult: EnumPromptCreateAssetResult_INTERNAL,
 	PromptCreateAvatarResult: EnumPromptCreateAvatarResult_INTERNAL,
 	PromptCreateOutfitResult: EnumPromptCreateOutfitResult_INTERNAL,
@@ -8044,6 +8320,7 @@ type ENUM_LIST = {
 	RenderingCacheOptimizationMode: EnumRenderingCacheOptimizationMode_INTERNAL,
 	RenderingTestComparisonMethod: EnumRenderingTestComparisonMethod_INTERNAL,
 	ReplicateInstanceDestroySetting: EnumReplicateInstanceDestroySetting_INTERNAL,
+	ReplicationMode: EnumReplicationMode_INTERNAL,
 	ResamplerMode: EnumResamplerMode_INTERNAL,
 	ReservedHighlightId: EnumReservedHighlightId_INTERNAL,
 	RestPose: EnumRestPose_INTERNAL,
@@ -8055,6 +8332,7 @@ type ENUM_LIST = {
 	RigLabel: EnumRigLabel_INTERNAL,
 	RigScale: EnumRigScale_INTERNAL,
 	RigType: EnumRigType_INTERNAL,
+	RobuxTransferEligibility: EnumRobuxTransferEligibility_INTERNAL,
 	RollOffMode: EnumRollOffMode_INTERNAL,
 	RolloutState: EnumRolloutState_INTERNAL,
 	RotationOrder: EnumRotationOrder_INTERNAL,
@@ -8087,6 +8365,7 @@ type ENUM_LIST = {
 	SelfViewPosition: EnumSelfViewPosition_INTERNAL,
 	SensorMode: EnumSensorMode_INTERNAL,
 	SensorUpdateType: EnumSensorUpdateType_INTERNAL,
+	SerializationFormat: EnumSerializationFormat_INTERNAL,
 	ServerLiveEditingMode: EnumServerLiveEditingMode_INTERNAL,
 	ServiceVisibility: EnumServiceVisibility_INTERNAL,
 	Severity: EnumSeverity_INTERNAL,
@@ -8145,6 +8424,8 @@ type ENUM_LIST = {
 	TerrainFace: EnumTerrainFace_INTERNAL,
 	TerrainLiquidMergeOperation: EnumTerrainLiquidMergeOperation_INTERNAL,
 	TerrainSolidMergeOperation: EnumTerrainSolidMergeOperation_INTERNAL,
+	TestCaseStatus: EnumTestCaseStatus_INTERNAL,
+	TestRunStatus: EnumTestRunStatus_INTERNAL,
 	TextChannelDisplayMode: EnumTextChannelDisplayMode_INTERNAL,
 	TextChatMessageStatus: EnumTextChatMessageStatus_INTERNAL,
 	TextDirection: EnumTextDirection_INTERNAL,
@@ -8176,6 +8457,7 @@ type ENUM_LIST = {
 	TrackerType: EnumTrackerType_INTERNAL,
 	TriStateBoolean: EnumTriStateBoolean_INTERNAL,
 	TweenStatus: EnumTweenStatus_INTERNAL,
+	UIBlurStrength: EnumUIBlurStrength_INTERNAL,
 	UICaptureMode: EnumUICaptureMode_INTERNAL,
 	UIDragDetectorBoundingBehavior: EnumUIDragDetectorBoundingBehavior_INTERNAL,
 	UIDragDetectorDragRelativity: EnumUIDragDetectorDragRelativity_INTERNAL,
@@ -8201,6 +8483,7 @@ type ENUM_LIST = {
 	VRControllerModelMode: EnumVRControllerModelMode_INTERNAL,
 	VRDeviceType: EnumVRDeviceType_INTERNAL,
 	VRLaserPointerMode: EnumVRLaserPointerMode_INTERNAL,
+	VRPresentationMode: EnumVRPresentationMode_INTERNAL,
 	VRSafetyBubbleMode: EnumVRSafetyBubbleMode_INTERNAL,
 	VRScaling: EnumVRScaling_INTERNAL,
 	VRSessionState: EnumVRSessionState_INTERNAL,
@@ -8732,6 +9015,8 @@ declare function Version(): string
 @[deprecated{ use = "gcinfo" }]
 declare function collectgarbage(mode: "count"): number
 
+declare function loadstring<A...>(src: string, chunkname: string?): (((A...) -> any)?, string?)
+
 @[deprecated{ use = 'game:GetService("Stats")' }]
 declare function stats(): Stats
 @[deprecated{ use = 'game:GetService("Stats")' }]
@@ -8849,7 +9134,7 @@ export type ReflectionParameter = {
 export type ReflectedProperty = {
   Name: string,
   Serialized: boolean,
-  Owner: string?,
+  Owner: string,
   -- AliasFor: string?,
 
   Type: ReflectionType,
@@ -8861,7 +9146,6 @@ export type ReflectedProperty = {
   Display: {
     Category: string,
     DeprecationMessage: string?,
-    LayoutOrder: number,
   }?,
   Permits: {
     Read: SecurityCapabilities?,
@@ -8881,7 +9165,6 @@ export type ReflectedMethod = {
   Display: {
     Category: string,
     DeprecationMessage: string?,
-    LayoutOrder: number,
   }?,
   Permits: {
     Call: SecurityCapabilities?,
@@ -8897,7 +9180,6 @@ export type ReflectedEvent = {
   Display: {
     Category: string,
     DeprecationMessage: string?,
-    LayoutOrder: number,
   }?,
   Permits: {
     Listen: SecurityCapabilities?,
@@ -8912,7 +9194,6 @@ export type ReflectedClass = {
   Display: {
     Category: string,
     DeprecationMessage: string?,
-    LayoutOrder: number,
   }?,
   Permits: {
     GetService: SecurityCapabilities?,
@@ -9293,6 +9574,16 @@ type AudioMemoryResult = {
     Children: { { Name: string, Size: number, AssetId: string?, Owners: { { Name: string, ClassName: string } }?, Children: { any }? } },
 }
 
+type CollisionGeometryMemoryResult = {
+    Name: string,
+    Size: number,
+    Children: { {
+        Name: string,
+        Size: number,
+        Owners: { Instance },
+    } },
+}
+
 type VirtualInputPointerAction = {
     Wheel: number?,
     Pan: Vector2?,
@@ -9307,16 +9598,57 @@ type CameraState = {
     ViewportSize: Vector2,
 }
 
+type FeatureMatchingSchema = {
+    SchemaName: string?,
+    Normalization: EnumFeatureNormalization?,
+    Channels: { { Name: string, Width: number, Weight: number?, ElementWidth: number?, Offset: number?, Normalize: EnumFeatureNormalization?, Encoding: EnumFeatureChannelEncoding? } },
+    Fields: { { Name: string, Type: EnumMetadataFieldType?, Width: number?, Tags: { [string]: number }? } }?,
+    NormalizationField: string?,
+    BlendSpaces: { [string]: { BlendDim: number, Frames: { any }, SyncSequences: boolean? } }?,
+    Sequences: { [string]: { StartRow: number, EndRow: number, SampleInterval: number, Loop: boolean?, SyncPoints: { { Name: string, Time: number } }? } }?,
+    Constants: { [string]: { Type: EnumMetadataFieldType?, Value: any } }?
+}
+
+type FeatureMatchingColumns = buffer | { [string]: { number } | buffer }
+
+type FeatureMatchingMetadataColumns = { [string]: { any } | buffer }
+
 type AnimatedImageFrameEntry = {
     FrameName: string,
     Duration: number
 }
 
-type AnimatedImagePlaybackOptions = {
-    StartFrame: number?,
-    PlaybackSpeed: number?,
-    RepeatCount: number?
+type FilePickerOptions = {
+    Source: "Files" | "Library" | "Camera" | "Microphone",
+    MediaTypes: { "Image" | "Video" | "Audio" }?, -- Library, Camera, and Microphone only; empty allows every type the source supports; Camera requires exactly one; Microphone allows only "Audio"
+    CameraFacing: ("Default" | "Front" | "Back")?, -- Camera only; a preference; default "Default"
+    MimeTypes: { string }?, -- Files only; wildcards like "image/*" allowed
+    Extensions: { string }?, -- Files only; lowercase, without the leading dot
+    MaxCount: number?, -- Files and Library only; default 1; 0 is unlimited
 }
+
+type PickFilesResult = {
+    Status: "Success" | "Cancelled" | "PermissionDenied" | "Unavailable" | "PlatformError",
+    Files: { PickedFile }, -- empty unless Success
+    Truncated: boolean, -- true if more than MaxCount were picked; Files only holds MaxCount of them
+}
+
+type PickedFileLoadOptions = {
+    MaxSizeBytes: number?, -- files larger than this return Status "TooLarge" and are not kept on the device; default unlimited
+}
+
+type PickedFileLoadResult = {
+    Status: "Success" | "Unavailable" | "InsufficientStorage" | "PlatformError" | "Cancelled" | "TooLarge",
+    File: Blob?, -- Success only
+}
+
+type PlayerDeviceTrustMeasures = {
+    IsPlatformVersionSecure: boolean,
+    IsPlatformBootSecure: boolean,
+    IsAppSecure: boolean
+}
+
+type PlayerDeviceTrustResult = { Action: EnumPlayerDeviceTrustDecision, Message: string?, ExcludeFromSessionAnalytics: boolean? }
 
 
 type ReflectedClassOrNil = ReflectedClass?
@@ -9332,10 +9664,17 @@ declare extern type Object with
 	function IsA(self, className: string): boolean
 end
 
-declare extern type AnimatedImageTrack extends Object with
+declare extern type AnimationNode extends Object with
 end
 
-declare extern type AnimationNode extends Object with
+declare extern type AppHandle extends Object with
+	function Call(self, name: string, args: { [string]: any }?): string
+	function Close(self): string
+	function ExecuteLuau(self, source: string): string
+	function RunTest(self, testName: string, args: { [string]: any }?): string
+end
+
+declare extern type Blob extends Object with
 end
 
 declare extern type Capture extends Object with
@@ -9368,12 +9707,12 @@ end
 declare extern type EditableImage extends Object with
 	Size: Vector2
 	function Destroy(self): nil
-	function DrawCircle(self, center: Vector2, radius: number, color: Color3, transparency: number, combineType: EnumImageCombineType, antiAliasing: EnumAntiAliasing?): nil
-	function DrawImage(self, position: Vector2, image: EditableImage, combineType: EnumImageCombineType): nil
+	function DrawCircle(self, center: Vector2, radius: number, color: Color3, transparency: number?, combineType: EnumImageCombineType?, antiAliasing: EnumAntiAliasing?, alphaBlendType: EnumImageAlphaType?): nil
+	function DrawImage(self, position: Vector2, image: EditableImage, combineType: EnumImageCombineType?, alphaBlendType: EnumImageAlphaType?): nil
 	function DrawImageProjected(self, projectionSource: Object, projection: ProjectionParams, brushConfig: BrushConfig): nil
 	function DrawImageTransformed(self, position: Vector2, scale: Vector2, rotation: number, image: EditableImage, options: { [string]: any }?): nil
-	function DrawLine(self, p1: Vector2, p2: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType, antiAliasing: EnumAntiAliasing?): nil
-	function DrawRectangle(self, position: Vector2, size: Vector2, color: Color3, transparency: number, combineType: EnumImageCombineType): nil
+	function DrawLine(self, p1: Vector2, p2: Vector2, color: Color3, transparency: number?, combineType: EnumImageCombineType?, antiAliasing: EnumAntiAliasing?, alphaBlendType: EnumImageAlphaType?): nil
+	function DrawRectangle(self, position: Vector2, size: Vector2, color: Color3, transparency: number?, combineType: EnumImageCombineType?, alphaBlendType: EnumImageAlphaType?): nil
 	function ReadPixelsBuffer(self, position: Vector2, size: Vector2): buffer
 	function SampleImageProjected(self, projectionSource: Object, sourceTexture: EditableImage, projectionConfig: { [string]: any }, brushConfig: { [string]: any }): nil
 	function WritePixelsBuffer(self, position: Vector2, size: Vector2, buffer: buffer): nil
@@ -9387,7 +9726,7 @@ declare extern type EditableMesh extends Object with
 	FixedSize: boolean
 	function AddBone(self, boneProperties: { [string]: any }): number
 	function AddColor(self, color: Color3, alpha: number): number
-	function AddFace(self, vertexIds: { any }): number
+	function AddFace(self, ...: any): number
 	function AddNormal(self, normal: Vector3?): number
 	function AddTriangle(self, vertexId0: number, vertexId1: number, vertexId2: number): number
 	function AddUV(self, uv: Vector2): number
@@ -9485,6 +9824,41 @@ declare extern type ExecutedRemoteCommand extends Object with
 	function RunMoreCode(self, code: string, ...: any): nil
 	function SendUpdate(self, ...: any): nil
 	function Stop(self): nil
+end
+
+declare extern type FeatureMatchingSession extends Object with
+	function GetChannels(self): { any }
+	function GetDimensionCount(self): number
+	function GetFeatureRow(self, row: number): buffer
+	function GetFeatureRows(self, rows: { any }): { any }
+	function GetMetadataRow(self, row: number): { [string]: any }
+	function GetRowCount(self): number
+	function GetSchemaName(self): string
+	function GetTagColumns(self): { any }
+	function Search(self, query: buffer, params: FeatureSearchParams?): { [string]: any }
+	function SearchBatch(self, queries: { any }, sharedParams: FeatureSearchParams?, perQueryParams: { any }?): { any }
+	function StandardizeQuery(self, query: buffer): buffer
+end
+
+declare extern type FeatureSearchParams extends Object with
+	AnchorCostScale: number
+	AnchorIgnoresTagFilters: boolean
+	AnchorRow: number
+	MaxDistance: number
+	MaxResults: number
+	NormalizationKey: number
+	ReturnChannelCosts: boolean
+	SelectionMode: EnumFeatureSelectionMode
+	SelectionSeed: number
+	SelectionTemperature: number
+	function GetChannelWeights(self): { [string]: any }
+	function GetCostBiases(self): { any }
+	function GetFilters(self): { [string]: any }
+	function GetReturnedFields(self): { any }
+	function SetChannelWeights(self, weights: { [string]: any }): nil
+	function SetCostBiases(self, costBiases: { any }): nil
+	function SetFilters(self, filters: { [string]: any }): nil
+	function SetReturnedFields(self, fieldNames: { any }): nil
 end
 
 declare extern type Instance extends Object with
@@ -9691,6 +10065,7 @@ end
 
 declare extern type AnimationNodeDefinition extends Instance with
 	InputPinsChanged: RBXScriptSignal<()>
+	NodeId: string
 	NodeType: EnumAnimationNodeType
 	function AddInputPin(self, pin: string): nil
 	function GetOrderedInputPinNames(self): { any }
@@ -9698,7 +10073,12 @@ declare extern type AnimationNodeDefinition extends Instance with
 	function SetOrderedInputPinNames(self, pins: { any }): nil
 end
 
+declare extern type AnimationPlayer extends Instance with
+end
+
 declare extern type AnimationRigData extends Instance with
+	function Inspect(self): { any }
+	function LoadFromModel(self, model: Instance): boolean
 end
 
 declare extern type AnimationStreamTrack extends Instance with
@@ -9739,6 +10119,7 @@ declare extern type AnimationTrack extends Instance with
 end
 
 declare extern type AnimationValueNodeDefinition extends Instance with
+	NodeId: string
 	NodeType: EnumAnimationValueNodeType
 end
 
@@ -9756,6 +10137,7 @@ declare extern type Animator extends Instance with
 	function GetTrackByAnimationId(self, animationId: ContentId): AnimationTrack
 	function LoadAnimation(self, animation: Animation): AnimationTrack
 	function RegisterEvaluationParallelCallback(self, callback: ((...any) -> ...any)): nil
+	function StepAnimations(self, deltaTime: number): nil
 end
 
 declare extern type Annotation extends Instance with
@@ -9828,6 +10210,7 @@ declare extern type AssetService extends Instance with
 	function GetAudioMetadataAsync(self, idList: { any }): { any }
 	function GetBundleDetailsAsync(self, bundleId: number): { [string]: any }
 	function GetGamePlacesAsync(self): Instance
+	function GetLatestVersionUriAsync(self, asset: Content): Content
 	function LoadAssetAsync(self, assetId: number): Instance
 	function PromptCreatePlatformContentAsync(self, player: Player, object: Object, assetType: EnumAssetType): ...any
 	function PromptImportAnimationClipFromVideoAsync(self, player: Player, progressCallback: ((...any) -> ...any)): ...any
@@ -10156,8 +10539,10 @@ declare extern type AudioSearchParams extends Instance with
 	Artist: string
 	AudioSubType: EnumAudioSubType
 	MaxDuration: number
+	MaxPageSize: number
 	MinDuration: number
 	SearchKeyword: string
+	SortType: EnumAudioSortType
 	Tag: string
 	Title: string
 end
@@ -10170,6 +10555,32 @@ declare extern type AudioSpeechToText extends Instance with
 	function GetConnectedWires(self, pin: string): { Instance }
 	function GetInputPins(self): { any }
 	function GetOutputPins(self): { any }
+end
+
+declare extern type AudioStreamReader extends Instance with
+	Layout: EnumAudioChannelLayout
+	SampleFormat: EnumAudioSampleFormat
+	SampleRate: number
+	WindowSize: EnumAudioWindowSize
+	WiringChanged: RBXScriptSignal<(boolean, string, Wire, Instance)>
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
+	function Peek(self, into: { any }): number
+	function Read(self, into: { any }): number
+end
+
+declare extern type AudioStreamWriter extends Instance with
+	Layout: EnumAudioChannelLayout
+	SampleFormat: EnumAudioSampleFormat
+	SampleRate: number
+	WindowSize: EnumAudioWindowSize
+	WiringChanged: RBXScriptSignal<(boolean, string, Wire, Instance)>
+	function GetConnectedWires(self, pin: string): { Instance }
+	function GetInputPins(self): { any }
+	function GetOutputPins(self): { any }
+	function Space(self): number
+	function Write(self, audioBuffer: { any }): number
 end
 
 declare extern type AudioTextToSpeech extends Instance with
@@ -10268,21 +10679,81 @@ declare extern type AvatarAbilityRules extends Instance with
 end
 
 declare extern type AvatarAccessoryRules extends Instance with
+	AccessoryMode: EnumAvatarSettingsAccessoryMode
+	BackAccessoryOverride: number
+	EnableEmissives: boolean
+	EnableSound: boolean
+	EnableSpawnEffects: boolean
+	EnableVFX: boolean
+	FaceAccessoryOverride: number
+	FrontAccessoryOverride: number
+	HairAccessoryOverride: number
+	HeadAccessoryOverride: number
+	LimitBounds: Vector3
+	LimitMethod: EnumAvatarSettingsAccessoryLimitMethod
+	NeckAccessoryOverride: number
+	ShoulderAccessoryOverride: number
+	WaistAccessoryOverride: number
 end
 
 declare extern type AvatarAnimationRules extends Instance with
+	AnimationPacksMode: EnumAvatarSettingsAnimationPacksMode
+	ClimbAnimationOverride: number
+	FallAnimationOverride: number
+	IdleAltAnimationOverride: number
+	IdleAnimationOverride: number
+	JumpAnimationOverride: number
+	MoodAnimationOverride: number
+	RunAnimationOverride: number
+	SwimAnimationOverride: number
+	SwimIdleAnimationOverride: number
+	WalkAnimationOverride: number
 end
 
 declare extern type AvatarBodyRules extends Instance with
+	AvatarType: EnumGameAvatarType
+	BuildMode: EnumAvatarSettingsBuildMode
+	CustomBuildBodyType: NumberRange
+	CustomBuildHead: NumberRange
+	CustomBuildHeight: NumberRange
+	CustomBuildProportions: NumberRange
+	CustomBuildWidth: NumberRange
+	CustomWorldHeight: NumberRange
+	HeadOverride: number
+	LeftArmOverride: number
+	LeftLegOverride: number
+	RightArmOverride: number
+	RightLegOverride: number
+	ScaleMode: EnumAvatarSettingsScaleMode
+	TorsoOverride: number
 end
 
 declare extern type AvatarChatService extends Instance with
 end
 
 declare extern type AvatarClothingRules extends Instance with
+	ClassicPantsOverride: number
+	ClassicShirtOverride: number
+	ClassicTShirtOverride: number
+	ClothingMode: EnumAvatarSettingsClothingMode
+	DressSkirtAccessoryOverride: number
+	JacketAccessoryOverride: number
+	LeftShoeAccessoryOverride: number
+	LimitBounds: Vector3
+	PantsAccessoryOverride: number
+	RightShoeAccessoryOverride: number
+	ShirtAccessoryOverride: number
+	ShortsAccessoryOverride: number
+	SweaterAccessoryOverride: number
+	TShirtAccessoryOverride: number
 end
 
 declare extern type AvatarCollisionRules extends Instance with
+	BodyPartsCollidableOnDeath: boolean
+	CollisionMode: EnumAvatarSettingsCollisionMode
+	HitboxSize: Vector3
+	SingleColliderSize: Vector3
+	TouchAndQueryDetectionMode: EnumAvatarSettingsTouchAndQueryDetectionMode
 end
 
 declare extern type AvatarCreationService extends Instance with
@@ -10362,6 +10833,11 @@ declare extern type AvatarEditorService extends Instance with
 	function PromptSetFavorite(self, itemId: number, itemType: EnumAvatarItemType, shouldFavorite: boolean): nil
 	function PromptUpdateOutfit(self, outfitId: number, updatedOutfit: HumanoidDescription, rigType: EnumHumanoidRigType): nil
 	function SearchCatalogAsync(self, searchParameters: CatalogSearchParams): CatalogPages
+end
+
+declare extern type AvatarEffectDescription extends Instance with
+	AssetId: number
+	EffectType: EnumAvatarEffectType
 end
 
 declare extern type AvatarImportService extends Instance with
@@ -10575,11 +11051,15 @@ declare extern type WrapLayer extends BaseWrap with
 	AutoSkin: EnumWrapLayerAutoSkin
 	BindOffset: CFrame
 	Enabled: boolean
+	NonUniformScaleContent: Content
 	Order: number
 	ReferenceMeshContent: Content
 	ReferenceMeshId: ContentId
 	ReferenceOrigin: CFrame
 	ReferenceOriginWorld: CFrame
+	RotateUniformScaleContent: Content
+	TargetShaping: number
+	UniformScaleContent: Content
 end
 
 declare extern type WrapTarget extends BaseWrap with
@@ -10703,9 +11183,6 @@ declare extern type BrowserService extends Instance with
 end
 
 declare extern type BugReporterService extends Instance with
-end
-
-declare extern type BulkImportService extends Instance with
 end
 
 declare extern type CacheableContentProvider extends Instance with
@@ -10885,6 +11362,9 @@ end
 declare extern type CloudCRUDService extends Instance with
 end
 
+declare extern type CloudClientService extends Instance with
+end
+
 declare extern type CloudExecutionService extends Instance with
 end
 
@@ -10920,6 +11400,7 @@ declare extern type CollectionService extends Instance with
 	function AddTag(self, instance: Instance, tag: string): nil
 	function CreateCollection(self, query: string, root: Instance?): CollectionHandle
 	function GetAllTags(self): { string }
+	function GetCollections(self, instance: Instance): { any }
 	function GetInstanceAddedSignal(self, tag: string): RBXScriptSignal<Instance>
 	function GetInstanceRemovedSignal(self, tag: string): RBXScriptSignal<Instance>
 	function GetTagged(self, tag: string): { Instance }
@@ -11237,6 +11718,7 @@ declare extern type ControlState extends Instance with
 	function GetChangedState(self, prev: EnumStateReferenceFrame?, next: EnumStateReferenceFrame?): { [string]: any }
 	function GetReplicationWeight(self): number
 	function GetState(self, ref: EnumStateReferenceFrame?): { [string]: any }
+	function HasField(self, name: string): boolean
 	function SetField(self, name: string, value: any): nil
 	function UpdateFields(self, state: { [string]: any }): nil
 end
@@ -11593,6 +12075,7 @@ declare extern type DigitsRigDescription extends Instance with
 	function GetFingerTip(self, fingerIndex: number): Vector3
 	function SetFingerControl(self, fingerIndex: number, control: Vector3): nil
 	function SetFingerTip(self, fingerIndex: number, point: Vector3): nil
+	function SetJoint(self, label: EnumRigLabel, joint: Instance): nil
 end
 
 declare extern type DisplayWakeLock extends Instance with
@@ -11776,9 +12259,13 @@ declare extern type Decal extends FaceInstance with
 	EmissiveStrength: number
 	EmissiveTint: Color3
 	LocalTransparencyModifier: number
+	MetalnessMap: ContentId
 	MetalnessMapContent: Content
+	NormalMap: ContentId
 	NormalMapContent: Content
+	ResampleMode: EnumResamplerMode
 	Rotation: number
+	RoughnessMap: ContentId
 	RoughnessMapContent: Content
 	Texture: ContentId
 	TextureContent: Content
@@ -11823,6 +12310,18 @@ end
 declare extern type MotorFeature extends Feature with
 end
 
+declare extern type FeatureMatchingService extends Instance with
+	function CreateSearchParams(self): FeatureSearchParams
+	function CreateTable(self, schema: { [string]: any }, rawFeatures: any, offset: any, scale: any, metadataColumns: { [string]: any }?): FeatureMatchingTable
+	function Load(self, featureTable: FeatureMatchingTable): FeatureMatchingSession
+	function LoadAsync(self, source: Content): FeatureMatchingSession
+end
+
+declare extern type FeatureMatchingTable extends Instance with
+	SchemaName: string
+	function GetSchema(self): { [string]: any }
+end
+
 declare extern type FeatureRestrictionManager extends Instance with
 end
 
@@ -11830,6 +12329,9 @@ declare extern type File extends Instance with
 end
 
 declare extern type FileManagerService extends Instance with
+end
+
+declare extern type FilePickerService extends Instance with
 end
 
 declare extern type FileSyncReplicationService extends Instance with
@@ -11869,11 +12371,28 @@ declare extern type NonReplicatedCSGDictionaryService extends FlyweightService w
 end
 
 declare extern type Folder extends Instance with
+	ExplorerIconContent: Content
 	IconTint: Color3
 end
 
 declare extern type GeneratedFolder extends Folder with
 	function SetPrimaryPart(self, part: BasePart): nil
+end
+
+declare extern type FollowRotationBoneBehavior extends Instance with
+	CounterRotate: boolean
+	Driver: Instance
+	Weight: number
+end
+
+declare extern type FollowTwistBoneBehavior extends Instance with
+	Axis: EnumAxis
+	AxisMode: EnumFollowTwistBoneAxisMode
+	CounterRotate: boolean
+	Driver: Instance
+	EndBone: Instance
+	StartBone: Instance
+	Weight: number
 end
 
 declare extern type ForceField extends Instance with
@@ -11889,6 +12408,9 @@ end
 declare extern type FriendsCallingParticipant extends Instance with
 end
 
+declare extern type FriendsCallingService extends Instance with
+end
+
 declare extern type FunctionalTest extends Instance with
 	Description: string
 	function Error(self, message: string?): nil
@@ -11896,6 +12418,9 @@ declare extern type FunctionalTest extends Instance with
 	function Pass(self, message: string?): nil
 	function Passed(self, message: string?): nil
 	function Warn(self, message: string?): nil
+end
+
+declare extern type GameDownloaderService extends Instance with
 end
 
 declare extern type GamePassService extends Instance with
@@ -11909,7 +12434,7 @@ end
 declare extern type GamepadService extends Instance with
 	GamepadCursorEnabled: boolean
 	function DisableGamepadCursor(self): nil
-	function EnableGamepadCursor(self, guiObject: Instance): nil
+	function EnableGamepadCursor(self, guiObject: GuiObject?): nil
 end
 
 declare extern type GenerationService extends Instance with
@@ -11933,11 +12458,15 @@ declare extern type Geometry extends Instance with
 end
 
 declare extern type GeometryService extends Instance with
+	function BakeToMeshAsync(self, input: Instance, options: { [string]: any }?): MeshPart
 	function CalculateConstraintsToPreserve(self, source: Instance, destination: { any }, options: { [string]: any }?): { any }
 	function CreateBasicMeshPart(self, shape: EnumBasicMeshPartShape, options: { [string]: any }?): MeshPart
 	function FragmentAsync(self, part: BasePart, sites: { any }, options: { [string]: any }?): { any }
 	function GenerateFragmentSites(self, part: BasePart, options: { [string]: any }?): { any }
 	function IntersectAsync(self, part: Instance, parts: { any }, options: { [string]: any }?): { any }
+	function NegateAsync(self, parts: { Instance }): { any }
+	function SeparateAsync(self, parts: { Instance }): { any }
+	function SplitApartAsync(self, parts: { any }, options: { [string]: any }?): { any }
 	function SubtractAsync(self, part: Instance, parts: { any }, options: { [string]: any }?): { any }
 	function SweepPartAsync(self, part: BasePart, cframes: { any }, options: { [string]: any }?): MeshPart
 	function UnionAsync(self, part: Instance, parts: { any }, options: { [string]: any }?): { any }
@@ -11994,9 +12523,6 @@ end
 declare extern type GuiBase extends Instance with
 end
 
-declare extern type AnimatedImage extends GuiBase with
-end
-
 declare extern type GuiBase2d extends GuiBase with
 	AbsolutePosition: Vector2
 	AbsoluteRotation: number
@@ -12046,9 +12572,9 @@ declare extern type GuiObject extends GuiBase2d with
 	Position: UDim2
 	Rotation: number
 	Selectable: boolean
-	SelectionGained: RBXScriptSignal<()>
+	SelectionGained: RBXScriptSignal<EnumGuiNavigationDirection>
 	SelectionImageObject: GuiObject
-	SelectionLost: RBXScriptSignal<()>
+	SelectionLost: RBXScriptSignal<EnumGuiNavigationDirection>
 	SelectionOrder: number
 	Size: UDim2
 	SizeConstraint: EnumSizeConstraint
@@ -12294,6 +12820,7 @@ declare extern type VideoFrame extends GuiObject with
 	RollOffMaxDistance: number
 	RollOffMinDistance: number
 	RollOffMode: EnumRollOffMode
+	SubtitlesChanged: RBXScriptSignal<{ any }>
 	TimeLength: number
 	TimePosition: number
 	Video: ContentId
@@ -12316,8 +12843,10 @@ declare extern type LayerCollector extends GuiBase2d with
 	@deprecated
 		function GetLayoutNodeTree(self): { [string]: any }
 	Enabled: boolean
+	InputSinkEnabled: EnumRolloutState
 	ResetOnSpawn: boolean
 	ZIndexBehavior: EnumZIndexBehavior
+	function GetGuiObjectsAtPosition(self, x: number, y: number): { Instance }
 end
 
 declare extern type BillboardGui extends LayerCollector with
@@ -12433,11 +12962,13 @@ declare extern type HandleAdornment extends PVAdornment with
 end
 
 declare extern type BoxHandleAdornment extends HandleAdornment with
+	DoubleSided: boolean
 	Shading: EnumAdornShading
 	Size: Vector3
 end
 
 declare extern type ConeHandleAdornment extends HandleAdornment with
+	DoubleSided: boolean
 	Height: number
 	Hollow: boolean
 	Radius: number
@@ -12446,6 +12977,7 @@ end
 
 declare extern type CylinderHandleAdornment extends HandleAdornment with
 	Angle: number
+	DoubleSided: boolean
 	Height: number
 	InnerRadius: number
 	Radius: number
@@ -12453,6 +12985,7 @@ declare extern type CylinderHandleAdornment extends HandleAdornment with
 end
 
 declare extern type ImageHandleAdornment extends HandleAdornment with
+	DoubleSided: boolean
 	Image: ContentId
 	ImageContent: Content
 	Size: Vector2
@@ -12464,6 +12997,7 @@ declare extern type LineHandleAdornment extends HandleAdornment with
 end
 
 declare extern type PyramidHandleAdornment extends HandleAdornment with
+	DoubleSided: boolean
 	Height: number
 	Shading: EnumAdornShading
 	Sides: number
@@ -12471,6 +13005,7 @@ declare extern type PyramidHandleAdornment extends HandleAdornment with
 end
 
 declare extern type SphereHandleAdornment extends HandleAdornment with
+	DoubleSided: boolean
 	Radius: number
 	Shading: EnumAdornShading
 end
@@ -12603,6 +13138,7 @@ declare extern type HapticEffect extends Instance with
 	Position: Vector3
 	Radius: number
 	Type: EnumHapticEffectType
+	function GetWaveformKeys(self): { any }
 	function Play(self): nil
 	function SetWaveformKeys(self, keys: { any }): nil
 	function Stop(self): nil
@@ -12628,6 +13164,9 @@ declare extern type HeatmapService extends Instance with
 end
 
 declare extern type HeightmapImporterService extends Instance with
+end
+
+declare extern type HiddenPlayerService extends Instance with
 end
 
 declare extern type HiddenSurfaceRemovalAsset extends Instance with
@@ -12742,10 +13281,12 @@ declare extern type Humanoid extends Instance with
 	TargetPoint: Vector3
 	Touched: RBXScriptSignal<(BasePart, BasePart)>
 	UseJumpPower: boolean
+	UsesAvatarCollider: boolean
 	WalkSpeed: number
 	WalkToPart: BasePart?
 	WalkToPoint: Vector3
 	function AddAccessory(self, accessory: Accessory): nil
+	function ApplyAvatarRulesAsync(self, avatarRules: any): nil
 	function ApplyDescriptionAsync(self, humanoidDescription: HumanoidDescription, assetTypeVerification: EnumAssetTypeVerification?): nil
 	function ApplyDescriptionResetAsync(self, humanoidDescription: HumanoidDescription, assetTypeVerification: EnumAssetTypeVerification?): nil
 	function BuildRigFromAttachments(self): nil
@@ -12754,6 +13295,7 @@ declare extern type Humanoid extends Instance with
 	function GetAccessories(self): { Accessory }
 	function GetAppliedDescription(self): HumanoidDescription
 	function GetBodyPartR15(self, part: BasePart): EnumBodyPartR15
+	function GetCanCollideOnDeath(self, part: BasePart, fallback: boolean): boolean
 	function GetLimb(self, part: BasePart): EnumLimb
 	function GetMoveVelocity(self): Vector3
 	function GetRelativeVelocityAtFloor(self): Vector3
@@ -12878,6 +13420,7 @@ declare extern type HumanoidRigDescription extends Instance with
 	NeckRangeMin: Vector3
 	NeckSize: number
 	NeckTposeAdjustment: CFrame
+	OriginOffset: CFrame
 	RightAnkle: Instance
 	RightAnkleRangeMax: Vector3
 	RightAnkleRangeMin: Vector3
@@ -12933,10 +13476,14 @@ declare extern type HumanoidRigDescription extends Instance with
 	WaistRangeMin: Vector3
 	WaistSize: number
 	WaistTposeAdjustment: CFrame
+	function GetJoint(self, label: EnumRigLabel): Instance
 	function GetJointFromName(self, name: string): Instance
 	function GetJointNames(self): { any }
+	function GetR15JointLabels(self): { any }
 	function GetR15JointNames(self): { any }
 	function GetR6JointNames(self): { any }
+	function SetJoint(self, label: EnumRigLabel, joint: Instance): nil
+	function SetTposeAdjustment(self, label: EnumRigLabel, transform: CFrame): nil
 end
 
 declare extern type IKControl extends Instance with
@@ -13004,6 +13551,7 @@ end
 declare extern type InputBinding extends Instance with
 	Backward: EnumKeyCode
 	ClampMagnitudeToOne: boolean
+	Deadzone: NumberRange
 	DisplayImage: Content
 	DisplayName: string
 	Down: EnumKeyCode
@@ -13042,6 +13590,9 @@ declare extern type InputObject extends Instance with
 	function IsModifierKeyDown(self, modifierKey: EnumModifierKey): boolean
 end
 
+declare extern type InputReplayService extends Instance with
+end
+
 declare extern type InsertService extends Instance with
 	@[deprecated {use = "InsertService:GetBaseSets"}]
 		function GetBaseCategories(self): { any }
@@ -13078,6 +13629,13 @@ declare extern type InstanceExtensionsService extends Instance with
 end
 
 declare extern type InstanceFileSyncService extends Instance with
+end
+
+declare extern type InstanceRegistryService extends Instance with
+end
+
+declare extern type IntegrityService extends Instance with
+	EvaluatePlayerDeviceTrust: (player: Player, measures: { [string]: any }) -> any
 end
 
 declare extern type IntentService extends Instance with
@@ -13236,6 +13794,7 @@ declare extern type Lighting extends Instance with
 	FogStart: number
 	GeographicLatitude: number
 	GlobalShadows: boolean
+	LightAttenuationMode: EnumLightAttenuationMode
 	LightingChanged: RBXScriptSignal<boolean>
 	LightingStyle: EnumLightingStyle
 	OutdoorAmbient: Color3
@@ -13428,7 +13987,9 @@ declare extern type MarketplaceService extends Instance with
 	PromptRobloxSubscriptionPurchaseFinished: RBXScriptSignal<(Player, boolean)>
 	PromptSubscriptionPurchaseFinished: RBXScriptSignal<(Player, string, boolean)>
 	function BindReceiptHandler(self, transactionType: EnumReceiptType, handler: ((...any) -> ...any), filter: { any }?): RBXScriptConnection
+	function CanUsersTransferRobuxAsync(self, sender: Player, receiverUser: (User | number)): EnumRobuxTransferEligibility
 	function GetDeveloperProductsAsync(self): Pages
+	function GetPassOwnershipAsync(self, user: Player, gamePassId: number): { [string]: any }
 	function GetProductInfoAsync(self, assetId: number, infoType: EnumInfoType?): { [string]: any }
 	function GetRobloxSubscriptionDetailsAsync(self, user: Player): { [string]: any }
 	function GetSubscriptionProductInfoAsync(self, subscriptionId: string): { [string]: any }
@@ -13448,6 +14009,7 @@ declare extern type MarketplaceService extends Instance with
 	function PromptRobloxSubscriptionPurchase(self, user: Player): nil
 	function PromptRobuxTransferAsync(self, sender: Player, receiverUserId: number, amount: number): string
 	function PromptSubscriptionPurchase(self, user: Player, subscriptionId: string): nil
+	function PromptVIPServerPurchase(self, player: Player): nil
 	function RankProductsAsync(self, productIdentifiers: ProductIdentifierArray): RankedItemArray
 	function RecommendTopProductsAsync(self, infoTypes: InfoTypeArray): RankedItemArray
 	function UserOwnsGamePassAsync(self, userId: (User | number), gamePassId: number): boolean
@@ -13554,11 +14116,16 @@ declare extern type MicroProfilerService extends Instance with
 	function ProcessCommand(self, cmdBuf: buffer, cmdOffset: number, cmdSize: number, respBuf: buffer, respOffset: number, respSize: number): number
 end
 
+declare extern type ModelInfoService extends Instance with
+end
+
 declare extern type ModerationService extends Instance with
 	function BindReviewableContentEventProcessor(self, priority: number, callback: (event: ReviewableContentEvent) -> ()): RBXScriptConnection
+	function BindViolationProcessor(self, priority: number, callback: ((...any) -> ...any)): RBXScriptConnection
 	function CreateReviewableContentAsync(self, config: CreateReviewableContentParams): string
 	function CreateReviewableContentKey(self, content: Content): string
 	function InternalRequestReviewableContentReviewAsync(self, config: RequestReviewableContentReviewParams): nil
+	function MockViolationCallbackAsync(self, report: { [string]: any }): nil
 end
 
 declare extern type MomentsService extends Instance with
@@ -13833,6 +14400,8 @@ declare extern type Terrain extends BasePart with
 		function SetCells(self, region: Region3int16, material: EnumCellMaterial, block: EnumCellBlock, orientation: EnumCellOrientation): nil
 	@deprecated
 		function SetWaterCell(self, x: number, y: number, z: number, force: EnumWaterForce, direction: EnumWaterDirection): nil
+	Decoration: boolean
+	GrassLength: number
 	MaxExtents: Region3int16
 	WaterColor: Color3
 	WaterReflectance: number
@@ -13886,6 +14455,7 @@ declare extern type MeshPart extends TriangleMeshPart with
 	TextureContent: Content
 	TextureID: ContentId
 	function ApplyMesh(self, meshPart: MeshPart): nil
+	function GetSurfaceSlotsAsync(self): { any }
 end
 
 declare extern type PartOperation extends TriangleMeshPart with
@@ -13953,7 +14523,11 @@ declare extern type Camera extends PVInstance with
 	InterpolationFinished: RBXScriptSignal<()>
 	MaxAxisFieldOfView: number
 	NearPlaneZ: number
+	OrthographicMode: EnumOrthographicMode
+	OrthographicSize: number
+	ProjectionType: EnumProjectionType
 	VRTiltAndRollEnabled: boolean
+	ViewStretch: number
 	ViewportSize: Vector2
 	function GetPartsObscuringTarget(self, castPoints: { Vector3 }, ignoreList: { Instance }): { BasePart }
 	function GetRenderCFrame(self): CFrame
@@ -13994,6 +14568,8 @@ declare extern type Model extends PVInstance with
 		function BreakJoints(self): nil
 	@deprecated
 		function MakeJoints(self): nil
+	ExplorerIconContent: Content
+	LevelOfDetail: EnumModelLevelOfDetail
 	ModelStreamingMode: EnumModelStreamingMode
 	PrimaryPart: BasePart?
 	WorldPivot: CFrame
@@ -14096,7 +14672,7 @@ declare extern type WorldRoot extends Model with
 	function Raycast(self, origin: Vector3, direction: Vector3, raycastParams: RaycastParams?): RaycastResult?
 	function RegisterCollisionGroup(self, name: string): nil
 	function RenameCollisionGroup(self, from: string, to: string): nil
-	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?): RaycastResult?
+	function Shapecast(self, part: BasePart, direction: Vector3, params: RaycastParams?, cframeOverride: CFrame?, sizeOverride: Vector3?): RaycastResult?
 	function Spherecast(self, position: Vector3, radius: number, direction: Vector3, params: RaycastParams?): RaycastResult?
 	function UnregisterCollisionGroup(self, name: string): nil
 end
@@ -14105,6 +14681,7 @@ declare extern type Workspace extends WorldRoot with
 	AirDensity: number
 	AirTurbulenceIntensity: number
 	AllowThirdPartySales: boolean
+	AuthorityMode: EnumAuthorityMode
 	ClientAnimatorThrottling: EnumClientAnimatorThrottlingMode
 	CurrentCamera: Camera
 	DistributedGameTime: number
@@ -14113,10 +14690,19 @@ declare extern type Workspace extends WorldRoot with
 	GlobalWind: Vector3
 	Gravity: number
 	InsertPoint: Vector3
+	LuauTypeCheckMode: EnumLuauTypeCheckMode
+	NextGenerationPhysicsSolver: EnumRolloutState
 	PersistentLoaded: RBXScriptSignal<Player>
+	PredictiveStreamingMode: EnumPredictiveStreamingMode
+	ReplicationFrequency: EnumReplicationMode
+	ReplicationThroughput: EnumReplicationMode
 	Retargeting: EnumAnimatorRetargetingMode
+	StreamOutBehavior: EnumStreamOutBehavior
 	StreamingAdaptiveRadius: boolean
 	StreamingEnabled: boolean
+	StreamingIntegrityMode: EnumStreamingIntegrityMode
+	StreamingMinRadius: number
+	StreamingTargetRadius: number
 	Terrain: Terrain
 	function GetNumAwakeParts(self): number
 	function GetPhysicsThrottling(self): number
@@ -14246,6 +14832,42 @@ declare extern type ParticleEmitter extends Instance with
 	function Emit(self, particleCount: number?): nil
 end
 
+declare extern type ParticleEmitter2D extends Instance with
+	Acceleration: Vector2
+	Blend: number
+	Brightness: number
+	Color: ColorSequence
+	Drag: number
+	EmissionAngle: number
+	EmissionMode: EnumParticleEmitter2DEmissionMode
+	EmissionOffset: Vector2
+	EmissionSpread: Vector2
+	Enabled: boolean
+	FlipbookBlendFrames: boolean
+	FlipbookFramerate: NumberRange
+	FlipbookLayout: EnumParticleFlipbookLayout
+	FlipbookMode: EnumParticleFlipbookMode
+	FlipbookSizeX: number
+	FlipbookSizeY: number
+	FlipbookStartRandom: boolean
+	Lifetime: NumberRange
+	LightInfluence: number
+	LockedToParent: boolean
+	Rate: number
+	RotSpeed: NumberRange
+	Rotation: NumberRange
+	Size: NumberSequence
+	Speed: NumberRange
+	SpreadAngle: number
+	Squash: NumberSequence
+	TextureContent: Content
+	TimeScale: number
+	Transparency: NumberSequence
+	ZIndex: number
+	function Clear(self): nil
+	function Emit(self, particleCount: number?): nil
+end
+
 declare extern type PartyEmulatorService extends Instance with
 end
 
@@ -14340,6 +14962,12 @@ declare extern type PinShortcutService extends Instance with
 end
 
 declare extern type PlaceAssetIdsService extends Instance with
+end
+
+declare extern type PlaceSettings extends Instance with
+	function GetActiveRollouts(self): { any }
+	function GetRolloutState(self, rolloutName: string): any
+	function SetRolloutState(self, rolloutName: string, state: any): nil
 end
 
 declare extern type PlaceStatsService extends Instance with
@@ -14437,7 +15065,9 @@ declare extern type Player extends Instance with
 	DevEnableMouseLock: boolean
 	DevTouchCameraMode: EnumDevTouchCameraMovementMode
 	DevTouchMovementMode: EnumDevTouchMovementMode
+	DeviceTrustLevel: EnumPlayerDeviceTrustLevel
 	DisplayName: string
+	EmotesLoaded: RBXScriptSignal<()>
 	FollowUserId: number
 	FrustumStreaming: EnumFrustumStreamingMode
 	GameplayPaused: boolean
@@ -14453,7 +15083,7 @@ declare extern type Player extends Instance with
 	PartyId: string
 	ReplicationFocus: Instance?
 	RespawnLocation: SpawnLocation
-	Team: Team
+	Team: Team?
 	TeamColor: BrickColor
 	User: User
 	UserId: number
@@ -14462,7 +15092,6 @@ declare extern type Player extends Instance with
 	function ClearCharacterAppearance(self): nil
 	function DistanceFromCharacter(self, point: Vector3): number
 	function GetCameraState(self): { [string]: any }
-	function GetData(self): PlayerData
 	function GetFriendsInServerAsync(self): { any }
 	function GetFriendsInUniverseAsync(self): { any }
 	function GetFriendsOnlineAsync(self, maxFriends: number?): { any }
@@ -14476,6 +15105,7 @@ declare extern type Player extends Instance with
 	function IsVerified(self, level: EnumVerifiedLevel?): boolean
 	function Kick(self, message: string?): nil
 	function LoadCharacterAsync(self): nil
+	function LoadCharacterWithAvatarRulesAsync(self, avatarRules: any): nil
 	function LoadCharacterWithHumanoidDescriptionAsync(self, humanoidDescription: HumanoidDescription, assetTypeVerification: EnumAssetTypeVerification?): nil
 	function Move(self, walkDirection: Vector3, relativeToCamera: boolean?): nil
 	function PromptAgeCheck(self): nil
@@ -14484,43 +15114,9 @@ declare extern type Player extends Instance with
 end
 
 declare extern type PlayerData extends Instance with
-	function GetPlayer(self): Player
-	function GetRecordAsync(self, recordName: string?): PlayerDataRecord
-end
-
-declare extern type PlayerDataRecord extends Instance with
-	Changed: RBXScriptSignal<(string, any)>
-	CreatedTime: number
-	DefaultRecordName: boolean
-	Dirty: boolean
-	Error: EnumPlayerDataErrorState
-	Flushed: RBXScriptSignal<(boolean, string?)>
-	FlushedTime: number
-	Loaded: RBXScriptSignal<(boolean, string?)>
-	LoadedTime: number
-	ModifiedTime: number
-	NewRecord: boolean
-	Readable: boolean
-	RecordName: string
-	Writable: boolean
-	function GetPlayer(self): Player
-	function GetValue(self, key: string): any
-	function GetValueChangedSignal(self, key: string): RBXScriptSignal
-	function ReleaseAsync(self): nil
-	function RemoveValue(self, key: string): nil
-	function RequestFlushAsync(self): nil
-	function SetValue(self, key: string, value: any): nil
-end
-
-declare extern type PlayerDataRecordConfig extends Instance with
-	RecordName: string
-	function GetDefaultValue(self, key: string): any
-	function SetDefaultValue(self, key: string, value: any): nil
 end
 
 declare extern type PlayerDataService extends Instance with
-	LoadFailureBehavior: EnumPlayerDataLoadFailureBehavior
-	function GetRecordConfig(self, recordName: string?): PlayerDataRecordConfig
 end
 
 declare extern type PlayerEmulatorService extends Instance with
@@ -14561,6 +15157,7 @@ declare extern type Players extends Instance with
 		function players(self): { Instance }
 	@deprecated
 		function GetCharacterAppearanceAsync(self, userId: (User | number)): Model
+	BanningEnabled: boolean
 	BubbleChat: boolean
 	CharacterAutoLoads: boolean
 	ClassicChat: boolean
@@ -14572,6 +15169,7 @@ declare extern type Players extends Instance with
 	PlayerRemoving: RBXScriptSignal<(Player, EnumPlayerExitReason)>
 	PreferredPlayers: number
 	RespawnTime: number
+	UseStrafingAnimations: boolean
 	UserSubscriptionStatusChanged: RBXScriptSignal<(Player, string)>
 	function BanAsync(self, config: BanConfigType): nil
 	function CreateHumanoidModelFromDescriptionAsync(self, description: HumanoidDescription, rigType: EnumHumanoidRigType, assetTypeVerification: EnumAssetTypeVerification?): Model
@@ -14703,6 +15301,8 @@ end
 
 declare extern type ColorCorrectionEffect extends PostEffect with
 	Brightness: number
+	ColorLutContent: Content
+	ColorLutIntensity: number
 	Contrast: number
 	Saturation: number
 	TintColor: Color3
@@ -14801,7 +15401,9 @@ end
 declare extern type RealtimeMedia extends Instance with
 	AudioInputActive: boolean
 	AudioInputRequested: RBXScriptSignal<()>
+	Disconnected: RBXScriptSignal<(boolean, string)>
 	IsConnected: boolean
+	IsConnectionWeak: boolean
 	OnMessage: RBXScriptSignal<(string, boolean)>
 	WiringChanged: RBXScriptSignal<(boolean, string, Wire, Instance)>
 	function ConnectAsync(self, serverUrl: string, connectParams: { [string]: any }?): boolean
@@ -14999,12 +15601,16 @@ declare extern type RunService extends Instance with
 	PreSimulation: RBXScriptSignal<number>
 	RenderStepped: RBXScriptSignal<number>
 	Rollback: RBXScriptSignal<number>
+	RunState: EnumRunState
 	Stepped: RBXScriptSignal<(number, number)>
 	function BindToAnimation(self, func: ((...any) -> ...any), frequency: EnumStepFrequency?, priority: number?): RBXScriptConnection
+	function BindToAnimationParallel(self, func: ((...any) -> ...any), frequency: EnumStepFrequency?, priority: number?): RBXScriptConnection
 	function BindToRenderStep(self, name: string, priority: number, func: ((delta: number) -> ())): ()
 	function BindToSimulation(self, func: ((...any) -> ...any), frequency: EnumStepFrequency?, priority: number?): RBXScriptConnection
+	function BindToSimulationParallel(self, func: ((...any) -> ...any), frequency: EnumStepFrequency?, priority: number?): RBXScriptConnection
 	function GetPredictionStatus(self, context: Instance): EnumPredictionStatus
 	function IsClient(self): boolean
+	function IsEdit(self): boolean
 	function IsResimulating(self): boolean
 	function IsRunMode(self): boolean
 	function IsRunning(self): boolean
@@ -15029,6 +15635,7 @@ end
 declare extern type SceneAnalysisService extends Instance with
 	function GetAnimationMemoryAsync(self): { [string]: any }
 	function GetAudioMemoryAsync(self): { [string]: any }
+	function GetCollisionGeometryMemoryAsync(self): { [string]: any }
 	function GetInstanceCompositionAsync(self): { [string]: any }
 	function GetScriptMemoryAsync(self): { [string]: any }
 	function GetTriangleCompositionAsync(self): { [string]: any }
@@ -15161,18 +15768,29 @@ declare extern type ControllerPartSensor extends ControllerSensor with
 	SensedMaterial: EnumMaterial
 	SensedPart: BasePart?
 	SensorMode: EnumSensorMode
+	function GetExtents(self): (Vector3, Vector3)
 end
 
 declare extern type FluidForceSensor extends SensorBase with
+	BuoyancyForce: Vector3
+	BuoyancyTorque: Vector3
 	CenterOfPressure: Vector3
 	Force: Vector3
 	Torque: Vector3
 	function EvaluateAsync(self, linearVelocity: Vector3, angularVelocity: Vector3, cframe: CFrame): ...any
 end
 
+declare extern type PhysicsActivitySensor extends SensorBase with
+	Active: boolean
+	Position: Vector3
+	Size: Vector3
+end
+
 declare extern type SerializationService extends Instance with
 	function DeserializeInstancesAsync(self, buffer: buffer): { Instance }
+	function DeserializeValue(self, buffer: buffer, format: EnumSerializationFormat?): any
 	function SerializeInstancesAsync(self, inputInstances: { Instance }): buffer
+	function SerializeValue(self, value: any, format: EnumSerializationFormat?): buffer
 end
 
 declare extern type ServerScriptService extends Instance with
@@ -15217,6 +15835,7 @@ declare extern type DataModel extends ServiceProvider with
 	RunService: RunService
 	ServerLifecycleChanged: RBXScriptSignal<{ [string]: any }>
 	ServerLowMemoryWarning: RBXScriptSignal<()>
+	ServerRegion: string
 	ServerRestartScheduled: RBXScriptSignal<(DateTime, EnumCloseReason, { [string]: any })>
 	Workspace: Workspace
 	function BindToClose(self, func: ((...any) -> ...any)): nil
@@ -15240,6 +15859,9 @@ declare extern type SessionCheckService extends Instance with
 end
 
 declare extern type SessionService extends Instance with
+end
+
+declare extern type SessionStorage extends Instance with
 end
 
 declare extern type SharedTableRegistry extends Instance with
@@ -15319,6 +15941,7 @@ declare extern type SocialService extends Instance with
 	function PromptGameInvite(self, player: Player, experienceInviteOptions: Instance?): nil
 	function PromptLinkSharingAsync(self, player: Player, options: LinkSharingOptions?): ...any
 	function PromptPhoneBook(self, player: Instance, tag: string): nil
+	function PromptRateExperienceAsync(self): EnumExperienceRatingResult
 	function PromptRsvpToEventAsync(self, eventId: string): EnumRsvpStatus
 	function ShowSelfView(self, selfViewPosition: EnumSelfViewPosition?): nil
 end
@@ -15443,6 +16066,7 @@ declare extern type SoundService extends Instance with
 	AcousticSimulationEnabled: boolean
 	AmbientReverb: EnumReverbType
 	CharacterSoundsUseNewApi: EnumRolloutState
+	DefaultListenerLocation: EnumListenerLocation
 	DiffractionEnabled: boolean
 	DistanceFactor: number
 	DopplerScale: number
@@ -15453,6 +16077,7 @@ declare extern type SoundService extends Instance with
 	RespectFilteringEnabled: boolean
 	ReverbEnabled: boolean
 	RolloffScale: number
+	function GetInputDevice(self): ...any
 	function GetListener(self): (EnumListenerType, any)
 	function GetMixerTime(self): number
 	function PlayLocalSound(self, sound: Sound): nil
@@ -15490,6 +16115,7 @@ declare extern type StartPageService extends Instance with
 end
 
 declare extern type StarterGear extends Instance with
+	Loaded: boolean
 end
 
 declare extern type StarterPack extends Instance with
@@ -15508,6 +16134,7 @@ declare extern type StarterPlayer extends Instance with
 	CharacterUseJumpPower: boolean
 	CharacterWalkSpeed: number
 	ClassicDeath: boolean
+	CreateDefaultPlayerModule: boolean
 	DevCameraOcclusionMode: EnumDevCameraOcclusionMode
 	DevComputerCameraMovementMode: EnumDevComputerCameraMovementMode
 	DevComputerMovementMode: EnumDevComputerMovementMode
@@ -15518,6 +16145,7 @@ declare extern type StarterPlayer extends Instance with
 	LoadCharacterAppearance: boolean
 	LuaCharacterController: EnumCharacterControlMode
 	NameDisplayDistance: number
+	PlaceAvatarRules: Instance
 	UserEmotesEnabled: boolean
 end
 
@@ -15537,6 +16165,7 @@ declare extern type StateMachineTransitionDefinition extends Instance with
 	From: Instance
 	Priority: number
 	To: Instance
+	TransitionId: string
 end
 
 declare extern type Stats extends Instance with
@@ -15565,6 +16194,8 @@ declare extern type Stats extends Instance with
 	function GetHarmonyQualityLevel(self): number
 	function GetMemoryCategoryNames(self): { any }
 	function GetMemoryUsageMbAllCategories(self): { any }
+	function GetMemoryUsageMbAllCategoriesFiltered(self, dmId: number, vmClass: number): { any }
+	function GetMemoryUsageMbFiltered(self, dmId: number, vmClass: number): number
 	function GetMemoryUsageMbForTag(self, tag: EnumDeveloperMemoryTag): number
 	function GetTotalMemoryUsageMb(self): number
 	function ResetHarmonyMemoryTarget(self): nil
@@ -15727,6 +16358,7 @@ declare extern type SurfaceAppearance extends Instance with
 	NormalMapContent: Content
 	ResampleMode: EnumResamplerMode
 	RoughnessMapContent: Content
+	SurfaceSlot: number
 end
 
 declare extern type SystemThemeService extends Instance with
@@ -15771,16 +16403,17 @@ declare extern type TeleportAsyncResult extends Instance with
 end
 
 declare extern type TeleportOptions extends Instance with
-	ReservedServerAccessCode: string
+	ForcePublicServer: boolean
 	ReservedServerId: string
 	ServerInstanceId: string
-	ShouldReserveServer: boolean
 	VipServerId: string
 	function GetTeleportData(self): TeleportData?
 	function SetTeleportData(self, teleportData: TeleportData)
 end
 
 declare extern type TeleportService extends Instance with
+	@[deprecated {use = "TeleportService:TeleportAsync"}]
+		function ReserveServerAsync(self, placeId: number): ...any
 	LocalPlayerArrivedFromTeleport: RBXScriptSignal<Player, any>
 	TeleportInitFailed: RBXScriptSignal<Player, EnumTeleportResult, string, number, TeleportOptions>
 	function GetArrivingTeleportGui(self): ScreenGui
@@ -15789,7 +16422,6 @@ declare extern type TeleportService extends Instance with
 	function GetTeleportSetting(self, setting: string): any
 	function PromptExperienceDetailsAsync(self, player: Player, universeId: number): EnumPromptExperienceDetailsResult
 	function ReserveServer(self, placeId: number): (string, string)
-	function ReserveServerAsync(self, placeId: number): ...any
 	function SetTeleportGui(self, gui: GuiObject): nil
 	function SetTeleportSetting(self, setting: string, value: any): nil
 	function Teleport(self, placeId: number, player: Player?, teleportData: TeleportData?, customLoadingScreen: GuiObject?)
@@ -15818,16 +16450,18 @@ declare extern type TerrainRegion extends Instance with
 	SizeInCells: Vector3
 end
 
-declare extern type TestCase extends Instance with
-	function Assert(self, condition: boolean, message: string?, source: Instance?, line: number?): nil
-	function AssertLegacy(self, condition: boolean, message: string?, source: Instance?, line: number?): nil
-	function EndTest(self, message: string?, source: Instance?, line: number?): nil
-	function Message(self, text: string, source: Instance?, line: number?): nil
-	function Require(self, condition: boolean, message: string?, source: Instance?, line: number?): nil
-	function RequireLegacy(self, condition: boolean, message: string?, source: Instance?, line: number?): nil
+declare extern type TestCoordinatorService extends Instance with
+	function AwaitAllAsync(self, pendingIds: { any }): { any }
+	function AwaitAnyAsync(self, pendingIds: { any }): { [string]: any }
+	function AwaitSignalAsync(self, topic: string): { [string]: any }
+	function BarrierAsync(self, name: string, participantIds: { any }): nil
+	function Participant(self, id: string): ParticipantHandle
+	function Signal(self, topic: string, payload: { [string]: any }?): nil
 end
 
 declare extern type TestService extends Instance with
+	@[deprecated {use = "TestService:RegisterTest"}]
+		function RegisterTestLegacy(self, testOptions: { [string]: any }): TestCase
 	AutoRuns: boolean
 	Description: string
 	Enabled: boolean
@@ -15840,6 +16474,7 @@ declare extern type TestService extends Instance with
 	ServerCollectResult: RBXScriptSignal<(string, Instance, number)>
 	SimulateSecondsLag: number
 	TestCount: number
+	TestRegistryChanged: RBXScriptSignal<()>
 	ThrottlePhysicsToRealtime: boolean
 	Timeout: number
 	WarnCount: number
@@ -15852,19 +16487,24 @@ declare extern type TestService extends Instance with
 	function FetchTestControlsAsync(self, category: string): ...any
 	function GetTestControlSchema(self, providerName: string): { [string]: any }
 	function GetTestControls(self, providerName: string): { [string]: any }
+	function ListTests(self): { any }
 	function Message(self, text: string, source: Instance?, line: number?): nil
-	function RegisterTest(self, testOptions: { [string]: any }): TestCase
-	function RegisterTestLegacy(self, testOptions: { [string]: any }): TestCase
+	function RegisterSuite(self, suiteName: string, options: { [string]: any }?): TestSuite
+	function RegisterTest(self, testName: string, callback: ((...any) -> ...any), options: { [string]: any }?): TestCase
 	function RequestValidationAsync(self, module: string, artifactName: string, options: any): ...any
 	function Require(self, condition: boolean, description: string, source: Instance?, line: number?): nil
 	function ResetTestControl(self, providerName: string, controlName: string): nil
+	function ResetTestRegistry(self): nil
+	function RunTestsAsync(self, filter: { [string]: any }?): TestRunResult
 	function ScopeTime(self): { [string]: any }
 	function SetTestControl(self, providerName: string, controlName: string, value: any): nil
 	function SignalProfilingCapture(self, target: string?, options: { [string]: any }?): nil
 	function SignalProfilingStart(self, target: string?, options: { [string]: any }?): nil
 	function SignalProfilingStop(self, target: string?): nil
+	function StartAudioCaptureAsync(self, artifactName: string?, options: { [string]: any }?): ...any
 	function StartTestSession(self): nil
 	function StartVideoCaptureAsync(self, artifactName: string?, options: { [string]: any }?): ...any
+	function StopAudioCaptureAsync(self): ...any
 	function StopTestSession(self): nil
 	function StopVideoCaptureAsync(self): ...any
 	function TakeSnapshot(self, snapshotname: string, source: Instance?): nil
@@ -16032,6 +16672,8 @@ declare extern type TextChatService extends Instance with
 end
 
 declare extern type TextDocument extends Instance with
+	TextContent: Content
+	function ReadAsync(self): string
 end
 
 declare extern type TextFilterResult extends Instance with
@@ -16176,6 +16818,13 @@ end
 declare extern type UIComponent extends UIBase with
 end
 
+declare extern type UIBlur extends UIComponent with
+	Color: Color3
+	Enabled: boolean
+	Strength: EnumUIBlurStrength
+	Transparency: number
+end
+
 declare extern type UIConstraint extends UIComponent with
 end
 
@@ -16226,6 +16875,7 @@ declare extern type UIDragDetector extends UIComponent with
 	MinDragTranslation: UDim2
 	ReferenceUIInstance: GuiObject
 	ResponseStyle: EnumUIDragDetectorResponseStyle
+	Selectable: boolean
 	SelectionModeDragSpeed: UDim2
 	SelectionModeRotateSpeed: number
 	UIDragSpeedAxisMapping: EnumUIDragSpeedAxisMapping
@@ -16429,7 +17079,7 @@ declare extern type UserInputService extends Instance with
 	VREnabled: boolean
 	WindowFocusReleased: RBXScriptSignal<()>
 	WindowFocused: RBXScriptSignal<()>
-	function CreateVirtualInput(self): Object
+	function CreateVirtualInput(self, target: Instance?): Object
 	function GamepadSupports(self, gamepadNum: EnumUserInputType, gamepadKeyCode: EnumKeyCode): boolean
 	function GetConnectedGamepads(self): { EnumUserInputType }
 	function GetDeviceAcceleration(self): InputObject
@@ -16581,6 +17231,8 @@ declare extern type VersionControlService extends Instance with
 end
 
 declare extern type VideoCaptureService extends Instance with
+	function ClearMockInput(self): nil
+	function SetMockInputAsync(self, videoContent: Content): ...any
 end
 
 declare extern type VideoDeviceInput extends Instance with
@@ -16676,6 +17328,9 @@ declare extern type VoiceChatInternal extends Instance with
 end
 
 declare extern type VoiceChatService extends Instance with
+	DefaultDistanceAttenuation: EnumVoiceChatDistanceAttenuationType
+	EnableDefaultVoice: boolean
+	UseAudioApi: EnumAudioApiRollout
 	function GetChatGroupsAsync(self, players: { Instance }): { any }
 	function IsVoiceEnabledForUserIdAsync(self, userId: (User | number)): boolean
 end
@@ -16714,9 +17369,6 @@ declare extern type Wire extends Instance with
 	TargetName: string
 end
 
-declare extern type WrapDeformMeshProvider extends Instance with
-end
-
 declare extern type WrapTextureTransfer extends Instance with
 	ReferenceCageMeshContent: Content
 	UVMaxBound: Vector2
@@ -16746,7 +17398,23 @@ end
 declare extern type OutputLink extends Object with
 end
 
+declare extern type ParticipantHandle extends Object with
+	function Click(self, x: number, y: number): string
+	function InputText(self, text: string, enter: boolean?): string
+	function InvokePluginCommand(self, command: string, args: { [string]: any }?): string
+	function Launch(self, options: { [string]: any }?): string
+	function Screenshot(self, name: string): string
+	function Scroll(self, direction: string, power: number?): string
+	function Shutdown(self): string
+end
+
+declare extern type PickedFile extends Object with
+end
+
 declare extern type PluginConnection extends Object with
+end
+
+declare extern type SceneSnapshot extends Object with
 end
 
 declare extern type StudioActionOverride extends Object with
@@ -16769,6 +17437,67 @@ end
 declare extern type TerrainWriteOperation extends Object with
 	function CommitBlock(self, block: { [string]: any }): RBXScriptSignal
 	function GetBlock(self): { [string]: any }
+end
+
+declare extern type TestCase extends Object with
+	SuiteName: string
+	TestId: string
+	TestName: string
+	TimeoutSec: number
+	function Assert(self, condition: boolean, message: string?, source: Instance?, line: number?): nil
+	function AssertLegacy(self, condition: boolean, message: string?, source: Instance?, line: number?): nil
+	function Check(self, actualValue: any, expectedValue: any, message: string?): nil
+	function EndTest(self, message: string?, source: Instance?, line: number?): nil
+	function GetTestTags(self): { any }
+	function Message(self, text: string, source: Instance?, line: number?): nil
+	function Require(self, actualValue: any, expectedValue: any, message: string?): nil
+	function RequireLegacy(self, condition: boolean, message: string?, source: Instance?, line: number?): nil
+end
+
+declare extern type TestExecutionContext extends Object with
+	function Skip(self, reason: string?): nil
+end
+
+declare extern type TestFailure extends Object with
+	Line: number
+	Matcher: string
+	Message: string
+	StackTrace: string
+	function GetActual(self): any
+	function GetExpected(self): any
+	function GetSource(self): Instance
+end
+
+declare extern type TestResult extends Object with
+	Duration: number
+	FailedChecks: number
+	PassedChecks: number
+	SkipReason: string
+	Status: EnumTestCaseStatus
+	SuiteName: string
+	TestId: string
+	TestName: string
+	UncaughtError: string
+	function GetFailures(self): { any }
+	function GetTestTags(self): { any }
+end
+
+declare extern type TestRunResult extends Object with
+	Duration: number
+	Failed: number
+	Passed: number
+	Skipped: number
+	Status: EnumTestRunStatus
+	Summary: string
+	Total: number
+	function GetTests(self): { any }
+end
+
+declare extern type TestSuite extends Object with
+	SuiteName: string
+	TimeoutSec: number
+	function GetTestTags(self): { any }
+	function RegisterTest(self, testName: string, callback: ((...any) -> ...any), options: { [string]: any }?): TestCase
 end
 
 declare extern type VideoSampler extends Object with
@@ -16985,11 +17714,11 @@ declare Font: {
 }
 
 declare FloatCurveKey: {
-	new: ((time: number, value: number, Interpolation: EnumKeyInterpolationMode) -> FloatCurveKey),
+	new: ((time: number, value: number, Interpolation: EnumKeyInterpolationMode?) -> FloatCurveKey),
 }
 
 declare RotationCurveKey: {
-	new: ((time: number, value: CFrame, Interpolation: EnumKeyInterpolationMode) -> RotationCurveKey),
+	new: ((time: number, value: CFrame, Interpolation: EnumKeyInterpolationMode?) -> RotationCurveKey),
 }
 
 declare Secret: {
