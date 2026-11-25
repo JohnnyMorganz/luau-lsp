@@ -45,7 +45,7 @@ export type LSPManager = typeof(setmetatable({} :: LSPManagerData, LSPManager))
 --- @param instanceTracker -- The InstanceTracker instance for change tracking.
 --- @return LSPManager -- A new LSPManager ready for initialization.
 function LSPManager.new(settings: Settings.Settings, instanceTracker: InstanceTracker.InstanceTracker): LSPManager
-	local self = {
+	local self: LSPManagerData = {
 		_connected = false,
 		_address = nil,
 		_sendDebounce = nil,

@@ -8,11 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- `luau-lsp analyze` now reports each module's type errors once. A file that was already checked as a dependency of an earlier analyzed file printed its own type errors again, along with those of every module it requires
 - Fixed the language server crashing on autocomplete after a file required by the current file is deleted or renamed, or after its unsaved document is closed
 
 ### Changed
 
-- Sync to upstream Luau 0.741
+- Sync to upstream Luau 0.747
+- **Breaking**: `luau-lsp analyze` now uses the new Luau type solver by default, as upstream Luau no longer treats `LuauSolverV2` as an experimental flag. The language server is also affected when all FFlags are enabled by default. Pass `--flag:LuauSolverV2=false` to keep the old solver
 
 ## [1.70.1] - 2026-09-27
 
