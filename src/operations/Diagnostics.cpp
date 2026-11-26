@@ -19,6 +19,56 @@ static bool supportsRelatedDocuments(const lsp::ClientCapabilities& capabilities
     return capabilities.textDocument && capabilities.textDocument->diagnostic && capabilities.textDocument->diagnostic->relatedDocumentSupport;
 }
 
+/// If `file` exists but its path below `root` is spelt with a different case than it has on disk, returns the on-disk spelling
+/// of that part of the path. Only a case-insensitive file system can find such a file, so this is always std::nullopt elsewhere.
+static std::optional<std::string> findPathCaseMismatch(const Uri& root, const Uri& file)
+{
+    if (!root.isAncestorOf(file) || !file.exists())
+        return std::nullopt;
+
+    std::vector<std::string> onDiskComponents;
+    bool mismatch = false;
+    Uri current = file;
+    while (current != root)
+    {
+        auto parent = current.parent();
+        if (!parent)
+            return std::nullopt;
+
+        const std::string name = current.filename();
+        std::optional<std::string> onDisk;
+        Luau::FileUtils::traverseDirectory(parent->fsPath(),
+            [&](const std::string& entryPath)
+            {
+                if (onDisk == name)
+                    return;
+                auto entry = Uri::file(entryPath).filename();
+                if (entry == name || toLower(entry) == toLower(name))
+                    onDisk = entry;
+            });
+
+        if (!onDisk)
+            return std::nullopt;
+        if (*onDisk != name)
+            mismatch = true;
+
+        onDiskComponents.insert(onDiskComponents.begin(), *onDisk);
+        current = *parent;
+    }
+
+    if (!mismatch)
+        return std::nullopt;
+
+    std::string result;
+    for (const auto& component : onDiskComponents)
+    {
+        if (!result.empty())
+            result += "/";
+        result += component;
+    }
+    return result;
+}
+
 /// Compute a document diagnostics report for a single file (and potentially related files)
 /// By default, this is called by the client for an open document. Hence we can expect that files are managed
 /// However, we sometimes call this as part of reverse-dependency updates (see updateTextDocument), where the file may be unmanaged
@@ -109,6 +159,30 @@ lsp::DocumentDiagnosticReport WorkspaceFolder::documentDiagnostics(
     }
     for (auto& error : cr.lintResult.warnings)
         report.items.emplace_back(createLintDiagnostic(error, *textDocument));
+
+    // String requires are case sensitive, but a case-insensitive file system (Windows, macOS) still finds a file whose name
+    // only differs in case. Warn about these, since the same require fails on a case-sensitive file system and in tools
+    // that resolve requires case sensitively.
+    if (auto sourceNode = frontend.sourceNodes.find(moduleName); sourceNode != frontend.sourceNodes.end())
+    {
+        for (const auto& [requiredModuleName, location] : sourceNode->second->requireLocations)
+        {
+            if (platform->isVirtualPath(requiredModuleName) || !Luau::FileUtils::isAbsolutePath(requiredModuleName))
+                continue;
+
+            auto onDisk = findPathCaseMismatch(rootUri, Uri::file(requiredModuleName));
+            if (!onDisk)
+                continue;
+
+            lsp::Diagnostic diagnostic;
+            diagnostic.source = "Luau";
+            diagnostic.message =
+                "Require path does not match the case of the file on disk ('" + *onDisk + "'). This require will fail on case-sensitive file systems";
+            diagnostic.severity = lsp::DiagnosticSeverity::Warning;
+            diagnostic.range = {toUTF16(*textDocument, location.begin), toUTF16(*textDocument, location.end)};
+            report.items.emplace_back(diagnostic);
+        }
+    }
 
     return report;
 }

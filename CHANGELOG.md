@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- A warning on a string require whose path differs in case from the file on disk. A case-insensitive file system (Windows, macOS) still finds the file, but the same require fails on a case-sensitive file system and in tools that resolve requires case sensitively ([#1050](https://github.com/JohnnyMorganz/luau-lsp/issues/1050))
+
 ### Fixed
 
 - `luau-lsp analyze` now reports each module's type errors once. A file that was already checked as a dependency of an earlier analyzed file printed its own type errors again, along with those of every module it requires

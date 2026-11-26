@@ -244,4 +244,43 @@ TEST_CASE_FIXTURE(Fixture, "document_diagnostics_respects_cancellation")
     CHECK_THROWS_AS(workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, cancellationToken), RequestCancelledException);
 }
 
+#if defined(_WIN32) || defined(__APPLE__)
+// Only a case-insensitive file system can find a module whose name differs in case
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_warns_when_string_require_case_differs_from_file_on_disk")
+{
+    tempDir.write_child("Folder/Module.luau", "return {}");
+
+    auto document = newDocument("main.luau", R"(
+        local a = require("./folder/module")
+        local b = require("./Folder/Module")
+    )");
+
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr);
+
+    std::vector<lsp::Diagnostic> caseWarnings;
+    for (const auto& diagnostic : diagnostics.items)
+        if (diagnostic.message.find("does not match the case of the file on disk") != std::string::npos)
+            caseWarnings.push_back(diagnostic);
+
+    REQUIRE_EQ(caseWarnings.size(), 1);
+    CHECK_EQ(caseWarnings[0].severity, lsp::DiagnosticSeverity::Warning);
+    CHECK_EQ(caseWarnings[0].range.start.line, 1);
+    CHECK(caseWarnings[0].message.find("'Folder/Module.luau'") != std::string::npos);
+}
+#endif
+
+TEST_CASE_FIXTURE(Fixture, "document_diagnostics_does_not_warn_when_string_require_case_matches_file_on_disk")
+{
+    tempDir.write_child("Folder/Module.luau", "return {}");
+
+    auto document = newDocument("main.luau", R"(
+        local a = require("./Folder/Module")
+        local b = require("./Folder/Missing")
+    )");
+
+    auto diagnostics = workspace.documentDiagnostics(lsp::DocumentDiagnosticParams{{document}}, nullptr);
+    for (const auto& diagnostic : diagnostics.items)
+        CHECK(diagnostic.message.find("does not match the case of the file on disk") == std::string::npos);
+}
+
 TEST_SUITE_END();
